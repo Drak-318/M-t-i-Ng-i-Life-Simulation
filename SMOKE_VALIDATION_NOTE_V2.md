@@ -1,0 +1,1 @@
+Validation trigger for the corrected gameplay smoke test entry point.
