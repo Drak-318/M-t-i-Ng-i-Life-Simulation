@@ -1,8 +1,5 @@
 extends Node
 
-## Nền tảng thời gian của Life Simulation.
-## 1 giây thực = 1 phút trong game ở vertical slice hiện tại.
-
 signal time_changed(day: int, hour: int, minute: int)
 signal day_changed(day: int)
 
@@ -44,12 +41,31 @@ func advance_minutes(amount: int) -> void:
 func get_total_minutes() -> int:
     return (day - 1) * 1440 + hour * 60 + minute
 
+func get_day() -> int:
+    return day
+
+func get_hour() -> int:
+    return hour
+
+func get_minute() -> int:
+    return minute
+
 func get_clock_text() -> String:
     return "%02d:%02d" % [hour, minute]
 
 func get_day_text() -> String:
     var names := ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"]
     return names[(day - 1) % 7]
+
+func snapshot() -> Dictionary:
+    return {"day":day,"hour":hour,"minute":minute}
+
+func restore(data: Dictionary) -> void:
+    day = int(data.get("day", start_day))
+    hour = int(data.get("hour", start_hour))
+    minute = int(data.get("minute", start_minute))
+    _accumulator = 0.0
+    _emit_time()
 
 func _emit_time() -> void:
     time_changed.emit(day, hour, minute)
