@@ -2,73 +2,90 @@
 
 Cập nhật: 2026-11-03
 
-## 1. Mục tiêu dự án
+## 1. Trạng thái hiện tại
 
-Game mô phỏng cuộc sống 3D của một người trưởng thành bình thường tại TP.HCM.
+**MVP gameplay vertical slice: HOÀN THÀNH VỀ MẶT HỆ THỐNG.**
 
-Người chơi là Nguyễn Minh, 24 tuổi. Thế giới, NPC và các mối quan hệ có quyền tự vận động. Không thiết kế theo kiểu chọn đúng = thắng.
+Repository đã có một vòng chơi 1 tuần có thể chạy: người chơi điều khiển Nguyễn Minh trong khu phố 3D, thời gian tự trôi, NPC quan trọng có lịch riêng, sự kiện xuất hiện theo bối cảnh, người chơi lựa chọn, state/memory/relationship thay đổi, hậu quả có thể trì hoãn, có save/load và có nhiều trạng thái kết thúc.
+
+CI đã chạy Godot 4.3 headless thành công cho project parse và boot.
 
 ## 2. Đã triển khai
 
-### Repository / nền tảng
-- Godot 4.x project.
-- Main scene.
-- Input WASD + E.
-- README và layout MVP.
-
 ### 3D vertical slice
-- Ground có collision.
+- Ground + collision.
 - Đường phố MVP.
-- HOME.
-- OFFICE.
-- CAFE.
-- STORE.
-- RESTAURANT.
-- PARK.
-- PARKING.
-- Player Nguyễn Minh.
+- HOME, OFFICE, CAFE, STORE, RESTAURANT, PARK, PARKING.
+- Nguyễn Minh 24 tuổi.
 - Third-person camera.
-- Player collision + gravity.
-- 4 NPC nền có chuyển động tự do đơn giản.
-- Location Area nhận biết khi Player đi vào khu vực.
+- WASD movement, gravity, collision.
+- 4 NPC nền có chuyển động.
+- Location detection.
+- Một NPC quan trọng có lịch sống riêng và di chuyển theo ngày/giờ.
+- Nhân vật nữ MVP tên Linh: 24 tuổi, nhân viên thiết kế nội dung, có profile, nhu cầu, ranh giới, mục tiêu và lịch riêng.
 
-### Life Simulation foundation
-- TimeSystem: ngày/giờ/phút, bắt đầu Chủ nhật 07:42.
+### Life simulation
+- TimeSystem: ngày/giờ/phút, bắt đầu Chủ Nhật 07:42.
+- Có thể pause thời gian khi đang lựa chọn.
 - StateManager: energy, money, stress, confidence, social_energy, work_pressure.
-- MemoryManager: memory có source, game_minute, emotional_weight, tags và trạng thái triggerable.
+- MemoryManager: memory, source, game_minute, emotional_weight, tags, triggerable.
 - RelationshipManager: affection, trust, understanding, closeness, respect, hurt, irritation, compatibility, willingness_to_continue.
-- Main đã kết nối các hệ thống này.
+- CharacterProfile: personality, needs, boundaries, communication style, goals, mood, energy, workload, family pressure, social energy.
 
-## 3. Chưa coi là hoàn thành
+### Story engine
+- EventSystem chọn scene theo location + giờ + memory + relationship + state conditions.
+- 25 scene MVP.
+- Choice system.
+- State effects.
+- Relationship effects.
+- Memory creation.
+- Delayed consequence system.
+- Có scene bị khóa/mở dựa trên lịch sử trước đó.
 
-- Chưa playtest runtime bằng Godot trong môi trường phát triển hiện tại.
-- Đồ họa 3D vẫn là placeholder primitive.
-- Chưa có model nhân vật cuối cùng.
-- Chưa có xe cộ thực.
-- Chưa có hệ thống lịch NPC theo ngày/giờ.
-- Chưa có nhân vật nữ chính trong runtime.
-- Chưa có Story/Event Selector hoàn chỉnh.
-- Chưa có dialogue/choice UI.
-- Chưa có save/load.
-- Chưa có 20–30 scenes MVP.
-- Chưa có 5–8 ending states.
+### UX
+- Dialogue panel.
+- Choice buttons.
+- System narration.
+- Clock/location/state HUD.
+- Save: P.
+- Load: L.
 
-## 4. Thứ tự triển khai tiếp theo
+### Endings
+- EndingSystem với 6 trạng thái kết thúc khác nhau, không dùng Good/Bad Ending.
+- Kết thúc được quyết định từ relationship + state + memory.
 
-1. Runtime validation và sửa lỗi.
-2. NPC schedule + daily routine.
-3. Character data model.
-4. Nhân vật nữ chính và đời sống riêng.
-5. Event/Scene Selector.
-6. Dialogue + choices.
-7. Relationship reaction.
-8. Memory-triggered delayed consequences.
-9. Save/load.
-10. 20–30 MVP scenes + 5–8 ending states.
-11. Sau đó mới nâng cấp art, vehicles, audio, weather và thành phố.
+### Validation
+- GitHub Actions cài Godot 4.3.
+- Headless editor parse: PASS.
+- Headless game boot: PASS.
+
+## 3. Những gì CHƯA phải sản phẩm cuối
+
+- Model 3D nhân vật cuối cùng chưa có; hiện vẫn dùng primitive placeholder.
+- Chưa có animation nhân vật chất lượng cao.
+- Chưa có xe cộ giao thông thực.
+- Chưa có audio/music/SFX hoàn chỉnh.
+- Chưa có weather system hoàn chỉnh.
+- Chưa có art direction/city assets chất lượng production.
+- Chưa có hệ thống công việc/tài chính/gia đình/mạng xã hội ở độ sâu production.
+- Chưa có nhiều thành phố, nghề nghiệp hoặc nhiều nhân vật quan trọng.
+- Chưa có mobile build.
+
+Đây là phạm vi **MVP**, không phải bản commercial production hoàn chỉnh.
+
+## 4. Thứ tự phát triển sau MVP
+
+1. Playtest thủ công trên máy có Godot.
+2. Sửa lỗi UX/logic sau playtest.
+3. Nâng cấp character art + animation.
+4. Xe cộ, traffic, audio, weather, day/night lighting.
+5. Mở rộng life systems: work, money, family, friends, hobbies, social media.
+6. Mở rộng character simulation và quan hệ giữa NPC.
+7. Tăng replayability và hidden consequences.
+8. Sau khi gameplay ổn định mới cân nhắc mobile/cloud/expansion.
 
 ## 5. Quy tắc bàn giao
 
-GitHub repository là nguồn kỹ thuật hiện tại. Project/Kho lưu trữ là nguồn thiết kế. Khi tiếp tục, AI mới phải đọc file này và các file thiết kế trước khi thay đổi kiến trúc.
+GitHub repository là nguồn kỹ thuật hiện tại. Project/Kho là nguồn thiết kế. AI tiếp theo phải đọc file này, README, HANDOFF_TO_ANOTHER_AI.md và các tài liệu thiết kế trước khi thay đổi kiến trúc.
 
 Không được coi placeholder là sản phẩm cuối.
