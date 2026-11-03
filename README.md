@@ -1,6 +1,6 @@
 # Một Đời Người — Life Simulation
 
-Game mô phỏng cuộc sống 3D với cốt truyện phân nhánh.
+Game mô phỏng cuộc sống 3D trên **Web**, với cốt truyện phân nhánh và thế giới có trạng thái.
 
 ## Mục tiêu
 
@@ -33,22 +33,54 @@ Một khu phố nhỏ tại TP.HCM gồm:
 
 Nhân vật người chơi: **Nguyễn Minh, 24 tuổi**, nhân viên văn phòng, sống tại TP.HCM.
 
-## Công nghệ
+## Công nghệ hiện tại
 
-Engine: **Godot 4.x**.
+- **Web 3D:** Three.js
+- **HTML/CSS/JavaScript:** giao diện và runtime hiện tại
+- **GitHub:** quản lý mã nguồn
+- **GitHub Pages:** preview/deployment Web
 
-Repository này là nơi lưu mã nguồn game. Các tài liệu thiết kế chi tiết được quản lý trong Project/Kho lưu trữ của dự án và được chuyển thành hệ thống/code theo từng giai đoạn.
+Prototype Godot trước đây được giữ trong lịch sử Git như một bước thử nghiệm kỹ thuật, nhưng **hướng phát triển chính từ đây là Web**.
 
-## Quy trình phát triển
+## Quy trình phát triển Web
 
-1. Dựng vertical slice có thể chơi.
-2. Kiểm tra hệ thống nền tảng.
-3. Thêm NPC và lịch sinh hoạt.
-4. Thêm state/memory/relationship.
-5. Thêm Story/Event Engine, dialogue, save/load và hậu quả trì hoãn.
-6. Playtest thực tế và sửa các điểm thiếu tự nhiên.
-7. Mở rộng art, audio, vehicles, weather và các life systems sau khi MVP ổn định.
+1. Sửa code trên repository.
+2. GitHub tự động triển khai bản Web mới.
+3. Mở trình duyệt để test, không cần tải `.exe`.
+4. Ghi nhận lỗi/feedback.
+5. Sửa hệ thống.
+6. Lặp lại cho đến khi vertical slice ổn định.
+
+> Mục tiêu của quy trình là biến việc test thành: **sửa → refresh → test**.
+
+## Web vertical slice hiện tại
+
+Prototype Web đầu tiên đã có:
+
+- Khu phố 3D procedural.
+- Nguyễn Minh và camera góc nhìn thứ ba.
+- WASD để di chuyển.
+- Kéo chuột để xoay camera.
+- Nhà, văn phòng, quán cà phê, công viên, cửa hàng, nhà hàng.
+- NPC nền có chuyển động độc lập.
+- Hệ thống thời gian bắt đầu từ Chủ nhật 07:42.
+- HUD vị trí, thời gian và tiền.
+- Tương tác bằng E.
+- Khung state/memory cơ bản để tiếp tục mở rộng thành game loop hoàn chỉnh.
+
+## Phát triển tiếp theo
+
+Ưu tiên theo thứ tự:
+
+1. Web runtime ổn định và responsive.
+2. State/Memory/Relationship hoàn chỉnh.
+3. NPC schedule và NPC agency.
+4. Nhân vật nữ chính với lịch sống riêng.
+5. Story/Event Engine.
+6. Dialogue + choices.
+7. Delayed consequences.
+8. Save/load bằng local storage rồi mở rộng kiến trúc dữ liệu.
+9. 20–30 scene MVP và 5–8 trạng thái kết thúc.
+10. Art, animation, vehicles, audio, weather và city polish.
 
 > Người chơi không phải trung tâm duy nhất của thế giới. Thế giới vẫn tiếp tục sống khi người chơi không nhìn thấy nó.
-
-CI của repository tự động chạy Godot headless để kiểm tra project có thể parse và boot hay không.
