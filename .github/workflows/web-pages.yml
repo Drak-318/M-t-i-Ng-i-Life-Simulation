@@ -23,6 +23,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Web MVP smoke test
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const html = fs.readFileSync('standalone.html', 'utf8');
+          if (!html.includes('<canvas id="world">')) throw new Error('Missing game canvas');
+          if (!html.includes('function boot()')) throw new Error('Missing boot function');
+          if (/<script[^>]+src=/.test(html)) throw new Error('Standalone MVP must not depend on external scripts');
+          const scripts = [...html.matchAll(/<script>([\\s\\S]*?)<\\/script>/g)].map(m => m[1]);
+          if (!scripts.length) throw new Error('Missing inline runtime');
+          new Function(scripts[scripts.length - 1]);
+          for (const id of ['world','clock','loc','money','energy','stress','rel','modal','story','choices','hour','save','load','error']) {
+            if (!html.includes(`id="${id}"`)) throw new Error(`Missing UI element: ${id}`);
+          }
+          console.log('Web MVP smoke test: PASS');
+          NODE
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
