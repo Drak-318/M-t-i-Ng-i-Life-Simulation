@@ -29,9 +29,9 @@ func _build_ground() -> void:
     body.add_child(collision)
 
 func _build_roads() -> void:
-    _add_box("Road_Main", Vector3(0, 0.01, 0), Vector3(40, 0.08, 6))
-    _add_box("Road_North", Vector3(0, 0.02, -14), Vector3(40, 0.08, 4))
-    _add_box("Road_Vertical", Vector3(0, 0.025, 0), Vector3(4, 0.09, 40))
+    _add_box("Road_Main", Vector3(0, 0.12, 0), Vector3(40, 0.08, 6))
+    _add_box("Road_North", Vector3(0, 0.13, -14), Vector3(40, 0.08, 4))
+    _add_box("Road_Vertical", Vector3(0, 0.135, 0), Vector3(4, 0.09, 40))
 
 func _build_locations() -> void:
     _add_location("HOME", "Nhà của Minh", Vector3(-12, 2.0, 8), Vector3(7, 4, 6), "Ở nhà. Một buổi sáng Chủ nhật bình thường.", true)
@@ -40,7 +40,7 @@ func _build_locations() -> void:
     _add_location("STORE", "Cửa hàng tiện lợi", Vector3(3, 1.5, -8), Vector3(4, 3, 4), "Cửa hàng tiện lợi mở cả ngày.", true)
     _add_location("RESTAURANT", "Quán ăn", Vector3(9, 1.5, 8), Vector3(6, 3, 5), "Một quán ăn bình dân trong khu phố.", true)
     _add_location("PARK", "Công viên", Vector3(0, 0.08, 9), Vector3(12, 0.12, 6), "Công viên nhỏ. Có người đi bộ và ngồi nghỉ.", false)
-    _add_location("PARKING", "Bãi xe", Vector3(-2, 0.08, 4), Vector3(6, 0.12, 4), "Một bãi xe nhỏ cạnh khu dân cư.", false)
+    _add_location("PARKING", "Bãi xe", Vector3(-2, 0.12, 4), Vector3(6, 0.12, 4), "Một bãi xe nhỏ cạnh khu dân cư.", false)
 
 func _add_location(location_id: String, display_name: String, pos: Vector3, size: Vector3, interaction_text: String, blocking: bool) -> void:
     if blocking:
