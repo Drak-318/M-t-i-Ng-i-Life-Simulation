@@ -6,9 +6,7 @@ Cập nhật: 2026-11-03
 
 **MVP gameplay vertical slice: HOÀN THÀNH VỀ MẶT HỆ THỐNG.**
 
-Repository đã có một vòng chơi 1 tuần có thể chạy: người chơi điều khiển Nguyễn Minh trong khu phố 3D, thời gian tự trôi, NPC quan trọng có lịch riêng, sự kiện xuất hiện theo bối cảnh, người chơi lựa chọn, state/memory/relationship thay đổi, hậu quả có thể trì hoãn, có save/load và có nhiều trạng thái kết thúc.
-
-CI đã chạy Godot 4.3 headless thành công cho project parse và boot.
+Repository có một vòng chơi 1 tuần: Nguyễn Minh sống trong khu phố 3D, thời gian tự trôi, NPC quan trọng có lịch riêng, sự kiện xuất hiện theo bối cảnh, người chơi lựa chọn, state/memory/relationship thay đổi, hậu quả có thể trì hoãn, có save/load và nhiều trạng thái kết thúc.
 
 ## 2. Đã triển khai
 
@@ -21,67 +19,73 @@ CI đã chạy Godot 4.3 headless thành công cho project parse và boot.
 - WASD movement, gravity, collision.
 - 4 NPC nền có chuyển động.
 - Location detection.
-- Một NPC quan trọng có lịch sống riêng và di chuyển theo ngày/giờ.
-- Nhân vật nữ MVP tên Linh: 24 tuổi, nhân viên thiết kế nội dung, có profile, nhu cầu, ranh giới, mục tiêu và lịch riêng.
+- NPC quan trọng có lịch sống riêng và di chuyển theo ngày/giờ.
+- Linh: 24 tuổi, nhân viên thiết kế nội dung, có profile, nhu cầu, ranh giới, mục tiêu và lịch riêng.
+- Traffic nền.
+- Chu kỳ ánh sáng ngày/đêm.
 
 ### Life simulation
 - TimeSystem: ngày/giờ/phút, bắt đầu Chủ Nhật 07:42.
-- Có thể pause thời gian khi đang lựa chọn.
+- Pause khi người chơi đang lựa chọn.
 - StateManager: energy, money, stress, confidence, social_energy, work_pressure.
+- LifeSystems: chi phí sinh hoạt, dòng tiền, áp lực công việc cơ bản.
+- WeatherSystem: thời tiết theo ngày và nhiệt độ.
 - MemoryManager: memory, source, game_minute, emotional_weight, tags, triggerable.
 - RelationshipManager: affection, trust, understanding, closeness, respect, hurt, irritation, compatibility, willingness_to_continue.
 - CharacterProfile: personality, needs, boundaries, communication style, goals, mood, energy, workload, family pressure, social energy.
 
 ### Story engine
-- EventSystem chọn scene theo location + giờ + memory + relationship + state conditions.
+- EventSystem chọn scene theo location + giờ + memory + relationship + điều kiện state.
 - 25 scene MVP.
 - Choice system.
 - State effects.
 - Relationship effects.
 - Memory creation.
 - Delayed consequence system.
-- Có scene bị khóa/mở dựa trên lịch sử trước đó.
+- Scene có thể mở/khóa theo lịch sử.
 
-### UX
+### UX / persistence
 - Dialogue panel.
 - Choice buttons.
 - System narration.
-- Clock/location/state HUD.
+- Clock/location/weather/state HUD.
 - Save: P.
 - Load: L.
+- Save chứa time, state, memories, relationships, story progress, weather và vị trí người chơi.
 
 ### Endings
 - EndingSystem với 6 trạng thái kết thúc khác nhau, không dùng Good/Bad Ending.
-- Kết thúc được quyết định từ relationship + state + memory.
+- Kết thúc dựa trên relationship + state + memory.
 
 ### Validation
 - GitHub Actions cài Godot 4.3.
 - Headless editor parse: PASS.
 - Headless game boot: PASS.
+- Scene-based gameplay logic smoke test: PASS.
 
 ## 3. Những gì CHƯA phải sản phẩm cuối
 
-- Model 3D nhân vật cuối cùng chưa có; hiện vẫn dùng primitive placeholder.
-- Chưa có animation nhân vật chất lượng cao.
-- Chưa có xe cộ giao thông thực.
-- Chưa có audio/music/SFX hoàn chỉnh.
-- Chưa có weather system hoàn chỉnh.
-- Chưa có art direction/city assets chất lượng production.
-- Chưa có hệ thống công việc/tài chính/gia đình/mạng xã hội ở độ sâu production.
-- Chưa có nhiều thành phố, nghề nghiệp hoặc nhiều nhân vật quan trọng.
-- Chưa có mobile build.
+- Model 3D nhân vật cuối cùng; hiện vẫn dùng primitive placeholder.
+- Animation nhân vật chất lượng production.
+- Xe cộ/traffic chưa có va chạm và luật giao thông gameplay.
+- Audio/music/SFX.
+- Weather mới ở mức gameplay/state, chưa có hiệu ứng mưa 3D.
+- Art direction/city assets chất lượng production.
+- Work/money/family/friends/hobbies/social media chưa ở độ sâu production.
+- Nhiều thành phố, nghề nghiệp và nhiều nhân vật quan trọng.
+- Mobile build.
 
-Đây là phạm vi **MVP**, không phải bản commercial production hoàn chỉnh.
+Đây là phạm vi **MVP hoàn chỉnh về gameplay**, chưa phải bản commercial production cuối.
 
-## 4. Thứ tự phát triển sau MVP
+## 4. Giai đoạn tiếp theo
 
 1. Playtest thủ công trên máy có Godot.
-2. Sửa lỗi UX/logic sau playtest.
+2. Sửa lỗi UX/logic sau playtest thực tế.
 3. Nâng cấp character art + animation.
-4. Xe cộ, traffic, audio, weather, day/night lighting.
-5. Mở rộng life systems: work, money, family, friends, hobbies, social media.
-6. Mở rộng character simulation và quan hệ giữa NPC.
-7. Tăng replayability và hidden consequences.
+4. Xe cộ, traffic gameplay, audio, hiệu ứng thời tiết.
+5. Mở rộng work/money/family/friends/hobbies/social media.
+6. Mở rộng character simulation và quan hệ NPC-NPC.
+7. Replayability, hidden consequences và nhiều tuần sống.
 8. Sau khi gameplay ổn định mới cân nhắc mobile/cloud/expansion.
 
 ## 5. Quy tắc bàn giao
