@@ -23,23 +23,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Web MVP smoke test
+      - name: Web 3D smoke test
         run: |
           node <<'NODE'
           const fs = require('fs');
-          const html = fs.readFileSync('standalone.html', 'utf8');
-          if (!html.includes('<canvas id="world">')) throw new Error('Missing game canvas');
-          if (!html.includes('function boot()')) throw new Error('Missing boot function');
-          if (/<script[^>]+src=/.test(html)) throw new Error('Standalone MVP must not depend on external scripts');
-          const start = html.indexOf('<script>');
-          const end = html.lastIndexOf('</script>');
-          if (start < 0 || end <= start) throw new Error('Missing inline runtime');
-          const js = html.slice(start + 8, end);
-          new Function(js);
+          const html = fs.readFileSync('web.html', 'utf8');
+          const js = fs.readFileSync('src/web3d.js', 'utf8');
           for (const id of ['world','clock','loc','money','energy','stress','rel','modal','story','choices','hour','save','load','error']) {
             if (!html.includes(`id="${id}"`)) throw new Error(`Missing UI element: ${id}`);
           }
-          console.log('Web MVP smoke test: PASS');
+          if (!html.includes('src="src/web3d.js')) throw new Error('Missing 3D runtime script');
+          if (!js.includes('getContext(\'webgl\'')) throw new Error('Missing WebGL runtime');
+          if (!js.includes('function interact()')) throw new Error('Missing interaction system');
+          if (!js.includes('canvas.addEventListener(\'mousedown\'')) throw new Error('Missing mouse camera control');
+          if (!js.includes('function updateNPC')) throw new Error('Missing NPC simulation');
+          new Function(js);
+          console.log('Web 3D smoke test: PASS');
           NODE
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -52,5 +51,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-# Web deployment trigger verified after GitHub Pages was enabled.
