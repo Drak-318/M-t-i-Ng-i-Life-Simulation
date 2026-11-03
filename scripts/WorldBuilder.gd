@@ -2,9 +2,11 @@ extends Node3D
 
 const LocationScript = preload("res://scripts/Location.gd")
 const NPCScript = preload("res://scripts/NPC.gd")
+const ImportantCharacterScript = preload("res://scripts/ImportantCharacter.gd")
 
 signal location_ready(location_id: String, display_name: String, interaction_text: String)
 var locations: Dictionary = {}
+var important_character: CharacterBody3D
 
 func _ready() -> void:
     randomize()
@@ -12,6 +14,7 @@ func _ready() -> void:
     _build_roads()
     _build_locations()
     _build_background_npcs()
+    _build_important_character()
 
 func _build_ground() -> void:
     var body := StaticBody3D.new()
@@ -85,6 +88,18 @@ func _on_player_entered(location_id: String, display_name: String) -> void:
 func _on_player_exited(_location_id: String) -> void:
     pass
 
+func get_life_point(location_id: String) -> Vector3:
+    var points := {
+        "HOME": Vector3(-12, 0.2, 13.0),
+        "OFFICE": Vector3(12, 0.2, -13.0),
+        "CAFE": Vector3(-8, 0.2, -11.0),
+        "STORE": Vector3(3, 0.2, -11.0),
+        "RESTAURANT": Vector3(9, 0.2, 12.0),
+        "PARK": Vector3(0, 0.2, 9.0),
+        "PARKING": Vector3(-2, 0.2, 4.0)
+    }
+    return points.get(location_id, Vector3.ZERO)
+
 func _add_box(node_name: String, pos: Vector3, size: Vector3) -> void:
     var mesh_instance := MeshInstance3D.new()
     mesh_instance.name = node_name
@@ -100,3 +115,13 @@ func _build_background_npcs() -> void:
         var npc: CharacterBody3D = NPCScript.new()
         add_child(npc)
         npc.setup(starts[index], "NPC_%02d" % (index + 1))
+
+func _build_important_character() -> void:
+    important_character = ImportantCharacterScript.new()
+    add_child(important_character)
+    important_character.position = get_life_point("CAFE")
+    important_character.setup()
+    var points := {}
+    for key in ["HOME", "OFFICE", "CAFE", "STORE", "RESTAURANT", "PARK"]:
+        points[key] = get_life_point(key)
+    important_character.set_location_points(points)
