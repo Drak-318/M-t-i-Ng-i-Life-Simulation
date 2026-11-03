@@ -1,64 +1,6 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://scripts/Main.gd" id="1_main"]
-[ext_resource type="Script" path="res://scripts/Player.gd" id="2_player"]
-
-[sub_resource type="BoxMesh" id="BoxGround"]
-size = Vector3(40, 0.2, 40)
-
-[sub_resource type="BoxShape3D" id="GroundShape"]
-size = Vector3(40, 0.2, 40)
-
-[sub_resource type="BoxMesh" id="BoxBuilding"]
-size = Vector3(8, 5, 8)
-
-[sub_resource type="StandardMaterial3D" id="BuildingMaterial"]
-albedo_color = Color(0.55, 0.57, 0.62, 1)
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
-
-[node name="Sun" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-55, -25, 0)
-light_energy = 1.2
-shadow_enabled = true
-
-[node name="Ground" type="StaticBody3D" parent="."]
-
-[node name="Mesh" type="MeshInstance3D" parent="Ground"]
-mesh = SubResource("BoxGround")
-
-[node name="Collision" type="CollisionShape3D" parent="Ground"]
-shape = SubResource("GroundShape")
-
-[node name="Building" type="MeshInstance3D" parent="."]
-position = Vector3(0, 2.5, -10)
-mesh = SubResource("BoxBuilding")
-material_override = SubResource("BuildingMaterial")
-
-[node name="Player" type="CharacterBody3D" parent="."]
-position = Vector3(0, 1.2, 6)
-script = ExtResource("2_player")
-
-[node name="Camera" type="Camera3D" parent="Player"]
-position = Vector3(0, 5.5, 7)
-rotation_degrees = Vector3(-25, 0, 0)
-current = true
-
-[node name="UI" type="CanvasLayer" parent="."]
-
-[node name="Clock" type="Label" parent="UI"]
-offset_left = 24.0
-offset_top = 20.0
-offset_right = 150.0
-offset_bottom = 60.0
-theme_override_font_sizes/font_size = 28
-text = "07:42"
-
-[node name="Hint" type="Label" parent="UI"]
-offset_left = 24.0
-offset_top = 62.0
-offset_right = 500.0
-offset_bottom = 95.0
-theme_override_font_sizes/font_size = 16
-text = "W A S D — di chuyển"
