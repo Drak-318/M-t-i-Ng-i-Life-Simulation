@@ -29,6 +29,7 @@ Một khu phố nhỏ tại TP.HCM gồm:
 - Chu kỳ thời gian ngày/tuần
 - Story/Event Engine, dialogue, choices, memories, relationships
 - Save/load và các trạng thái kết thúc của tuần đầu tiên
+- Dòng tiền cơ bản, thời tiết theo ngày, giao thông nền và ánh sáng ngày/đêm
 
 Nhân vật người chơi: **Nguyễn Minh, 24 tuổi**, nhân viên văn phòng, sống tại TP.HCM.
 
