@@ -1,0 +1,1 @@
+This branch exists only to trigger CI against the current main revision. The validation includes Godot parsing, headless boot, and the gameplay logic smoke test.
