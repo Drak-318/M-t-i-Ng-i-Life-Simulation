@@ -1,18 +1,16 @@
 extends Node
 
-## Local save/load for the life-state MVP.
-## The save contains state, memories, relationships and story progress.
-
 const SAVE_PATH := "user://life_simulation_save.json"
 
-func save_game(time_system: Node, state_manager: Node, memory_manager: Node, relationship_manager: Node, event_system: Node, player: Node3D) -> bool:
+func save_game(time_system: Node, state_manager: Node, memory_manager: Node, relationship_manager: Node, event_system: Node, player: Node3D, weather_system: Node = null) -> bool:
     var data := {
-        "version": 1,
+        "version": 2,
         "time": time_system.snapshot(),
         "state": state_manager.snapshot(),
         "memories": memory_manager.snapshot(),
         "relationships": relationship_manager.snapshot(),
         "story": event_system.snapshot(),
+        "weather": weather_system.snapshot() if weather_system else {},
         "player_position": {"x": player.global_position.x, "y": player.global_position.y, "z": player.global_position.z}
     }
     var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -22,7 +20,7 @@ func save_game(time_system: Node, state_manager: Node, memory_manager: Node, rel
     file.close()
     return true
 
-func load_game(time_system: Node, state_manager: Node, memory_manager: Node, relationship_manager: Node, event_system: Node, player: Node3D) -> bool:
+func load_game(time_system: Node, state_manager: Node, memory_manager: Node, relationship_manager: Node, event_system: Node, player: Node3D, weather_system: Node = null) -> bool:
     if not FileAccess.file_exists(SAVE_PATH):
         return false
     var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
@@ -37,6 +35,8 @@ func load_game(time_system: Node, state_manager: Node, memory_manager: Node, rel
     memory_manager.restore(parsed.get("memories", []))
     relationship_manager.restore(parsed.get("relationships", {}))
     event_system.restore(parsed.get("story", {}))
+    if weather_system:
+        weather_system.restore(parsed.get("weather", {}))
     var pos: Dictionary = parsed.get("player_position", {})
     if pos.has("x"):
         player.global_position = Vector3(float(pos.get("x", 0.0)), float(pos.get("y", 0.2)), float(pos.get("z", 0.0)))
