@@ -1,8 +1,5 @@
 extends Node
 
-## Relationship không dùng một thanh "love" duy nhất.
-## Mỗi nhân vật có nhiều lớp cảm xúc và quan hệ độc lập.
-
 signal relationship_changed(character_id: String, key: String, value: float)
 
 var relationships: Dictionary = {}
@@ -32,6 +29,10 @@ func change(character_id: String, key: String, amount: float) -> void:
     var current := float(relationships[character_id].get(key, 0.0))
     relationships[character_id][key] = clamp(current + amount, -100.0, 100.0)
     relationship_changed.emit(character_id, key, relationships[character_id][key])
+
+func apply_changes(character_id: String, changes: Dictionary) -> void:
+    for key in changes.keys():
+        change(character_id, str(key), float(changes[key]))
 
 func set_value(character_id: String, key: String, value: float) -> void:
     ensure_character(character_id)
