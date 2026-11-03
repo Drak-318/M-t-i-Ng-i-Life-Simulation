@@ -1,6 +1,14 @@
 extends SceneTree
 
-func _initialize() -> void:
+var _ran := false
+
+func _init() -> void:
+    call_deferred("_run")
+
+func _run() -> void:
+    if _ran:
+        return
+    _ran = true
     var time = preload("res://scripts/TimeSystem.gd").new()
     var state = preload("res://scripts/StateManager.gd").new()
     var memory = preload("res://scripts/MemoryManager.gd").new()
