@@ -54,7 +54,7 @@ func get_clock_text() -> String:
     return "%02d:%02d" % [hour, minute]
 
 func get_day_text() -> String:
-    var names := ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"]
+    var names := ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"]
     return names[(day - 1) % 7]
 
 func snapshot() -> Dictionary:
