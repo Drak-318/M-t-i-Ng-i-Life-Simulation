@@ -8,6 +8,7 @@ const MemoryManagerScript = preload("res://scripts/MemoryManager.gd")
 const RelationshipManagerScript = preload("res://scripts/RelationshipManager.gd")
 const EventSystemScript = preload("res://scripts/EventSystem.gd")
 const SaveSystemScript = preload("res://scripts/SaveSystem.gd")
+const EndingSystemScript = preload("res://scripts/EndingSystem.gd")
 
 var world: Node3D
 var player: CharacterBody3D
@@ -17,6 +18,7 @@ var memory_manager: Node
 var relationship_manager: Node
 var event_system: Node
 var save_system: Node
+var ending_system: Node
 var important_character: Node
 
 var clock_label: Label
@@ -33,6 +35,7 @@ var current_location_id := "HOME"
 var current_location_name := "Nhà của Minh"
 var current_interaction := "Ở nhà. Một buổi sáng Chủ nhật bình thường."
 var dialogue_open := false
+var ending_shown := false
 
 func _ready() -> void:
     _build_life_systems()
@@ -55,21 +58,24 @@ func _process(_delta: float) -> void:
         important_character.profile.tick(1)
     _update_stats()
     var triggered := event_system.tick_delayed()
-    if not triggered.is_empty():
+    if not triggered.is_empty() and not ending_shown:
         _set_system_message("Một chuyện Minh từng làm trước đó đang quay trở lại trong cuộc sống.")
 
 func _unhandled_input(event: InputEvent) -> void:
-    if event.is_action_pressed("interact") and not dialogue_open:
+    if event.is_action_pressed("interact") and not dialogue_open and not ending_shown:
         _interact()
-    elif event.is_action_pressed("save_game"):
+    elif event.is_action_pressed("save_game") and not dialogue_open:
         if save_system.save_game(time_system, state_manager, memory_manager, relationship_manager, event_system, player):
             _set_system_message("Đã lưu cuộc sống hiện tại. Những gì đã xảy ra sẽ được giữ lại.")
         else:
             _set_system_message("Không thể lưu trạng thái hiện tại.")
-    elif event.is_action_pressed("load_game"):
+    elif event.is_action_pressed("load_game") and not dialogue_open:
         if save_system.load_game(time_system, state_manager, memory_manager, relationship_manager, event_system, player):
-            _set_system_message("Đã tải lại cuộc sống từ lần lưu gần nhất.")
+            ending_shown = false
+            time_system.set_paused(false)
+            dialogue_panel.visible = false
             _update_clock()
+            _set_system_message("Đã tải lại cuộc sống từ lần lưu gần nhất.")
         else:
             _set_system_message("Chưa có dữ liệu lưu để tải.")
 
@@ -93,6 +99,9 @@ func _build_life_systems() -> void:
     save_system = SaveSystemScript.new()
     save_system.name = "SaveSystem"
     add_child(save_system)
+    ending_system = EndingSystemScript.new()
+    ending_system.name = "EndingSystem"
+    add_child(ending_system)
 
 func _build_lighting() -> void:
     var sun := DirectionalLight3D.new()
@@ -155,8 +164,8 @@ func _build_ui() -> void:
     ui.add_child(controls)
 
     dialogue_panel = PanelContainer.new()
-    dialogue_panel.position = Vector2(180, 420)
-    dialogue_panel.size = Vector2(920, 205)
+    dialogue_panel.position = Vector2(180, 410)
+    dialogue_panel.size = Vector2(920, 225)
     dialogue_panel.visible = false
     ui.add_child(dialogue_panel)
     var margin := MarginContainer.new()
@@ -184,6 +193,8 @@ func _on_time_changed(_day: int, _hour: int, _minute: int) -> void:
 
 func _on_day_changed(day: int) -> void:
     _set_system_message("Một ngày mới bắt đầu. Ngày %d của cuộc đời này." % day)
+    if day >= 8 and not ending_shown:
+        _show_ending()
 
 func _on_location_ready(location_id: String, display_name: String, interaction_text: String) -> void:
     current_location_id = location_id
@@ -222,6 +233,7 @@ func _interact() -> void:
 
 func _open_dialogue(scene: Dictionary) -> void:
     dialogue_open = true
+    time_system.set_paused(true)
     dialogue_panel.visible = true
     dialogue_title.text = str(scene.get("title", ""))
     dialogue_text.text = str(scene.get("text", ""))
@@ -239,6 +251,29 @@ func _on_choice_pressed(index: int) -> void:
     var result := event_system.choose(index)
     dialogue_open = false
     dialogue_panel.visible = false
+    time_system.set_paused(false)
     if result.is_empty():
         return
     _set_system_message(str(result.get("text", "")) + "  Thời gian vẫn tiếp tục trôi.")
+
+func _show_ending() -> void:
+    ending_shown = true
+    time_system.set_paused(true)
+    var ending := ending_system.evaluate(state_manager, relationship_manager, memory_manager)
+    dialogue_open = true
+    dialogue_panel.visible = true
+    dialogue_title.text = str(ending.get("title", ""))
+    dialogue_text.text = str(ending.get("text", ""))
+    for child in choices_box.get_children():
+        child.queue_free()
+    var close_button := Button.new()
+    close_button.text = "Giữ lại cuộc sống này"
+    close_button.custom_minimum_size = Vector2(0, 36)
+    close_button.pressed.connect(_close_ending)
+    choices_box.add_child(close_button)
+    _set_system_message("Một tuần đã trôi qua. Không phải mọi thứ đều có câu trả lời.")
+
+func _close_ending() -> void:
+    dialogue_open = false
+    dialogue_panel.visible = false
+    _set_system_message("Bạn có thể tiếp tục đi lại và nhìn thế giới sau tuần đầu tiên, hoặc tải một lần lưu cũ.")
