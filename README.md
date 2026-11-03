@@ -25,8 +25,10 @@ Một khu phố nhỏ tại TP.HCM gồm:
 - Cửa hàng tiện lợi
 - Nhà hàng
 - Đường phố và bãi đỗ xe
-- Xe cộ và NPC nền
-- Chu kỳ thời gian ngày/đêm
+- NPC nền và một NPC quan trọng có lịch sống riêng
+- Chu kỳ thời gian ngày/tuần
+- Story/Event Engine, dialogue, choices, memories, relationships
+- Save/load và các trạng thái kết thúc của tuần đầu tiên
 
 Nhân vật người chơi: **Nguyễn Minh, 24 tuổi**, nhân viên văn phòng, sống tại TP.HCM.
 
@@ -44,6 +46,7 @@ Repository này là nơi lưu mã nguồn game. Các tài liệu thiết kế ch
 4. Thêm state/memory/relationship.
 5. Thêm Story/Event Engine, dialogue, save/load và hậu quả trì hoãn.
 6. Playtest thực tế và sửa các điểm thiếu tự nhiên.
+7. Mở rộng art, audio, vehicles, weather và các life systems sau khi MVP ổn định.
 
 > Người chơi không phải trung tâm duy nhất của thế giới. Thế giới vẫn tiếp tục sống khi người chơi không nhìn thấy nó.
 
