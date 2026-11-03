@@ -3,6 +3,7 @@ extends Node3D
 const LocationScript = preload("res://scripts/Location.gd")
 const NPCScript = preload("res://scripts/NPC.gd")
 const ImportantCharacterScript = preload("res://scripts/ImportantCharacter.gd")
+const TrafficSystemScript = preload("res://scripts/TrafficSystem.gd")
 
 signal location_ready(location_id: String, display_name: String, interaction_text: String)
 var locations: Dictionary = {}
@@ -15,6 +16,7 @@ func _ready() -> void:
     _build_locations()
     _build_background_npcs()
     _build_important_character()
+    _build_traffic()
 
 func _build_ground() -> void:
     var body := StaticBody3D.new()
@@ -38,7 +40,7 @@ func _build_roads() -> void:
 
 func _build_locations() -> void:
     _add_location("HOME", "Nhà của Minh", Vector3(-12, 2.0, 8), Vector3(7, 4, 6), "Ở nhà. Một buổi sáng Chủ nhật bình thường.", true)
-    _add_location("OFFICE", "Văn phòng", Vector3(12, 3.0, -8), Vector3(9, 6, 8), "Văn phòng của Minh. Hôm nay là Chủ nhật nên không có ca làm.", true)
+    _add_location("OFFICE", "Văn phòng", Vector3(12, 3.0, -8), Vector3(9, 6, 8), "Văn phòng của Minh. Những ngày đi làm sẽ bắt đầu từ đây.", true)
     _add_location("CAFE", "Quán cà phê", Vector3(-8, 1.5, -8), Vector3(5, 3, 5), "Một quán cà phê quen trong khu phố.", true)
     _add_location("STORE", "Cửa hàng tiện lợi", Vector3(3, 1.5, -8), Vector3(4, 3, 4), "Cửa hàng tiện lợi mở cả ngày.", true)
     _add_location("RESTAURANT", "Quán ăn", Vector3(9, 1.5, 8), Vector3(6, 3, 5), "Một quán ăn bình dân trong khu phố.", true)
@@ -125,3 +127,8 @@ func _build_important_character() -> void:
     for key in ["HOME", "OFFICE", "CAFE", "STORE", "RESTAURANT", "PARK"]:
         points[key] = get_life_point(key)
     important_character.set_location_points(points)
+
+func _build_traffic() -> void:
+    var traffic: Node3D = TrafficSystemScript.new()
+    traffic.name = "Traffic"
+    add_child(traffic)
