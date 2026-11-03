@@ -26,3 +26,7 @@ jobs:
         shell: bash
         run: |
           timeout 15s godot/Godot_v4.3-stable_linux.x86_64 --headless --path . --quit-after 5 || test $? -eq 124
+      - name: Gameplay logic smoke test
+        shell: bash
+        run: |
+          godot/Godot_v4.3-stable_linux.x86_64 --headless --path . --script res://tests/logic_smoke.gd
