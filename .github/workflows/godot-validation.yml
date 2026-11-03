@@ -29,4 +29,4 @@ jobs:
       - name: Gameplay logic smoke test
         shell: bash
         run: |
-          timeout 30s godot/Godot_v4.3-stable_linux.x86_64 --headless --path . --script res://tests/logic_smoke.gd
+          timeout 30s godot/Godot_v4.3-stable_linux.x86_64 --headless --path . --scene res://tests/LogicSmoke.tscn --quit-after 10
