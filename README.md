@@ -32,9 +32,9 @@ Nhân vật người chơi: **Nguyễn Minh, 24 tuổi**, nhân viên văn phòn
 
 ## Công nghệ
 
-Engine dự kiến: **Godot**.
+Engine: **Godot 4.x**.
 
-Repository này là nơi lưu mã nguồn game. Các tài liệu thiết kế chi tiết được quản lý trong Project/Kho lưu trữ của dự án và sẽ được chuyển thành hệ thống/code theo từng giai đoạn.
+Repository này là nơi lưu mã nguồn game. Các tài liệu thiết kế chi tiết được quản lý trong Project/Kho lưu trữ của dự án và được chuyển thành hệ thống/code theo từng giai đoạn.
 
 ## Quy trình phát triển
 
@@ -42,7 +42,9 @@ Repository này là nơi lưu mã nguồn game. Các tài liệu thiết kế ch
 2. Kiểm tra hệ thống nền tảng.
 3. Thêm NPC và lịch sinh hoạt.
 4. Thêm state/memory/relationship.
-5. Thêm nội dung và các nhánh sự kiện.
+5. Thêm Story/Event Engine, dialogue, save/load và hậu quả trì hoãn.
 6. Playtest thực tế và sửa các điểm thiếu tự nhiên.
 
 > Người chơi không phải trung tâm duy nhất của thế giới. Thế giới vẫn tiếp tục sống khi người chơi không nhìn thấy nó.
+
+CI của repository tự động chạy Godot headless để kiểm tra project có thể parse và boot hay không.
