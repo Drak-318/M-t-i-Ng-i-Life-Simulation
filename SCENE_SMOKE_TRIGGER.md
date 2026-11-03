@@ -1,0 +1,1 @@
+Trigger full CI for the scene-based gameplay smoke test.
