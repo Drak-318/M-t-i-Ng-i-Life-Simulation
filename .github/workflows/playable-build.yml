@@ -1,0 +1,42 @@
+name: Playable Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build-windows:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Godot 4.3
+        shell: bash
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q Godot_v4.3-stable_linux.x86_64.zip -d godot
+          chmod +x godot/Godot_v4.3-stable_linux.x86_64
+      - name: Install export templates
+        shell: bash
+        run: |
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
+          unzip -q Godot_v4.3-stable_export_templates.tpz -d /tmp/godot_templates
+          cp -r /tmp/godot_templates/templates/* "$HOME/.local/share/godot/export_templates/4.3.stable/"
+      - name: Export Windows build
+        shell: bash
+        run: |
+          mkdir -p build/windows
+          godot/Godot_v4.3-stable_linux.x86_64 --headless --path . --export-release "Windows Desktop" build/windows/MotDoiNguoi.exe
+      - name: Package
+        shell: bash
+        run: |
+          cd build/windows
+          zip -r ../MotDoiNguoi-Windows-Test.zip .
+      - name: Upload playable build
+        uses: actions/upload-artifact@v4
+        with:
+          name: MotDoiNguoi-Windows-Test
+          path: build/MotDoiNguoi-Windows-Test.zip
+          retention-days: 14
