@@ -9,6 +9,8 @@ const RelationshipManagerScript = preload("res://scripts/RelationshipManager.gd"
 const EventSystemScript = preload("res://scripts/EventSystem.gd")
 const SaveSystemScript = preload("res://scripts/SaveSystem.gd")
 const EndingSystemScript = preload("res://scripts/EndingSystem.gd")
+const LifeSystemsScript = preload("res://scripts/LifeSystems.gd")
+const WeatherSystemScript = preload("res://scripts/WeatherSystem.gd")
 
 var world: Node3D
 var player: CharacterBody3D
@@ -19,13 +21,18 @@ var relationship_manager: Node
 var event_system: Node
 var save_system: Node
 var ending_system: Node
+var life_systems: Node
+var weather_system: Node
 var important_character: Node
+var sun: DirectionalLight3D
+var environment: WorldEnvironment
 
 var clock_label: Label
 var location_label: Label
 var interaction_label: Label
-var system_label: Label
 var stats_label: Label
+var weather_label: Label
+var system_label: Label
 var dialogue_panel: PanelContainer
 var dialogue_title: Label
 var dialogue_text: Label
@@ -45,10 +52,13 @@ func _ready() -> void:
     _build_ui()
     time_system.time_changed.connect(_on_time_changed)
     time_system.day_changed.connect(_on_day_changed)
+    life_systems.daily_summary.connect(_set_system_message)
     relationship_manager.ensure_character("LINH")
+    weather_system.set_for_day(time_system.get_day())
     _update_clock()
     _update_location_ui()
     _update_stats()
+    _update_weather()
     _set_system_message("Chủ Nhật, 07:42. Minh thức dậy và bắt đầu ngày mới.")
 
 func _process(_delta: float) -> void:
@@ -56,6 +66,7 @@ func _process(_delta: float) -> void:
         important_character.update_schedule(time_system.get_day(), time_system.get_hour())
     if important_character and important_character.profile:
         important_character.profile.tick(1)
+    _update_day_night()
     _update_stats()
     var triggered := event_system.tick_delayed()
     if not triggered.is_empty() and not ending_shown:
@@ -65,16 +76,17 @@ func _unhandled_input(event: InputEvent) -> void:
     if event.is_action_pressed("interact") and not dialogue_open and not ending_shown:
         _interact()
     elif event.is_action_pressed("save_game") and not dialogue_open:
-        if save_system.save_game(time_system, state_manager, memory_manager, relationship_manager, event_system, player):
+        if save_system.save_game(time_system, state_manager, memory_manager, relationship_manager, event_system, player, weather_system):
             _set_system_message("Đã lưu cuộc sống hiện tại. Những gì đã xảy ra sẽ được giữ lại.")
         else:
             _set_system_message("Không thể lưu trạng thái hiện tại.")
     elif event.is_action_pressed("load_game") and not dialogue_open:
-        if save_system.load_game(time_system, state_manager, memory_manager, relationship_manager, event_system, player):
+        if save_system.load_game(time_system, state_manager, memory_manager, relationship_manager, event_system, player, weather_system):
             ending_shown = false
             time_system.set_paused(false)
             dialogue_panel.visible = false
             _update_clock()
+            _update_weather()
             _set_system_message("Đã tải lại cuộc sống từ lần lưu gần nhất.")
         else:
             _set_system_message("Chưa có dữ liệu lưu để tải.")
@@ -102,14 +114,21 @@ func _build_life_systems() -> void:
     ending_system = EndingSystemScript.new()
     ending_system.name = "EndingSystem"
     add_child(ending_system)
+    life_systems = LifeSystemsScript.new()
+    life_systems.name = "LifeSystems"
+    add_child(life_systems)
+    life_systems.setup(state_manager, time_system)
+    weather_system = WeatherSystemScript.new()
+    weather_system.name = "WeatherSystem"
+    add_child(weather_system)
 
 func _build_lighting() -> void:
-    var sun := DirectionalLight3D.new()
+    sun = DirectionalLight3D.new()
     sun.rotation_degrees = Vector3(-55, -25, 0)
     sun.light_energy = 1.15
     sun.shadow_enabled = true
     add_child(sun)
-    var environment := WorldEnvironment.new()
+    environment = WorldEnvironment.new()
     var env := Environment.new()
     env.background_mode = Environment.BG_COLOR
     env.background_color = Color(0.55, 0.66, 0.78)
@@ -149,8 +168,12 @@ func _build_ui() -> void:
     interaction_label.position = Vector2(24, 94)
     interaction_label.add_theme_font_size_override("font_size", 16)
     ui.add_child(interaction_label)
+    weather_label = Label.new()
+    weather_label.position = Vector2(24, 123)
+    weather_label.add_theme_font_size_override("font_size", 14)
+    ui.add_child(weather_label)
     stats_label = Label.new()
-    stats_label.position = Vector2(24, 125)
+    stats_label.position = Vector2(24, 147)
     stats_label.add_theme_font_size_override("font_size", 14)
     ui.add_child(stats_label)
     system_label = Label.new()
@@ -164,8 +187,8 @@ func _build_ui() -> void:
     ui.add_child(controls)
 
     dialogue_panel = PanelContainer.new()
-    dialogue_panel.position = Vector2(180, 410)
-    dialogue_panel.size = Vector2(920, 225)
+    dialogue_panel.position = Vector2(180, 405)
+    dialogue_panel.size = Vector2(920, 230)
     dialogue_panel.visible = false
     ui.add_child(dialogue_panel)
     var margin := MarginContainer.new()
@@ -192,15 +215,24 @@ func _on_time_changed(_day: int, _hour: int, _minute: int) -> void:
     _update_clock()
 
 func _on_day_changed(day: int) -> void:
+    weather_system.set_for_day(day)
+    _update_weather()
     _set_system_message("Một ngày mới bắt đầu. Ngày %d của cuộc đời này." % day)
     if day >= 8 and not ending_shown:
         _show_ending()
 
-func _on_location_ready(location_id: String, display_name: String, interaction_text: String) -> void:
-    current_location_id = location_id
-    current_location_name = display_name
-    current_interaction = interaction_text
-    _update_location_ui()
+func _update_day_night() -> void:
+    if sun == null or environment == null:
+        return
+    var hour := time_system.get_hour() + time_system.get_minute() / 60.0
+    var daylight := clamp((sin((hour - 6.0) / 24.0 * TAU) + 0.25) / 1.25, 0.12, 1.0)
+    sun.light_energy = lerp(0.22, 1.15, daylight)
+    environment.environment.ambient_light_energy = lerp(0.25, 0.8, daylight)
+    sun.rotation_degrees = Vector3(-25.0 - daylight * 45.0, -25.0, 0.0)
+
+func _update_weather() -> void:
+    if weather_label and weather_system:
+        weather_label.text = weather_system.get_display_text()
 
 func _update_clock() -> void:
     if clock_label and time_system:
@@ -215,7 +247,10 @@ func _update_location_ui() -> void:
 func _update_stats() -> void:
     if not stats_label or not state_manager:
         return
-    stats_label.text = "Năng lượng %d   Căng thẳng %d   Tự tin %d   Xã hội %d" % [int(state_manager.get_value("energy")), int(state_manager.get_value("stress")), int(state_manager.get_value("confidence")), int(state_manager.get_value("social_energy"))]
+    stats_label.text = "Năng lượng %d   Căng thẳng %d   Tự tin %d   Xã hội %d   Tiền %s" % [int(state_manager.get_value("energy")), int(state_manager.get_value("stress")), int(state_manager.get_value("confidence")), int(state_manager.get_value("social_energy")), _format_money(float(state_manager.get_value("money")))]
+
+func _format_money(value: float) -> String:
+    return "%.1fM" % (value / 1000000.0)
 
 func _set_system_message(message: String) -> void:
     if system_label:
