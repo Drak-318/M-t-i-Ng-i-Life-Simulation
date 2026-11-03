@@ -3,25 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Một Đời Người — Life Simulation</title>
+  <title>Một Đời Người — Life Simulation · Web MVP</title>
   <link rel="stylesheet" href="./src/styles.css" />
 </head>
 <body>
   <div id="game"></div>
   <div id="hud">
-    <div class="topbar">
-      <div class="brand">MỘT ĐỜI NGƯỜI</div>
-      <div id="clock">Chủ nhật · 07:42</div>
-    </div>
-    <div class="statusbar">
-      <span>Nguyễn Minh · 24</span>
-      <span id="location">Nhà</span>
-      <span id="money">15.000.000 ₫</span>
-    </div>
-    <div id="hint">WASD để di chuyển · kéo chuột để xoay camera · E để tương tác</div>
+    <div class="topbar"><div class="brand">MỘT ĐỜI NGƯỜI</div><div id="clock">Chủ nhật · 07:42</div></div>
+    <div class="statusbar"><span>Nguyễn Minh · 24</span><span id="location">Nhà</span><span id="money">15.000.000 ₫</span></div>
+    <div id="hint">WASD di chuyển · kéo chuột xoay camera · E tương tác · P lưu · L tải</div>
     <div id="interaction" class="hidden"></div>
   </div>
   <div id="loading">Đang dựng khu phố...</div>
-  <script type="module" src="./src/main.js"></script>
+  <script type="module" src="./src/mvp.js"></script>
 </body>
 </html>
