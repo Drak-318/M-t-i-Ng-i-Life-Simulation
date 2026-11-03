@@ -1,0 +1,15 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #10141a; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+#game { position: fixed; inset: 0; }
+canvas { display: block; width: 100%; height: 100%; }
+#hud { position: fixed; inset: 0; pointer-events: none; color: #fff; }
+.topbar { display: flex; justify-content: space-between; padding: 18px 22px 10px; font-size: 14px; text-shadow: 0 2px 8px #000; }
+.brand { font-weight: 750; letter-spacing: .14em; }
+#clock { opacity: .9; }
+.statusbar { display: flex; gap: 18px; padding: 0 22px; font-size: 13px; opacity: .9; text-shadow: 0 2px 8px #000; }
+#hint { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); padding: 10px 15px; border-radius: 10px; background: rgba(8, 12, 18, .68); backdrop-filter: blur(10px); font-size: 13px; }
+#interaction { position: absolute; left: 50%; top: 52%; transform: translate(-50%, -50%); padding: 11px 15px; border-radius: 9px; background: rgba(8, 12, 18, .78); font-size: 14px; }
+.hidden { display: none; }
+#loading { position: fixed; inset: 0; display: grid; place-items: center; color: #fff; background: #10141a; z-index: 10; transition: opacity .3s ease; }
+#loading.done { opacity: 0; pointer-events: none; }
+@media (max-width: 700px) { .statusbar { gap: 9px; font-size: 11px; flex-wrap: wrap; } #hint { width: calc(100% - 32px); text-align: center; } }
