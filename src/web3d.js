@@ -3,10 +3,10 @@
 const $=id=>document.getElementById(id);
 const canvas=$('world'), clock=$('clock'), locEl=$('loc'), moneyEl=$('money'), energyEl=$('energy'), stressEl=$('stress'), relEl=$('rel'), targetEl=$('target'), labels=$('labels'), modal=$('modal'), meta=$('meta'), story=$('story'), choices=$('choices'), toastEl=$('toast'), panel=$('panel'), panelTitle=$('panelTitle'), panelBody=$('panelBody'), errorEl=$('error'), errorText=$('errorText');
 const DAYS=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
-const SAVE='mot-doi-nguoi-web3d-v3';
+const SAVE='mot-doi-nguoi-web3d-v4';
 let state={day:1,min:462,money:15000000,energy:82,stress:18,confidence:52,trust:0,affection:0,understanding:0,closeness:0,respect:0,hurt:0,memories:[],done:[]};
-let player={x:-24,z:14,yaw:0};
-let destination=null,paused=false,last=performance.now(),toastTimer=0;
+let player={x:-24,z:14,yaw:0,walk:0};
+let destination=null,paused=false,last=performance.now(),toastTimer=0,animTime=0;
 const keys=new Set(); let dragging=false,lastMouse={x:0,y:0},camYaw=.65,camPitch=.42,camDist=12;
 const locations=[
 {id:'home',name:'Nhà Minh',x:-24,z:20,w:11,d:9,h:3.8,c:[.38,.50,.58],kind:'home',info:'Căn hộ của Minh. Nơi bắt đầu và kết thúc một ngày.'},
@@ -19,8 +19,8 @@ const locations=[
 const roads=[{x:0,z:0,w:76,d:5},{x:0,z:0,w:5,d:62}];
 const trees=Array.from({length:30},(_,i)=>({x:-35+(i*17)%70,z:-29+(i*23)%58}));
 const npcNames=['Huy','Mai','Tuấn','Vy','Nam','An','Phương','Duy','Trang','Khoa','Thảo','Long'];
-const npcs=Array.from({length:12},(_,i)=>({id:'npc'+i,name:npcNames[i],x:-31+(i*11)%62,z:-26+(i*17)%52,yaw:0,speed:.45+(i%4)*.08,phase:i*1.7,goal:['office','cafe','park','shop'][i%4],role:['đi làm','đi cà phê','đi dạo','mua đồ'][i%4]}));
-const linh={id:'linh',name:'Linh',x:-20,z:-15,yaw:2.2,speed:.18,phase:4.1,goal:'cafe',role:'công việc riêng'};
+const npcs=Array.from({length:12},(_,i)=>({id:'npc'+i,name:npcNames[i],x:-31+(i*11)%62,z:-26+(i*17)%52,yaw:0,speed:.45+(i%4)*.08,phase:i*1.7,goal:['office','cafe','park','shop'][i%4],role:['đi làm','đi cà phê','đi dạo','mua đồ'][i%4],walk:0}));
+const linh={id:'linh',name:'Linh',x:-20,z:-15,yaw:2.2,speed:.18,phase:4.1,goal:'cafe',role:'công việc riêng',walk:0};
 const vehicles=Array.from({length:5},(_,i)=>({x:-34+i*17,z:i%2?-2.2:2.2,dir:i%2?1:-1,speed:2.2+(i%3)*.45}));
 const scenes=[
 [1,'home','Sáng Chủ nhật. Điện thoại nằm trên bàn. Minh không có kế hoạch rõ ràng.',[['Ở nhà nghỉ ngơi',{energy:6,stress:-3,m:'rested'}],['Đi ra ngoài',{energy:-3,m:'went_out'}]]],
@@ -73,23 +73,60 @@ function cubeData(){const f=[[[ -1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]],[[-1,-1,
 const cd=cubeData(),vb=gl.createBuffer(),ib=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,cd.v,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,cd.i,gl.STATIC_DRAW);gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(aNor);gl.vertexAttribPointer(aNor,3,gl.FLOAT,false,24,12);gl.enable(gl.DEPTH_TEST);
 const I=()=>[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
 function mul(a,b){const o=Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o}
-function tr(x,y,z){const m=I();m[12]=x;m[13]=y;m[14]=z;return m}function sc(x,y,z){const m=I();m[0]=x;m[5]=y;m[10]=z;return m}function ry(a){const c=Math.cos(a),s=Math.sin(a);return[c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]}
-function model(x,y,z,sx,sy,sz,yaw=0){return mul(mul(tr(x,y,z),ry(yaw)),sc(sx,sy,sz))}
+function tr(x,y,z){const m=I();m[12]=x;m[13]=y;m[14]=z;return m}function sc(x,y,z){const m=I();m[0]=x;m[5]=y;m[10]=z;return m}function ry(a){const c=Math.cos(a),s=Math.sin(a);return[c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]}function rx(a){const c=Math.cos(a),s=Math.sin(a);return[1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1]}
+function model(x,y,z,sx,sy,sz,yaw=0,pitch=0){return mul(mul(mul(tr(x,y,z),ry(yaw)),rx(pitch)),sc(sx,sy,sz))}
 function persp(f,asp,n,far){const t=1/Math.tan(f/2),nf=1/(n-far);return[t/asp,0,0,0,0,t,0,0,0,0,(far+n)*nf,-1,0,0,2*far*n*nf,0]}
 function look(e,t){const z=[e[0]-t[0],e[1]-t[1],e[2]-t[2]],zn=Math.hypot(...z);for(let i=0;i<3;i++)z[i]/=zn;let x=[z[2],0,-z[0]],xn=Math.hypot(...x);for(let i=0;i<3;i++)x[i]/=xn;const y=[x[1]*z[2]-x[2]*z[1],x[2]*z[0]-x[0]*z[2],x[0]*z[1]-x[1]*z[0]];return[x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]),-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]),-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]),1]}
-let VP=I();function draw(x,y,z,sx,sy,sz,c,yaw=0){const m=model(x,y,z,sx,sy,sz,yaw);gl.uniformMatrix4fv(uModel,false,new Float32Array(m));gl.uniformMatrix4fv(uMVP,false,new Float32Array(mul(VP,m)));gl.uniform3fv(uColor,new Float32Array(c));gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0)}
+let VP=I();function draw(x,y,z,sx,sy,sz,c,yaw=0,pitch=0){const m=model(x,y,z,sx,sy,sz,yaw,pitch);gl.uniformMatrix4fv(uModel,false,new Float32Array(m));gl.uniformMatrix4fv(uMVP,false,new Float32Array(mul(VP,m)));gl.uniform3fv(uColor,new Float32Array(c));gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0)}
+function local(n,ox,oy,oz){const s=Math.sin(n.yaw),c=Math.cos(n.yaw);return{x:n.x+c*ox+s*oz,y:oy,z:n.z-s*ox+c*oz}}
+function part(n,ox,oy,oz,sx,sy,sz,c,pitch=0){const p=local(n,ox,oy,oz);draw(p.x,p.y,p.z,sx,sy,sz,c,n.yaw,pitch)}
+function person(n,type){
+  const isL=type==='linh',isP=type==='player';
+  const skin=isL?[.91,.78,.68]:isP?[.86,.70,.58]:[.72,.56,.44];
+  const hair=isL?[.82,.86,.91]:isP?[.055,.06,.07]:[.18,.16,.15];
+  const top=isL?[.88,.93,.96]:isP?[.16,.19,.22]:[.32,.38,.43];
+  const accent=isL?[.50,.66,.78]:isP?[.12,.14,.16]:[.28,.32,.36];
+  const bottom=isL?[.10,.15,.22]:isP?[.09,.10,.11]:[.16,.18,.20];
+  const shoes=isL?[.92,.94,.96]:[.08,.09,.10];
+  const step=Math.sin(animTime*8+n.phase)*.34*(n.walk||0);
+  const armStep=-step*.72;
+  part(n,0,.96,0,.30,.38,.18,top);
+  part(n,0,.67,0,.34,.15,.20,accent);
+  if(isL){part(n,0,.48,0,.40,.18,.25,bottom);part(n,0,.30,0,.34,.22,.24,bottom)}else{part(n,-.15,.35,step*.18,.12,.35,.12,bottom,step);part(n,.15,.35,-step*.18,.12,.35,.12,bottom,-step)}
+  if(isL){part(n,-.16,.32,step*.12,.11,.31,.11,skin,step);part(n,.16,.32,-step*.12,.11,.31,.11,skin,-step)}
+  part(n,-.40,1.02,armStep*.16,.10,.34,.11,top,armStep);part(n,.40,1.02,-armStep*.16,.10,.34,.11,top,-armStep);
+  part(n,-.44,.68,armStep*.28,.09,.16,.10,skin);part(n,.44,.68,-armStep*.28,.09,.16,.10,skin);
+  part(n,0,1.72,0,.28,.31,.27,skin);
+  part(n,0,2.02,-.01,.31,.20,.29,hair);
+  part(n,0,1.98,.18,.30,.10,.13,hair);
+  if(isL){
+    part(n,-.25,1.78,-.02,.12,.48,.14,hair,.02);part(n,.25,1.78,-.02,.12,.48,.14,hair,-.02);
+    part(n,-.18,2.03,.17,.10,.16,.10,hair);part(n,.18,2.03,.17,.10,.16,.10,hair);
+    part(n,-.09,1.78,.245,.035,.045,.025,[.24,.48,.70]);part(n,.09,1.78,.245,.035,.045,.025,[.24,.48,.70]);
+    part(n,0,1.56,.27,.035,.015,.025,[.42,.22,.25]);
+    part(n,0,1.19,.20,.045,.055,.025,[.72,.86,.94]);
+    part(n,-.12,.12,0,.13,.07,.20,shoes);part(n,.12,.12,0,.13,.07,.20,shoes);
+  }else if(isP){
+    part(n,-.16,2.02,.05,.13,.18,.13,hair,.05);part(n,.16,2.02,.05,.13,.18,.13,hair,-.05);
+    part(n,-.09,1.78,.245,.035,.045,.025,[.10,.16,.22]);part(n,.09,1.78,.245,.035,.045,.025,[.10,.16,.22]);
+    part(n,0,1.58,.27,.035,.015,.025,[.32,.22,.22]);
+    part(n,-.13,.08,0,.14,.06,.22,shoes);part(n,.13,.08,0,.14,.06,.22,shoes);
+  }else{
+    part(n,-.09,1.78,.245,.035,.045,.025,[.08,.11,.13]);part(n,.09,1.78,.245,.035,.045,.025,[.08,.11,.13]);
+    part(n,-.12,.08,0,.13,.06,.20,shoes);part(n,.12,.08,0,.13,.06,.20,shoes);
+  }
+}
+function vehicle(v){draw(v.x,.28,v.z,1.25,.28,.55,[.30,.34,.38],0);draw(v.x,.65,v.z,.62,.35,.45,[.48,.53,.58],0)}
 function ground(){draw(0,-.4,0,42,.4,34,[.24,.33,.24]);for(const r of roads)draw(r.x,-.02,r.z,r.w/2,.08,r.d/2,[.09,.11,.13]);for(let x=-36;x<=36;x+=4)draw(x,.07,0,.9,.02,.035,[.75,.68,.25]);for(let z=-30;z<=30;z+=4)draw(0,.07,z,.035,.02,.9,[.75,.68,.25])}
 function tree(t){draw(t.x,1,t.z,.23,1.05,.23,[.28,.19,.12]);draw(t.x,2.2,t.z,1,1.15,1,[.14,.36,.18])}
 function building(p){if(p.kind==='park'){draw(p.x,.08,p.z,p.w/2,.08,p.d/2,[.20,.40,.22]);return}draw(p.x,p.h/2,p.z,p.w/2,p.h/2,p.d/2,p.c);draw(p.x,p.h+.18,p.z,p.w/2+.12,.12,p.d/2+.12,[.10,.14,.18]);for(let i=-1;i<=1;i++)draw(p.x+i*p.w*.24,p.h*.58,p.z-p.d/2-.04,.58,.42,.08,[.68,.76,.80])}
-function person(n,type){const c=type==='linh'?[.78,.84,.92]:type==='player'?[.18,.22,.27]:[.38,.46,.53];draw(n.x,.82,n.z,.38,.82,.25,c,n.yaw);draw(n.x,1.86,n.z,.30,.42,.28,type==='linh'?[.90,.93,.96]:[.70,.53,.40],n.yaw);draw(n.x,2.42,n.z,.27,.28,.26,type==='linh'?[.92,.94,.98]:[.58,.47,.38],n.yaw);draw(n.x-.15,.75,n.z,.11,.70,.11,c,n.yaw);draw(n.x+.15,.75,n.z,.11,.70,.11,c,n.yaw)}
-function vehicle(v){draw(v.x,.28,v.z,1.25,.28,.55,[.30,.34,.38],0);draw(v.x,.65,v.z,.62,.35,.45,[.48,.53,.58],0)}
 function resize(){const d=Math.min(devicePixelRatio||1,2),w=Math.floor(innerWidth*d),h=Math.floor(innerHeight*d);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}}
 function project(x,y,z){const a=[x,y,z,1],r=[0,0,0,0];for(let c=0;c<4;c++)for(let rr=0;rr<4;rr++)r[c]+=VP[c*4+rr]*a[rr];if(r[3]<=0)return null;return{x:(r[0]/r[3]*.5+.5)*innerWidth,y:(-.5*r[1]/r[3]+.5)*innerHeight}}
 function renderLabels(){labels.innerHTML='';for(const p of locations){const q=project(p.x,p.kind==='park'?.5:p.h+.75,p.z);if(q&&q.x>-100&&q.x<innerWidth+100&&q.y>-30&&q.y<innerHeight+30){const e=document.createElement('div');e.className='label';e.textContent=p.name;e.style.left=q.x+'px';e.style.top=q.y+'px';labels.appendChild(e)}}}
-function render(){resize();gl.viewport(0,0,canvas.width,canvas.height);const h=state.min/1440,night=(h<.25||h>.78)?1:0;gl.clearColor(.31-.10*night,.40-.12*night,.31-.10*night,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);let cp=Math.cos(camPitch),sp=Math.sin(camPitch),cy=Math.cos(camYaw),sy=Math.sin(camYaw),cam=[player.x+sy*camDist*cp,2.3+camDist*sp,player.z+cy*camDist*cp];VP=mul(persp(1.02,canvas.width/canvas.height,.1,150),look(cam,[player.x,1.0,player.z]));gl.uniform3fv(uLight,new Float32Array([-.5,1,.35]));gl.uniform1f(uNight,night);ground();locations.forEach(building);trees.forEach(tree);for(const v of vehicles)vehicle(v);npcs.forEach(n=>person(n,'npc'));person(linh,'linh');person(player,'player');renderLabels();requestAnimationFrame(render)}
+function render(){resize();animTime=performance.now()/1000;gl.viewport(0,0,canvas.width,canvas.height);const h=state.min/1440,night=(h<.25||h>.78)?1:0;gl.clearColor(.31-.10*night,.40-.12*night,.31-.10*night,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);let cp=Math.cos(camPitch),sp=Math.sin(camPitch),cy=Math.cos(camYaw),sy=Math.sin(camYaw),cam=[player.x+sy*camDist*cp,2.3+camDist*sp,player.z+cy*camDist*cp];VP=mul(persp(1.02,canvas.width/canvas.height,.1,150),look(cam,[player.x,1.0,player.z]));gl.uniform3fv(uLight,new Float32Array([-.5,1,.35]));gl.uniform1f(uNight,night);ground();locations.forEach(building);trees.forEach(tree);for(const v of vehicles)vehicle(v);npcs.forEach(n=>person(n,'npc'));person(linh,'linh');person(player,'player');renderLabels();requestAnimationFrame(render)}
 function targetTo(x,z){destination={x,z};const dx=x-player.x,dz=z-player.z;player.yaw=Math.atan2(dx,dz)}
-function move(dt){if(paused)return;let f=(keys.has('w')?1:0)-(keys.has('s')?1:0),str=(keys.has('q')?1:0)-(keys.has('e')?1:0);if(keys.has('a'))player.yaw+=dt*1.9;if(keys.has('d'))player.yaw-=dt*1.9;let sp=(keys.has('shift')?8:4.8)*dt;if(destination&&!f&&!str){const dx=destination.x-player.x,dz=destination.z-player.z,dist=Math.hypot(dx,dz);if(dist>.7){player.yaw=Math.atan2(dx,dz);f=1}else destination=null}player.x+=Math.sin(player.yaw)*f*sp+Math.cos(player.yaw)*str*sp;player.z+=Math.cos(player.yaw)*f*sp-Math.sin(player.yaw)*str*sp;player.x=clamp(player.x,-38,38);player.z=clamp(player.z,-30,30)}
-function updateNPC(dt){if(paused)return;const hour=state.min/60;for(const n of npcs){let target;if(hour>=8&&hour<17)target=locations.find(p=>p.id==='office');else if(hour>=17&&hour<20)target=locations.find(p=>p.id===n.goal);else target=locations.find(p=>p.id=n.goal==='office'?'home':n.goal);if(target){const dx=target.x-n.x,dz=target.z-n.z,d=Math.hypot(dx,dz);if(d>2){n.x+=dx/d*n.speed*dt;n.z+=dz/d*n.speed*dt;n.yaw=Math.atan2(dx,dz)}}else{n.phase+=dt;n.x+=Math.sin(n.phase)*dt*.25;n.z+=Math.cos(n.phase*1.13)*dt*.25}}linh.phase+=dt*.3;if(hour>=17&&hour<21){linh.x+=(-20-linh.x)*dt*.08;linh.z+=(-18-linh.z)*dt*.08;linh.yaw=Math.atan2(-20-linh.x,-18-linh.z)}}
+function move(dt){if(paused){player.walk=0;return}let f=(keys.has('w')?1:0)-(keys.has('s')?1:0),str=(keys.has('q')?1:0)-(keys.has('e')?1:0);if(keys.has('a'))player.yaw+=dt*1.9;if(keys.has('d'))player.yaw-=dt*1.9;let sp=(keys.has('shift')?8:4.8)*dt;if(destination&&!f&&!str){const dx=destination.x-player.x,dz=destination.z-player.z,dist=Math.hypot(dx,dz);if(dist>.7){player.yaw=Math.atan2(dx,dz);f=1}else destination=null}player.walk=Math.min(1,Math.hypot(f,str));player.x+=Math.sin(player.yaw)*f*sp+Math.cos(player.yaw)*str*sp;player.z+=Math.cos(player.yaw)*f*sp-Math.sin(player.yaw)*str*sp;player.x=clamp(player.x,-38,38);player.z=clamp(player.z,-30,30)}
+function updateNPC(dt){if(paused){npcs.forEach(n=>n.walk=0);linh.walk=0;return}const hour=state.min/60;for(const n of npcs){let target;if(hour>=8&&hour<17)target=locations.find(p=>p.id==='office');else if(hour>=17&&hour<20)target=locations.find(p=>p.id===n.goal);else target=locations.find(p=>p.id===(n.goal==='office'?'home':n.goal));if(target){const dx=target.x-n.x,dz=target.z-n.z,d=Math.hypot(dx,dz);n.walk=d>2?1:0;if(d>2){n.x+=dx/d*n.speed*dt;n.z+=dz/d*n.speed*dt;n.yaw=Math.atan2(dx,dz)}}else{n.walk=.3;n.phase+=dt;n.x+=Math.sin(n.phase)*dt*.25;n.z+=Math.cos(n.phase*1.13)*dt*.25}}linh.phase+=dt*.3;linh.walk=0;if(hour>=17&&hour<21){const dx=-20-linh.x,dz=-18-linh.z;linh.walk=Math.hypot(dx,dz)>.4?1:0;linh.x+=dx*dt*.08;linh.z+=dz*dt*.08;linh.yaw=Math.atan2(dx,dz)}}
 function updateVehicles(dt){for(const v of vehicles){v.x+=v.dir*v.speed*dt;if(v.x>38)v.x=-38;if(v.x<-38)v.x=38}}
 function updateTarget(){const n=nearPerson();const p=nearLocation();if(n){targetEl.style.display='block';targetEl.textContent=`${n.name} · E / Click để nói chuyện`;return}if(p){targetEl.style.display='block';targetEl.textContent=`${p.name} · E / Click để tương tác`;return}targetEl.style.display='none'}
 function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;move(dt);updateNPC(dt);updateVehicles(dt);hud();updateTarget();requestAnimationFrame(tick)}
