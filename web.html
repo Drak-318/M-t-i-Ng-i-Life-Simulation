@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Một Đời Người — Life Simulation · Web 3D</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10161b;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}canvas{display:block;width:100%;height:100%;cursor:grab}canvas.drag{cursor:grabbing}
+#hud{position:fixed;inset:0;color:#fff;pointer-events:none;text-shadow:0 2px 5px #000}.top{display:flex;justify-content:space-between;align-items:center;padding:14px 18px 8px;font-weight:800;font-size:13px}.brand{font-size:16px;letter-spacing:.08em}.chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 18px}.chip,.btn,.hint{background:#071018df;border:1px solid #ffffff22;border-radius:9px;padding:7px 10px}.chip{font-size:11px}.hint{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);white-space:nowrap}.controls{position:fixed;right:14px;bottom:14px;display:flex;gap:6px;pointer-events:auto}.btn{color:#fff;cursor:pointer}.btn:hover{background:#1a2b37}
+#cross{position:fixed;left:50%;top:50%;width:12px;height:12px;transform:translate(-50%,-50%);opacity:.55}.cross1,.cross2{position:absolute;background:#fff}.cross1{left:5px;top:0;width:2px;height:12px}.cross2{left:0;top:5px;width:12px;height:2px}#target{position:fixed;left:50%;top:calc(50% + 32px);transform:translateX(-50%);background:#071018d9;border:1px solid #ffffff22;border-radius:9px;padding:7px 10px;font-size:12px;display:none}#labels{position:fixed;inset:0;pointer-events:none}.label{position:absolute;transform:translate(-50%,-50%);padding:5px 8px;border-radius:7px;background:#071018d9;border:1px solid #ffffff20;font-size:11px;white-space:nowrap;opacity:.9}.toast{position:fixed;top:74px;left:50%;transform:translateX(-50%);padding:9px 13px;border-radius:10px;background:#071018ed;color:#fff;opacity:0;transition:.2s;pointer-events:none}.toast.on{opacity:1}
+.modal{position:fixed;inset:0;background:#0009;display:none;place-items:end center;padding:22px;z-index:10}.card{width:min(780px,100%);background:#101820f7;color:#fff;border:1px solid #ffffff25;border-radius:18px;padding:20px;box-shadow:0 20px 70px #000a}.meta{font-size:11px;font-weight:800;opacity:.62;text-transform:uppercase;letter-spacing:.08em}.text{font-size:18px;line-height:1.55;margin:9px 0 16px}.choices{display:grid;gap:8px}.choice{border:1px solid #ffffff22;background:#ffffff0b;color:#fff;border-radius:10px;padding:12px;text-align:left;cursor:pointer;font-size:14px}.choice:hover{background:#ffffff18}
+#panel{position:fixed;left:14px;bottom:58px;width:min(320px,calc(100% - 28px));background:#071018df;border:1px solid #ffffff1e;border-radius:13px;padding:11px;color:#fff;pointer-events:none;display:none}.panel-title{font-weight:800;margin-bottom:4px}.panel-body{font-size:12px;line-height:1.45;opacity:.82}.error{position:fixed;inset:0;display:none;place-items:center;background:#10161b;color:#fff;padding:25px;z-index:99}.error .box{max-width:780px;background:#1b2630;padding:22px;border-radius:16px}.error pre{white-space:pre-wrap;color:#ffd7d7;font-size:12px}@media(max-width:700px){.hint{white-space:normal;text-align:center;width:calc(100% - 30px)}.controls{bottom:52px}.brand{font-size:13px}.text{font-size:16px}}
+</style>
+</head>
+<body>
+<canvas id="world"></canvas><div id="labels"></div>
+<div id="hud"><div class="top"><div class="brand">MỘT ĐỜI NGƯỜI</div><div id="clock"></div></div>
+<div class="chips"><span class="chip">Nguyễn Minh · 24</span><span class="chip" id="loc"></span><span class="chip" id="money"></span><span class="chip" id="energy"></span><span class="chip" id="stress"></span><span class="chip" id="rel"></span></div>
+<div id="cross"><i class="cross1"></i><i class="cross2"></i></div><div id="target"></div>
+<div class="hint">WASD di chuyển · A/D xoay nhân vật · Q/E đi ngang · Kéo chuột xoay camera · Click điểm đến/NPC · E tương tác · N +1 giờ · P lưu · L tải · R chơi lại</div></div>
+<div class="controls"><button class="btn" id="hour">+1 giờ</button><button class="btn" id="save">Lưu</button><button class="btn" id="load">Tải</button></div>
+<div id="panel"><div class="panel-title" id="panelTitle"></div><div class="panel-body" id="panelBody"></div></div><div class="toast" id="toast"></div>
+<div class="modal" id="modal"><div class="card"><div class="meta" id="meta"></div><div class="text" id="story"></div><div class="choices" id="choices"></div></div></div>
+<div class="error" id="error"><div class="box"><h2>Web 3D MVP gặp lỗi khởi động</h2><p>Bản chơi thử không thể khởi động.</p><pre id="errorText"></pre></div></div>
+<script src="src/web3d.js?v=20261103-3"></script>
+</body></html>
