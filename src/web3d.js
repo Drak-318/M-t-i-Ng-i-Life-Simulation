@@ -1,0 +1,103 @@
+(() => {
+'use strict';
+const $=id=>document.getElementById(id);
+const canvas=$('world'), clock=$('clock'), locEl=$('loc'), moneyEl=$('money'), energyEl=$('energy'), stressEl=$('stress'), relEl=$('rel'), targetEl=$('target'), labels=$('labels'), modal=$('modal'), meta=$('meta'), story=$('story'), choices=$('choices'), toastEl=$('toast'), panel=$('panel'), panelTitle=$('panelTitle'), panelBody=$('panelBody'), errorEl=$('error'), errorText=$('errorText');
+const DAYS=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+const SAVE='mot-doi-nguoi-web3d-v3';
+let state={day:1,min:462,money:15000000,energy:82,stress:18,confidence:52,trust:0,affection:0,understanding:0,closeness:0,respect:0,hurt:0,memories:[],done:[]};
+let player={x:-24,z:14,yaw:0};
+let destination=null,paused=false,last=performance.now(),toastTimer=0;
+const keys=new Set(); let dragging=false,lastMouse={x:0,y:0},camYaw=.65,camPitch=.42,camDist=12;
+const locations=[
+{id:'home',name:'Nhà Minh',x:-24,z:20,w:11,d:9,h:3.8,c:[.38,.50,.58],kind:'home',info:'Căn hộ của Minh. Nơi bắt đầu và kết thúc một ngày.'},
+{id:'office',name:'Văn phòng',x:24,z:19,w:14,d:9,h:4.5,c:[.30,.40,.48],kind:'office',info:'Nơi Minh làm việc. Công việc tạo tiền nhưng lấy đi thời gian và năng lượng.'},
+{id:'cafe',name:'Quán cà phê',x:-20,z:-18,w:9,d:7,h:3.2,c:[.50,.36,.28],kind:'cafe',info:'Một nơi nhỏ để gặp người khác hoặc ngồi một mình.'},
+{id:'park',name:'Công viên',x:20,z:-18,w:13,d:10,h:.35,c:[.23,.40,.25],kind:'park',info:'Không gian mở. Người khác vẫn sống ngày của họ ở đây.'},
+{id:'shop',name:'Cửa hàng',x:2,z:-17,w:8,d:6,h:3.1,c:[.55,.46,.27],kind:'shop',info:'Mua đồ dùng và những khoản chi nhỏ trong ngày.'},
+{id:'restaurant',name:'Nhà hàng',x:3,z:18,w:8,d:6,h:3.4,c:[.48,.30,.30],kind:'restaurant',info:'Ăn uống, gặp gỡ và những cuộc trò chuyện không được lên lịch.'}
+];
+const roads=[{x:0,z:0,w:76,d:5},{x:0,z:0,w:5,d:62}];
+const trees=Array.from({length:30},(_,i)=>({x:-35+(i*17)%70,z:-29+(i*23)%58}));
+const npcNames=['Huy','Mai','Tuấn','Vy','Nam','An','Phương','Duy','Trang','Khoa','Thảo','Long'];
+const npcs=Array.from({length:12},(_,i)=>({id:'npc'+i,name:npcNames[i],x:-31+(i*11)%62,z:-26+(i*17)%52,yaw:0,speed:.45+(i%4)*.08,phase:i*1.7,goal:['office','cafe','park','shop'][i%4],role:['đi làm','đi cà phê','đi dạo','mua đồ'][i%4]}));
+const linh={id:'linh',name:'Linh',x:-20,z:-15,yaw:2.2,speed:.18,phase:4.1,goal:'cafe',role:'công việc riêng'};
+const vehicles=Array.from({length:5},(_,i)=>({x:-34+i*17,z:i%2?-2.2:2.2,dir:i%2?1:-1,speed:2.2+(i%3)*.45}));
+const scenes=[
+[1,'home','Sáng Chủ nhật. Điện thoại nằm trên bàn. Minh không có kế hoạch rõ ràng.',[['Ở nhà nghỉ ngơi',{energy:6,stress:-3,m:'rested'}],['Đi ra ngoài',{energy:-3,m:'went_out'}]]],
+[1,'cafe','Quán cà phê không đông. Có những buổi sáng chẳng có chuyện gì đặc biệt.',[['Ngồi một mình',{energy:2,stress:-1,m:'quiet_cafe'}],['Mở lời với người ngồi gần',{energy:-2,confidence:2,m:'small_talk'}]]],
+[2,'office','Một việc gấp xuất hiện đúng lúc Minh vừa định đóng máy.',[['Ở lại xử lý',{energy:-8,stress:5,m:'worked_late'}],['Để sáng mai',{stress:-2,m:'set_boundary'}]]],
+[2,'home','Một tin nhắn của Linh xuất hiện. Chỉ là một câu hỏi rất bình thường.',[['Trả lời ngay',{energy:-1,trust:2,affection:2,m:'replied'}],['Để mai',{trust:-1,m:'delayed'}]]],
+[3,'office','Đồng nghiệp rủ Minh đi ăn trưa. Cậu đã định ăn một mình.',[['Đi cùng',{energy:-4,confidence:1,m:'lunch'}],['Từ chối',{energy:2,m:'alone'}]]],
+[3,'park','Công viên yên hơn thường lệ. Minh có thời gian nghĩ về tuần này.',[['Đi bộ',{energy:-2,stress:-5,m:'walk'}],['Về nhà',{energy:2,m:'home_early'}]]],
+[4,'cafe','Linh có vẻ mệt nhưng vẫn cố tỏ ra bình thường.',[['Hỏi thăm',{trust:2,understanding:3,affection:1,m:'noticed'}],['Không hỏi',{hurt:2,affection:-1,m:'missed_signal'}]]],
+[4,'park','Một buổi chiều rảnh bất ngờ. Minh có thể dùng nó cho chính mình.',[['Ngồi nghe nhạc',{stress:-4,energy:2,m:'music'}],['Nhắn cho Linh',{affection:1,trust:1,m:'checked_in'}]]],
+[5,'shop','Một khoản chi nhỏ cũng là một lựa chọn.',[['Mua thứ mình thích',{money:-80000,stress:-2,m:'small_treat'}],['Không mua',{confidence:1,m:'saved'}]]],
+[5,'restaurant','Một lời mời ăn tối đến bất ngờ.',[['Đi ăn',{money:-180000,energy:-3,affection:2,closeness:2,m:'dinner'}],['Từ chối',{energy:2,trust:-1,m:'declined'}]]],
+[6,'office','Cuối tuần đã gần tới nhưng một phần việc vẫn chưa xong.',[['Làm thêm',{energy:-5,stress:4,m:'overtime'}],['Đóng máy đúng giờ',{stress:-3,confidence:1,m:'protected_time'}]]],
+[6,'cafe','Linh hỏi: “Dạo này cậu ổn không?”',[['Nói thật một chút',{trust:4,understanding:4,closeness:2,confidence:2,m:'opened_up'}],['Nói “ổn mà”',{trust:-1,m:'kept_feelings'}]]],
+[7,'home','Sáng thứ Bảy. Minh có thể dành cả ngày cho việc riêng.',[['Ngủ thêm',{energy:8,stress:-3,m:'slept'}],['Dọn phòng',{energy:-2,confidence:1,m:'cleaned'}]]],
+[7,'park','Mỗi người trong công viên đều có một cuộc sống riêng. Minh cũng vậy.',[['Ngồi quan sát',{energy:2,stress:-3,understanding:1,m:'observed'}],['Đi bộ thật lâu',{energy:-5,stress:-6,m:'long_walk'}]]],
+[7,'cafe','Linh nhắn rằng hôm nay cô ấy rảnh. Không có kế hoạch đặc biệt nào.',[['Hẹn gặp',{energy:-3,affection:2,closeness:3,trust:2,m:'made_time'}],['Để dịp khác',{energy:2,trust:-2,m:'postponed'}]]],
+[7,'restaurant','Bữa tối kết thúc. Có những mối quan hệ không cần một câu trả lời ngay lập tức.',[['Muốn tiếp tục tìm hiểu',{trust:3,affection:3,closeness:2,m:'said_continue'}],['Giữ như hiện tại',{m:'status_quo'}]]],
+[2,'shop','Minh ghé mua đồ ăn trước khi về. Một người quen tình cờ đứng cùng hàng.',[['Chào hỏi',{confidence:1,trust:1,m:'greeted'}],['Im lặng',{m:'quiet_shop'}]]],
+[5,'office','Minh nhận ra mình đã ôm quá nhiều việc trong vài ngày.',[['Xin hỗ trợ',{stress:-3,confidence:2,m:'asked_help'}],['Tự làm hết',{energy:-6,stress:4,m:'did_all'}]]],
+[6,'home','Tối thứ Sáu. Căn phòng yên. Minh nghĩ về những người mình đã gặp trong tuần.',[['Nhắn một câu hỏi thăm',{trust:2,affection:1,m:'sent_care'}],['Tắt điện thoại',{stress:-2,m:'offline'}]]],
+[7,'shop','Cuối tuần. Minh phải quyết định khoản tiền nào đáng để chi.',[['Mua đồ cần thiết',{money:-120000,confidence:1,m:'planned_spend'}],['Để tuần sau',{confidence:1,m:'deferred_spend'}]]]
+];
+function clamp(v,a=0,b=100){return Math.max(a,Math.min(b,v))}
+function money(v){return new Intl.NumberFormat('vi-VN').format(Math.round(v))+' ₫'}
+function timeText(){const m=((state.min%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')}
+function relation(){return Math.round((state.trust+state.affection+state.understanding+state.closeness+state.respect)/5)}
+function nearLocation(){let b=null,d=999;for(const p of locations){const q=Math.hypot(player.x-p.x,player.z-p.z);if(q<d){d=q;b=p}}return d<7?b:null}
+function nearPerson(){let b=null,d=999;for(const n of [linh,...npcs]){const q=Math.hypot(player.x-n.x,player.z-n.z);if(q<d){d=q;b=n}}return d<3.3?b:null}
+function hud(){clock.textContent=`${DAYS[state.day-1]} · ${timeText()}`;locEl.textContent=(nearLocation()?.name)||'Đường phố';moneyEl.textContent=money(state.money);energyEl.textContent=`Năng lượng ${Math.round(state.energy)}`;stressEl.textContent=`Stress ${Math.round(state.stress)}`;relEl.textContent=`Quan hệ ${relation()}`}
+function toast(t){toastEl.textContent=t;toastEl.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('on'),1700)}
+function remember(m){state.memories.push({id:m,day:state.day,min:state.min})}
+function apply(e){for(const k of ['energy','stress','confidence','trust','affection','understanding','closeness','respect','hurt'])if(Number.isFinite(e[k]))state[k]=clamp(state[k]+e[k]);if(Number.isFinite(e.money))state.money=Math.max(0,state.money+e.money)}
+function advance(minutes){state.min+=minutes;while(state.min>=1440){state.min-=1440;state.day++;state.done=[];if(state.day>7){state.day=1;endWeek()}}hud()}
+function key(s){return `${state.day}|${s[1]}|${s[2]}`}
+function openScene(s){paused=true;meta.textContent=`${s[1]} · ${DAYS[state.day-1]} · ${timeText()}`;story.textContent=s[2];choices.innerHTML='';for(const ch of s[3]){const b=document.createElement('button');b.className='choice';b.textContent=ch[0];b.onclick=()=>{apply(ch[1]);if(ch[1].m)remember(ch[1].m);state.done.push(key(s));advance(12);modal.style.display='none';paused=false;destination=null;toast('Lựa chọn đã được ghi nhớ.');};choices.appendChild(b)}modal.style.display='grid'}
+function sceneHere(){const p=nearLocation();return p?scenes.find(s=>s[0]===state.day&&s[1]===p.id&&!state.done.includes(key(s))):null}
+function interact(){if(paused)return;const n=nearPerson();if(n){if(n===linh){openScene(['linh','Quán cà phê',state.stress>65?'Linh trông khá mệt. Cô ấy vẫn cố giữ nhịp sống của mình.':'Linh nhìn Minh rồi mỉm cười. Cả hai đều có lịch riêng.',[['Hỏi hôm nay thế nào',{trust:1,understanding:1,m:'asked'}],['Kể một chuyện nhỏ',{affection:1,closeness:1,m:'shared'}],['Để cô ấy có không gian',{respect:1,m:'space'}]]]);}else openScene(['npc','Đường phố',`${n.name} đang ${n.role}. Người này không biết Minh là trung tâm của câu chuyện — họ chỉ đang sống ngày của mình.`,[['Chào một câu',{confidence:1,m:'greet_'+n.id}],['Đi tiếp',{m:'passed_'+n.id}]]]);return}const s=sceneHere();if(s){openScene(s);return}const p=nearLocation();if(p){openScene(['loc',p.name,p.info,[['Quan sát xung quanh',{understanding:1,m:'observe_'+p.id}],['Rời đi',{m:'leave_'+p.id}]]]);return}toast('Không có gì đủ gần để tương tác.')}
+function endWeek(){state.energy=clamp(state.energy+18);state.stress=clamp(state.stress-12);toast(`Một tuần trôi qua · Quan hệ ${relation()}/100`);state.done=[]}
+function save(){localStorage.setItem(SAVE,JSON.stringify({state,player,linh:{x:linh.x,z:linh.z,yaw:linh.yaw},npcs:npcs.map(n=>({x:n.x,z:n.z,yaw:n.yaw,goal:n.goal}))}));toast('Đã lưu cuộc sống của Minh.')}
+function load(){const raw=localStorage.getItem(SAVE);if(!raw)return toast('Chưa có bản lưu.');try{const d=JSON.parse(raw);Object.assign(state,d.state);Object.assign(player,d.player);if(d.linh)Object.assign(linh,d.linh);if(Array.isArray(d.npcs))d.npcs.forEach((x,i)=>Object.assign(npcs[i],x));hud();toast('Đã tải bản lưu.')}catch(e){toast('Bản lưu không hợp lệ.')}}
+function reset(){localStorage.removeItem(SAVE);location.reload()}
+const gl=canvas.getContext('webgl',{antialias:true,alpha:false});if(!gl)throw new Error('Trình duyệt không hỗ trợ WebGL.');
+const vs=`attribute vec3 aPos;attribute vec3 aNor;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNor;varying vec3 vPos;void main(){vec4 w=uModel*vec4(aPos,1.0);vPos=w.xyz;vNor=mat3(uModel)*aNor;gl_Position=uMVP*w;}`;
+const fs=`precision mediump float;uniform vec3 uColor;uniform vec3 uLight;uniform float uNight;varying vec3 vNor;varying vec3 vPos;void main(){float d=max(dot(normalize(vNor),normalize(uLight)),0.0);vec3 c=uColor*(.38+.62*d);c*=mix(1.0,.48,uNight);gl_FragColor=vec4(c,1.0);}`;
+function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s}
+const prog=gl.createProgram();gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);if(!gl.getProgramParameter(prog,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(prog));gl.useProgram(prog);
+const aPos=gl.getAttribLocation(prog,'aPos'),aNor=gl.getAttribLocation(prog,'aNor'),uMVP=gl.getUniformLocation(prog,'uMVP'),uModel=gl.getUniformLocation(prog,'uModel'),uColor=gl.getUniformLocation(prog,'uColor'),uLight=gl.getUniformLocation(prog,'uLight'),uNight=gl.getUniformLocation(prog,'uNight');
+function cubeData(){const f=[[[ -1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]],[[-1,-1,1],[-1,1,1],[1,1,1],[1,-1,1]],[[-1,-1,-1],[-1,1,-1],[-1,1,1],[-1,-1,1]],[[1,-1,-1],[1,-1,1],[1,1,1],[1,1,-1]],[[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]],[[-1,-1,-1],[-1,-1,1],[1,-1,1],[1,-1,-1]]];const ns=[[0,0,-1],[0,0,1],[-1,0,0],[1,0,0],[0,1,0],[0,-1,0]],v=[],idx=[];for(let k=0;k<6;k++){const base=k*4;for(const p of f[k])v.push(p[0],p[1],p[2],...ns[k]);idx.push(base,base+1,base+2,base,base+2,base+3)}return {v:new Float32Array(v),i:new Uint16Array(idx)}}
+const cd=cubeData(),vb=gl.createBuffer(),ib=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,cd.v,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,cd.i,gl.STATIC_DRAW);gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(aNor);gl.vertexAttribPointer(aNor,3,gl.FLOAT,false,24,12);gl.enable(gl.DEPTH_TEST);
+const I=()=>[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+function mul(a,b){const o=Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o}
+function tr(x,y,z){const m=I();m[12]=x;m[13]=y;m[14]=z;return m}function sc(x,y,z){const m=I();m[0]=x;m[5]=y;m[10]=z;return m}function ry(a){const c=Math.cos(a),s=Math.sin(a);return[c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]}
+function model(x,y,z,sx,sy,sz,yaw=0){return mul(mul(tr(x,y,z),ry(yaw)),sc(sx,sy,sz))}
+function persp(f,asp,n,far){const t=1/Math.tan(f/2),nf=1/(n-far);return[t/asp,0,0,0,0,t,0,0,0,0,(far+n)*nf,-1,0,0,2*far*n*nf,0]}
+function look(e,t){const z=[e[0]-t[0],e[1]-t[1],e[2]-t[2]],zn=Math.hypot(...z);for(let i=0;i<3;i++)z[i]/=zn;let x=[z[2],0,-z[0]],xn=Math.hypot(...x);for(let i=0;i<3;i++)x[i]/=xn;const y=[x[1]*z[2]-x[2]*z[1],x[2]*z[0]-x[0]*z[2],x[0]*z[1]-x[1]*z[0]];return[x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]),-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]),-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]),1]}
+let VP=I();function draw(x,y,z,sx,sy,sz,c,yaw=0){const m=model(x,y,z,sx,sy,sz,yaw);gl.uniformMatrix4fv(uModel,false,new Float32Array(m));gl.uniformMatrix4fv(uMVP,false,new Float32Array(mul(VP,m)));gl.uniform3fv(uColor,new Float32Array(c));gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0)}
+function ground(){draw(0,-.4,0,42,.4,34,[.24,.33,.24]);for(const r of roads)draw(r.x,-.02,r.z,r.w/2,.08,r.d/2,[.09,.11,.13]);for(let x=-36;x<=36;x+=4)draw(x,.07,0,.9,.02,.035,[.75,.68,.25]);for(let z=-30;z<=30;z+=4)draw(0,.07,z,.035,.02,.9,[.75,.68,.25])}
+function tree(t){draw(t.x,1,t.z,.23,1.05,.23,[.28,.19,.12]);draw(t.x,2.2,t.z,1,1.15,1,[.14,.36,.18])}
+function building(p){if(p.kind==='park'){draw(p.x,.08,p.z,p.w/2,.08,p.d/2,[.20,.40,.22]);return}draw(p.x,p.h/2,p.z,p.w/2,p.h/2,p.d/2,p.c);draw(p.x,p.h+.18,p.z,p.w/2+.12,.12,p.d/2+.12,[.10,.14,.18]);for(let i=-1;i<=1;i++)draw(p.x+i*p.w*.24,p.h*.58,p.z-p.d/2-.04,.58,.42,.08,[.68,.76,.80])}
+function person(n,type){const c=type==='linh'?[.78,.84,.92]:type==='player'?[.18,.22,.27]:[.38,.46,.53];draw(n.x,.82,n.z,.38,.82,.25,c,n.yaw);draw(n.x,1.86,n.z,.30,.42,.28,type==='linh'?[.90,.93,.96]:[.70,.53,.40],n.yaw);draw(n.x,2.42,n.z,.27,.28,.26,type==='linh'?[.92,.94,.98]:[.58,.47,.38],n.yaw);draw(n.x-.15,.75,n.z,.11,.70,.11,c,n.yaw);draw(n.x+.15,.75,n.z,.11,.70,.11,c,n.yaw)}
+function vehicle(v){draw(v.x,.28,v.z,1.25,.28,.55,[.30,.34,.38],0);draw(v.x,.65,v.z,.62,.35,.45,[.48,.53,.58],0)}
+function resize(){const d=Math.min(devicePixelRatio||1,2),w=Math.floor(innerWidth*d),h=Math.floor(innerHeight*d);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}}
+function project(x,y,z){const a=[x,y,z,1],r=[0,0,0,0];for(let c=0;c<4;c++)for(let rr=0;rr<4;rr++)r[c]+=VP[c*4+rr]*a[rr];if(r[3]<=0)return null;return{x:(r[0]/r[3]*.5+.5)*innerWidth,y:(-.5*r[1]/r[3]+.5)*innerHeight}}
+function renderLabels(){labels.innerHTML='';for(const p of locations){const q=project(p.x,p.kind==='park'?.5:p.h+.75,p.z);if(q&&q.x>-100&&q.x<innerWidth+100&&q.y>-30&&q.y<innerHeight+30){const e=document.createElement('div');e.className='label';e.textContent=p.name;e.style.left=q.x+'px';e.style.top=q.y+'px';labels.appendChild(e)}}}
+function render(){resize();gl.viewport(0,0,canvas.width,canvas.height);const h=state.min/1440,night=(h<.25||h>.78)?1:0;gl.clearColor(.31-.10*night,.40-.12*night,.31-.10*night,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);let cp=Math.cos(camPitch),sp=Math.sin(camPitch),cy=Math.cos(camYaw),sy=Math.sin(camYaw),cam=[player.x+sy*camDist*cp,2.3+camDist*sp,player.z+cy*camDist*cp];VP=mul(persp(1.02,canvas.width/canvas.height,.1,150),look(cam,[player.x,1.0,player.z]));gl.uniform3fv(uLight,new Float32Array([-.5,1,.35]));gl.uniform1f(uNight,night);ground();locations.forEach(building);trees.forEach(tree);for(const v of vehicles)vehicle(v);npcs.forEach(n=>person(n,'npc'));person(linh,'linh');person(player,'player');renderLabels();requestAnimationFrame(render)}
+function targetTo(x,z){destination={x,z};const dx=x-player.x,dz=z-player.z;player.yaw=Math.atan2(dx,dz)}
+function move(dt){if(paused)return;let f=(keys.has('w')?1:0)-(keys.has('s')?1:0),str=(keys.has('q')?1:0)-(keys.has('e')?1:0);if(keys.has('a'))player.yaw+=dt*1.9;if(keys.has('d'))player.yaw-=dt*1.9;let sp=(keys.has('shift')?8:4.8)*dt;if(destination&&!f&&!str){const dx=destination.x-player.x,dz=destination.z-player.z,dist=Math.hypot(dx,dz);if(dist>.7){player.yaw=Math.atan2(dx,dz);f=1}else destination=null}player.x+=Math.sin(player.yaw)*f*sp+Math.cos(player.yaw)*str*sp;player.z+=Math.cos(player.yaw)*f*sp-Math.sin(player.yaw)*str*sp;player.x=clamp(player.x,-38,38);player.z=clamp(player.z,-30,30)}
+function updateNPC(dt){if(paused)return;const hour=state.min/60;for(const n of npcs){let target;if(hour>=8&&hour<17)target=locations.find(p=>p.id==='office');else if(hour>=17&&hour<20)target=locations.find(p=>p.id===n.goal);else target=locations.find(p=>p.id=n.goal==='office'?'home':n.goal);if(target){const dx=target.x-n.x,dz=target.z-n.z,d=Math.hypot(dx,dz);if(d>2){n.x+=dx/d*n.speed*dt;n.z+=dz/d*n.speed*dt;n.yaw=Math.atan2(dx,dz)}}else{n.phase+=dt;n.x+=Math.sin(n.phase)*dt*.25;n.z+=Math.cos(n.phase*1.13)*dt*.25}}linh.phase+=dt*.3;if(hour>=17&&hour<21){linh.x+=(-20-linh.x)*dt*.08;linh.z+=(-18-linh.z)*dt*.08;linh.yaw=Math.atan2(-20-linh.x,-18-linh.z)}}
+function updateVehicles(dt){for(const v of vehicles){v.x+=v.dir*v.speed*dt;if(v.x>38)v.x=-38;if(v.x<-38)v.x=38}}
+function updateTarget(){const n=nearPerson();const p=nearLocation();if(n){targetEl.style.display='block';targetEl.textContent=`${n.name} · E / Click để nói chuyện`;return}if(p){targetEl.style.display='block';targetEl.textContent=`${p.name} · E / Click để tương tác`;return}targetEl.style.display='none'}
+function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;move(dt);updateNPC(dt);updateVehicles(dt);hud();updateTarget();requestAnimationFrame(tick)}
+function clickWorld(e){if(paused)return;let best=null,bd=55;for(const n of [linh,...npcs]){const q=project(n.x,1.3,n.z);if(q){const d=Math.hypot(q.x-e.clientX,q.y-e.clientY);if(d<bd){bd=d;best=n}}}if(best){targetTo(best.x,best.z);toast(`Đang đi tới ${best.name}.`);return}for(const p of locations){const q=project(p.x,p.h+.5,p.z);if(q){const d=Math.hypot(q.x-e.clientX,q.y-e.clientY);if(d<80){targetTo(p.x,p.z+(p.d/2+2));toast(`Đang đi tới ${p.name}.`);return}}}}
+canvas.addEventListener('mousedown',e=>{dragging=true;canvas.classList.add('drag');lastMouse={x:e.clientX,y:e.clientY}});window.addEventListener('mouseup',()=>{dragging=false;canvas.classList.remove('drag')});window.addEventListener('mousemove',e=>{if(!dragging||paused)return;camYaw+=(e.clientX-lastMouse.x)*.006;camPitch=clamp(camPitch+(e.clientY-lastMouse.y)*.004,.18,.9);lastMouse={x:e.clientX,y:e.clientY}});canvas.addEventListener('click',e=>{if(Math.hypot(e.clientX-lastMouse.x,e.clientY-lastMouse.y)<5)clickWorld(e)});canvas.addEventListener('wheel',e=>{camDist=clamp(camDist+e.deltaY*.008,6,18)});
+window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['w','a','s','d','q','e','shift','n','p','l','r',' '].includes(k))e.preventDefault();keys.add(k);if(k==='e')interact();if(k==='n'){advance(60);toast('+1 giờ · thế giới tiếp tục trôi.')}if(k==='p')save();if(k==='l')load();if(k==='r'&&!paused)reset();if(k===' '&&!paused){camYaw=player.yaw+.65;toast('Camera bám theo Minh.')}});window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
+$('hour').onclick=()=>{if(!paused){advance(60);toast('+1 giờ · thế giới tiếp tục trôi.')}};$('save').onclick=save;$('load').onclick=load;
+function panelUpdate(){const p=nearLocation();if(!p){panel.style.display='none';return}panel.style.display='block';panelTitle.textContent=p.name;panelBody.textContent=p.info}
+window.addEventListener('resize',hud);setInterval(panelUpdate,250);function boot(){hud();panelUpdate();requestAnimationFrame(render);requestAnimationFrame(tick)}
+try{boot()}catch(e){errorEl.style.display='grid';errorText.textContent=e&&e.stack?e.stack:String(e)}
+})();
