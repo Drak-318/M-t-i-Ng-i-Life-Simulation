@@ -13,31 +13,20 @@ h1{margin:0 0 6px;font-size:18px}p{margin:0 0 12px;color:#bdc8d1}#status{display
 </script>
 </head>
 <body>
+<canvas id="world"></canvas>
 <div id="hud"><h1>MỘT ĐỜI NGƯỜI · 3D ASSET LAB</h1><p>Phòng kiểm tra kỹ thuật GLB — model bên dưới chỉ là fixture thử rig, không phải Minh hoặc Linh.</p><span id="status">Đang khởi tạo Three.js…</span><pre id="report">Chờ tải mô hình.</pre></div>
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { loadCharacterAsset } from './src/three-character-pipeline.mjs';
+import { createThreeWorld } from './src/three-world-adapter.mjs';
 const status = document.querySelector('#status'), report = document.querySelector('#report');
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('#9ab5cb');
-scene.fog = new THREE.Fog('#9ab5cb', 14, 42);
-const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 100);
+const canvas = document.querySelector('#world');
+const world = createThreeWorld(canvas, { background: '#9ab5cb', fogNear: 14, fogFar: 42 });
+const { scene, camera, renderer } = world;
+camera.fov = 42;
 camera.position.set(3.2, 2.4, 5.2);
-const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
-renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
-document.body.appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xe8f2ff, 0x53604c, 2.0));
-const key = new THREE.DirectionalLight(0xffe4c2, 3.0);
-key.position.set(-3, 7, 4); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); scene.add(key);
-const fill = new THREE.DirectionalLight(0xb9d8ff, 1.1);
-fill.position.set(4, 3, -4); scene.add(fill);
+camera.updateProjectionMatrix();
 const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({color:'#65756d', roughness:0.92}));
 floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
 const grid = new THREE.GridHelper(30, 30, 0x71877d, 0x839187); grid.position.y = 0.006; scene.add(grid);
@@ -50,7 +39,7 @@ try {
     name: 'RigPipelineFixture', targetHeight: 1.72,
     onProgress: (loaded, total) => { if (total) status.textContent = 'Đang tải mô hình: ' + Math.round(loaded / total * 100) + '%'; }
   });
-  scene.add(character.actor);
+  world.addActor(character);
   character.setMotion('idle');
   status.textContent = 'GLB đã tải · Skeleton hợp lệ';
   report.textContent = JSON.stringify(character.report, null, 2) + '\n\nGhi chú: fixture kỹ thuật, không dùng làm nhân vật trong game.';
@@ -63,10 +52,10 @@ let previous = performance.now();
 function frame(now) {
   requestAnimationFrame(frame);
   const delta = Math.min((now - previous) / 1000, 0.1); previous = now;
-  if (character) character.update(delta);
-  controls.update(); renderer.render(scene, camera);
+  world.update(delta);
+  controls.update(); world.render();
 }
 requestAnimationFrame(frame);
-addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+addEventListener('resize', () => { world.resize(innerWidth, innerHeight); });
 </script>
 </body></html>
