@@ -61,11 +61,70 @@ function interact(){if(paused)return;let n=nearPerson();if(n){const scene=Charac
 function save(){localStorage.setItem(SAVE,JSON.stringify({state,player,linh:{x:linh.x,z:linh.z,yaw:linh.yaw},npcs:npcs.map(n=>({x:n.x,z:n.z,yaw:n.yaw,goal:n.goal})),characterProfiles:CharacterSystem.serialize([linh,...npcs])}));toast("Đã lưu cuộc sống của Minh.")}
 function load(){let raw=localStorage.getItem(SAVE);if(!raw)return toast("Chưa có bản lưu.");try{let d=JSON.parse(raw);Object.assign(state,d.state);Object.assign(player,d.player);if(d.linh)Object.assign(linh,d.linh);if(Array.isArray(d.npcs))d.npcs.forEach((x,i)=>Object.assign(npcs[i],x));CharacterSystem.restore([linh,...npcs],d.characterProfiles);hud();toast("Đã tải bản lưu.")}catch(e){toast("Bản lưu không hợp lệ.")}}
 function reset(){localStorage.removeItem(SAVE);location.reload()}
-const gl=canvas.getContext("webgl",{antialias:true,alpha:false})||canvas.getContext("experimental-webgl");if(!gl)throw Error("Không khởi tạo được WebGL. Hãy bật Hardware Acceleration trong trình duyệt hoặc thử Chrome/Edge mới nhất.");
-const vs=`attribute vec3 aPos;attribute vec3 aNor;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNor;void main(){vec4 w=uModel*vec4(aPos,1.);vNor=mat3(uModel)*aNor;gl_Position=uMVP*w}`;
-const fs=`precision mediump float;uniform vec3 uColor;uniform vec3 uLight;uniform float uNight;varying vec3 vNor;void main(){float d=max(dot(normalize(vNor),normalize(uLight)),0.);vec3 c=uColor*(.42+.58*d);c*=mix(1.,.55,uNight);gl_FragColor=vec4(c,1.)}`;
-function shader(t,s){let x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(x));return x}
-const prog=gl.createProgram();gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);if(!gl.getProgramParameter(prog,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(prog));gl.useProgram(prog);
+function startFallback(reason){
+ console.error("WebGL unavailable; starting 2D compatibility renderer:",reason);
+ const fallback=document.createElement("canvas");fallback.id="world-fallback";
+ fallback.style.cssText="position:fixed;inset:0;width:100%;height:100%;display:block;z-index:1;cursor:crosshair";
+ canvas.style.display="none";document.body.insertBefore(fallback,canvas.nextSibling);
+ const ctx=fallback.getContext("2d");
+ if(!ctx){showFatalError(new Error("Cả WebGL và Canvas 2D đều không khả dụng: "+String(reason)));return}
+ const notice=document.createElement("div");notice.textContent="CHẾ ĐỘ TƯƠNG THÍCH · ĐỒ HỌA 2D";notice.style.cssText="position:fixed;top:12px;left:12px;z-index:3;padding:7px 10px;border-radius:8px;background:#101820dd;color:#fff;font:11px system-ui;pointer-events:none";document.body.appendChild(notice);
+ let zoom=1,cx=0,cz=0,drag=false,lastX=0,lastY=0;
+ function resize(){const d=Math.min(devicePixelRatio||1,2),w=Math.floor(innerWidth*d),h=Math.floor(innerHeight*d);if(fallback.width!==w||fallback.height!==h){fallback.width=w;fallback.height=h}ctx.setTransform(d,0,0,d,0,0)}
+ function point(x,z,s){return{x:innerWidth/2+(x-cx)*s,y:innerHeight/2+(z-cz)*s}}
+ function rect(x,z,w,h,s,color){const p=point(x-w/2,z-h/2,s);ctx.fillStyle=color;ctx.fillRect(p.x,p.y,w*s,h*s)}
+ function circle(x,z,r,s,color){const p=point(x,z,s);ctx.beginPath();ctx.arc(p.x,p.y,Math.max(2,r*s),0,Math.PI*2);ctx.fillStyle=color;ctx.fill()}
+ function label(x,z,t,s,color="#f5f5f5"){const p=point(x,z,s);ctx.font="12px system-ui";ctx.textAlign="center";ctx.fillStyle="#071018cc";ctx.fillRect(p.x-ctx.measureText(t).width/2-5,p.y-19,ctx.measureText(t).width+10,18);ctx.fillStyle=color;ctx.fillText(t,p.x,p.y-6)}
+ function renderFallback(){
+  resize();const s=Math.min(innerWidth/88,innerHeight/68)*zoom;
+  ctx.fillStyle="#8a9a83";ctx.fillRect(0,0,innerWidth,innerHeight);
+  rect(0,0,82,6,s,"#343a40");rect(0,0,6,66,s,"#343a40");
+  rect(0,0,82,.18,s,"#d7c98c");rect(0,0,.18,66,s,"#d7c98c");
+  rect(0,7,82,1,s,"#69716a");rect(0,-7,82,1,s,"#69716a");
+  for(const p of locations){
+   rect(p.x,p.z,p.w+0.8,p.d+0.8,s,"#59635d");
+   rect(p.x,p.z,p.w,p.d,s,p.kind==="park"?"#5d9560":p.kind==="home"?"#9babb5":p.kind==="office"?"#728997":p.kind==="cafe"?"#b68b69":p.kind==="shop"?"#b9a36c":"#a87575");
+   label(p.x,p.z,p.name,s);
+  }
+  for(let i=0;i<24;i++){const x=-34+(i*17)%68,z=-29+(i*23)%58;circle(x,z,.34,s,"#75553a");circle(x,z,.8,s,"#397849")}
+  for(const v of vehicles){rect(v.x,v.z,2.2,.95,s,v.color?"#8d9eae":"#657887")}
+  for(const n of npcs){circle(n.x,n.z,.48,s,"#e6b86c");circle(n.x,n.z-.08,.22,s,"#49382e")}
+  circle(linh.x,linh.z,.52,s,"#e58ca9");circle(linh.x,linh.z-.08,.23,s,"#49382e");label(linh.x,linh.z,"Linh",s,"#ffdce8");
+  circle(player.x,player.z,.58,s,"#65c9f0");circle(player.x,player.z-.1,.24,s,"#183d55");label(player.x,player.z,"Minh",s,"#d8f4ff");
+  ctx.fillStyle="#071018aa";ctx.fillRect(12,innerHeight-42,Math.min(600,innerWidth-24),30);
+  ctx.fillStyle="#fff";ctx.font="12px system-ui";ctx.textAlign="left";ctx.fillText("WASD di chuyển · A/D xoay · Q/E đi ngang · Click di chuyển · E tương tác · N +1 giờ",22,innerHeight-22);
+  requestAnimationFrame(renderFallback);
+ }
+ fallback.addEventListener("pointerdown",e=>{drag=true;lastX=e.clientX;lastY=e.clientY;fallback.setPointerCapture(e.pointerId)});
+ fallback.addEventListener("pointermove",e=>{if(!drag)return;const s=Math.min(innerWidth/88,innerHeight/68)*zoom;cx-=(e.clientX-lastX)/s;cz-=(e.clientY-lastY)/s;lastX=e.clientX;lastY=e.clientY});
+ fallback.addEventListener("pointerup",()=>drag=false);
+ fallback.addEventListener("click",e=>{if(drag)return;const s=Math.min(innerWidth/88,innerHeight/68)*zoom;targetTo(cx+(e.clientX-innerWidth/2)/s,cz+(e.clientY-innerHeight/2)/s)});
+ fallback.addEventListener("wheel",e=>{zoom=clamp(zoom+(e.deltaY<0?.1:-.1),.65,1.8);e.preventDefault()},{passive:false});
+ addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(["w","a","s","d","q","e","shift","n","p","l","r"," "].includes(k))e.preventDefault();keys.add(k);if(k==="e")interact();if(k==="n")advance(60);if(k==="p")save();if(k==="l")load();if(k==="r"&&!paused)reset()});
+ addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
+ $("hour").onclick=()=>{if(!paused)advance(60)};$("save").onclick=save;$("load").onclick=load;
+ let fallbackLast=performance.now();
+ function fallbackTick(now){const dt=Math.min(.05,(now-fallbackLast)/1000);fallbackLast=now;move(dt);updateNPC(dt);updateVehicles(dt);hud();updateTarget();requestAnimationFrame(fallbackTick)}
+ hud();requestAnimationFrame(fallbackTick);requestAnimationFrame(renderFallback);
+}
+let gl=null,prog=null;
+function shader(t,s){
+ const x=gl.createShader(t);
+ if(!x)throw new Error("WebGL createShader returned null; contextLost="+gl.isContextLost()+"; glError=0x"+gl.getError().toString(16));
+ gl.shaderSource(x,s);gl.compileShader(x);
+ if(!gl.getShaderParameter(x,gl.COMPILE_STATUS)){const log=gl.getShaderInfoLog(x)||"(shader compiler returned an empty log)";throw new Error("Shader "+(t===gl.VERTEX_SHADER?"VERTEX":"FRAGMENT")+" compile failed: "+log+"; source="+s)}
+ return x;
+}
+try{
+ gl=canvas.getContext("webgl",{antialias:true,alpha:false})||canvas.getContext("experimental-webgl");
+ if(!gl)throw new Error("Trình duyệt không cấp phát được WebGL context.");
+ const vs=`attribute vec3 aPos;attribute vec3 aNor;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNor;void main(){vec4 w=uModel*vec4(aPos,1.0);vNor=aNor;gl_Position=uMVP*w;}`;
+ const fs=`precision mediump float;uniform vec3 uColor;uniform vec3 uLight;uniform float uNight;varying vec3 vNor;void main(){float d=max(dot(normalize(vNor),normalize(uLight)),0.0);vec3 c=uColor*(0.42+0.58*d);c*=mix(1.0,0.55,uNight);gl_FragColor=vec4(c,1.0);}`;
+ prog=gl.createProgram();if(!prog)throw new Error("WebGL createProgram returned null; glError=0x"+gl.getError().toString(16));
+ gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);
+ if(!gl.getProgramParameter(prog,gl.LINK_STATUS))throw new Error("Program link failed: "+(gl.getProgramInfoLog(prog)||"empty log"));
+ gl.useProgram(prog);
+}catch(err){startFallback(err);return;}
 const aPos=gl.getAttribLocation(prog,"aPos"),aNor=gl.getAttribLocation(prog,"aNor"),uMVP=gl.getUniformLocation(prog,"uMVP"),uModel=gl.getUniformLocation(prog,"uModel"),uColor=gl.getUniformLocation(prog,"uColor"),uLight=gl.getUniformLocation(prog,"uLight"),uNight=gl.getUniformLocation(prog,"uNight");
 const I=()=>[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],mul=(a,b)=>{let o=Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o};
 function tr(x,y,z){let m=I();m[12]=x;m[13]=y;m[14]=z;return m}function sc(x,y,z){let m=I();m[0]=x;m[5]=y;m[10]=z;return m}function ry(a){let c=Math.cos(a),s=Math.sin(a);return[c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1]}function rx(a){let c=Math.cos(a),s=Math.sin(a);return[1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1]}
