@@ -1,5 +1,15 @@
 # HANDOFF — Một Đời Người — Life Simulation
 
+## Cập nhật mới nhất — 2026-11-04
+
+- Character System Web v5 đã được tách thành `src/character-system.js` và tích hợp vào `src/web3d_v5.js`.
+- Có Linh + 12 NPC nền, profile cá nhân, lịch sống, mood/needs, relationship nhiều lớp, memory và save/load.
+- Unit test Character System PASS; Web 3D smoke test PASS; Godot Validation PASS; Playable Build PASS; GitHub Pages deployment PASS.
+- Bản Web để người dùng test: https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/.
+- Model hiện tại vẫn là procedural stylized placeholder, chưa phải model production/rig.
+
+
+
 ## Trạng thái hiện tại
 
 MVP gameplay vertical slice đã hoàn thành về mặt hệ thống và đã được GitHub Actions kiểm tra bằng Godot 4.3 headless:
@@ -51,7 +61,7 @@ Tiếp tục từ `PROJECT_STATUS.md` và Git history.
 
 ### Bước 5 — Việc tiếp theo
 
-1. Playtest thủ công trên máy có Godot.
+1. Playtest thủ công bản Web tại https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/.
 2. Sửa lỗi UX/logic từ playtest thực tế.
 3. Nâng cấp model/animation nhân vật.
 4. Nâng cấp traffic/vehicles, audio và weather effects.
