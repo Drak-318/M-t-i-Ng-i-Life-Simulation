@@ -24,6 +24,13 @@ Repository có một vòng chơi 1 tuần: Nguyễn Minh sống trong khu phố 
 - Traffic nền.
 - Chu kỳ ánh sáng ngày/đêm.
 
+### Visual Upgrade — Character & Neighborhood (2026-11-04)
+- WebGL renderer now creates reusable UV-sphere geometry and uses ellipsoid meshes for heads, faces, hair masses, necks, torsos, arms, hands, legs and shoes; Minh and Linh have distinct clothing/hair palettes and facial details.
+- Neighborhood pass adds façade/window/door/sign details, sidewalk paving, crosswalks, street lamps, richer tree canopies, park paths, benches, flower beds and more detailed vehicles.
+- This is a procedural stylized 3D art pass, not final sculpted GLB assets or production skeletal animation. Exact visual matching to the earlier two image references still needs a direct side-by-side review.
+- web.html cache version: 20261104-5.
+- JavaScript syntax check: PASS; Web 3D smoke test: PASS; GitHub Pages deployment: PASS; Godot Validation: PASS; Windows Playable Build: PASS.
+- Test URL: https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/web.html?v=20261104-5.
 ### Character System — Web v5 (2026-11-04)
 - `src/character-system.js` quản lý hồ sơ dữ liệu độc lập cho Linh và 12 NPC nền.
 - Hồ sơ gồm tuổi (đều là người trưởng thành), nghề nghiệp, tính cách, nhu cầu, ranh giới, cách giao tiếp, sở thích ẩn, mục tiêu, lịch sinh hoạt và ngoại hình.
