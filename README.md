@@ -19,8 +19,9 @@ Bản thử nghiệm hiện tại dùng hình thể người 3D procedural cách
 
 ## 3D Asset Lab — nền tảng nhân vật
 
-**[Mở phòng kiểm tra model 3D](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/art-pipeline-test.html
-- Character Candidate Review: https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/character-candidates-test.html)**
+**[Mở phòng kiểm tra model 3D](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/art-pipeline-test.html)**
+
+**[Mở phòng đánh giá Minh và Linh candidate](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/character-candidates-test.html)**
 
 Asset Lab là khu vực kỹ thuật tách biệt để kiểm tra GLB, humanoid skeleton, tỷ lệ model và animation. Model trong phòng lab là fixture kỹ thuật CC0, không phải Minh hoặc Linh. Nhân vật chính chỉ được gán model sau khi có asset phù hợp và vượt qua kiểm thử.
 
