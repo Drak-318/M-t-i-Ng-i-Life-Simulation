@@ -23,6 +23,8 @@ Bản thử nghiệm hiện tại dùng hình thể người 3D procedural cách
 
 **[Mở phòng đánh giá Minh và Linh candidate](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/character-candidates-test.html)**
 
+**[Mở phòng đánh giá nhân vật Minh và Linh được tạo mới](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/character-production-review.html)**
+
 **[Chơi thử bản Three.js với model Minh và Linh](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/web.html?threeCharacters=1)**
 
 Bản Three.js hiện là chế độ thử nghiệm bật bằng tham số URL; bản mặc định vẫn giữ renderer ổn định. Mô hình nhân vật sẽ chỉ được bật mặc định sau khi kiểm tra hình ảnh, chuyển động và gameplay đạt yêu cầu.
