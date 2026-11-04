@@ -134,3 +134,8 @@ Stage 2 is now active: source ordinary adult male/female models, verify CC0 prov
 - `web.html?threeCharacters=1` enables the opt-in overlay. Default page still uses the legacy renderer.
 - Playwright test `tests/game-three-overlay-browser.mjs` verifies both actors attach to the game and captures a screenshot; workflow runs this after candidate asset downloads.
 - Next: inspect screenshots/CI, tune forward axis and scale, confirm idle/walk timing and collision/ground contact. Only after visual acceptance should the imported models become default. Do not alter CharacterSystem/save schema for renderer work.
+
+
+### Candidate quality findings
+
+Do not promote the current two pedestrian models to final character art: Man is 1,852 tris/6 material slots/no textures; Woman Casual is 2,776 tris/8 slots/no textures. Both have 31 joints and 11 clips and are useful only for validating the rig/animation/gameplay bridge. Seek better detailed textured everyday-human assets or schedule a custom art pass; keep manifest production asset fields null.
