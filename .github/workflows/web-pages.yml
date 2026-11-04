@@ -48,8 +48,8 @@ jobs:
           if (js.split('function building(p)').length !== 2) throw new Error('Duplicate building renderer overrides detailed environment');
           if (!js.includes('const visualScale=n.visualScale||1')) throw new Error('Missing visible character scaling');
           if (!js.includes('"Minh · Bạn"') || !js.includes('"Linh"')) throw new Error('Missing on-screen main character labels');
-          if (!js.includes('camDist=7.2')) throw new Error('Default camera is too far from the player');
-          if (!js.includes('x:-24,z:13.8')) throw new Error('Linh must be visible near the opening scene');
+          if (!js.includes('camYaw=.35,camPitch=.34,camDist=5.4')) throw new Error('Opening camera must frame the main characters');
+          if (!js.includes('x:-21.8,z:14.0') || !js.includes('x:-26.2,z:14.0')) throw new Error('Main characters must start separated and visible');
 
           if (!js.includes('vNor=normalize(mat3(uModel)*aNor)')) throw new Error('Missing transformed character normals');
           if (!js.includes('createShader returned null')) throw new Error('Missing WebGL allocation diagnostics');
