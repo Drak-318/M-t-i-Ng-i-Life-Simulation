@@ -57,7 +57,7 @@ try {
   const productionStatus = await page.locator('#status').textContent();
   const productionReport = await page.locator('#report').textContent();
   assert.match(productionStatus, /Hai GLB đã tải/, 'Generated Minh and Linh must load in the production review lab');
-  const productionResults = JSON.parse(productionReport.split('\\n\\n')[0]);
+  const productionResults = JSON.parse(productionReport.split('\n\n')[0]);
   assert.equal(productionResults.length, 2);
   for (const character of productionResults) {
     assert.equal(character.status, 'loaded');
