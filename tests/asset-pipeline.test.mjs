@@ -67,3 +67,20 @@ assert.match(gameRuntime, /run:keys\.has\("shift"\)/);
 assert.match(loader, /triangleCount/);
 assert.match(loader, /materialCount/);
 assert.match(loader, /acceptanceWarnings/);
+
+const productionReview = fs.readFileSync('character-production-review.html', 'utf8');
+assert.ok(productionReview.includes('./assets/characters/generated/Minh.glb'));
+assert.ok(productionReview.includes('./assets/characters/generated/Linh.glb'));
+for (const name of ['Minh', 'Linh']) {
+  const params = JSON.parse(fs.readFileSync(`assets/characters/source/${name.toLowerCase()}.params.json`, 'utf8'));
+  assert.equal(params.name, name);
+  assert.equal(params.detail, 'medium');
+  assert.equal(params.rig, 'game');
+  assert.ok(params.asian >= 0.8, name + ' should use the project Asian character direction');
+  const gltf = readGlbJson(`assets/characters/generated/${name}.glb`);
+  assert.ok(gltf.images?.length, name + ' must include photo-based textures');
+  assert.ok(gltf.animations?.some(clip => /idle/i.test(clip.name)), name + ' idle clip missing');
+  assert.ok(gltf.animations?.some(clip => /walk/i.test(clip.name)), name + ' walk clip missing');
+  assert.ok(gltf.animations?.some(clip => /run/i.test(clip.name)), name + ' run clip missing');
+}
+console.log('Generated textured production character checks: PASS');
