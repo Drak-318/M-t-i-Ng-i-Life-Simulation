@@ -90,8 +90,41 @@ jobs:
         run: |
           mkdir -p assets/characters/generated
           GENERATOR_DIR="$RUNNER_TEMP/ara3dgen"
-          npm --prefix "$GENERATOR_DIR" run export -- --params "$GITHUB_WORKSPACE/assets/characters/source/minh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated" --formats glb --detail medium
-          npm --prefix "$GENERATOR_DIR" run export -- --params "$GITHUB_WORKSPACE/assets/characters/source/linh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated" --formats glb --detail medium
+          cat > "$GENERATOR_DIR/scripts/export-life-sim.ts" <<'TS'
+          import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+          import { join } from 'node:path';
+          import { buildHuman } from '../src/core/human';
+          import { DEFAULT_PARAMS } from '../src/core/params';
+          import { triangleCount } from '../src/core/mesh';
+          import { planExport, runExport } from '../src/export';
+          import { nodeLibrary } from './node-assets';
+          const value = (key: string) => {
+            const index = process.argv.indexOf('--' + key);
+            return index < 0 ? undefined : process.argv[index + 1];
+          };
+          const paramsPath = value('params');
+          const out = value('out') ?? 'out';
+          if (!paramsPath) throw new Error('Missing --params');
+          const params = { ...DEFAULT_PARAMS, ...JSON.parse(readFileSync(paramsPath, 'utf8')) };
+          const lib = await nodeLibrary();
+          const character = await buildHuman(lib, params);
+          const plan = planExport(character, {
+            mode: 'animated',
+            format: 'glb',
+            clips: ['idle', 'walk', 'run'],
+            packaging: 'embedded',
+            clipMesh: false,
+            rootMotion: false,
+            loopSuffix: false,
+            weaponFile: 'held'
+          });
+          const file = await runExport(lib, character, plan);
+          mkdirSync(out, { recursive: true });
+          writeFileSync(join(out, file.name), file.data);
+          console.log(`${params.name}: ${triangleCount(character.mesh)} triangles, three gameplay clips, ${(file.data.length / 1e6).toFixed(1)} MB -> ${file.name}`);
+          TS
+          "$GENERATOR_DIR/node_modules/.bin/tsx" "$GENERATOR_DIR/scripts/export-life-sim.ts" --params "$GITHUB_WORKSPACE/assets/characters/source/minh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated"
+          "$GENERATOR_DIR/node_modules/.bin/tsx" "$GENERATOR_DIR/scripts/export-life-sim.ts" --params "$GITHUB_WORKSPACE/assets/characters/source/linh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated"
           python3 - <<'PY'
           from pathlib import Path
           import json, struct
