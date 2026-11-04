@@ -150,3 +150,13 @@ A staged Three.js character overlay is now connected to the existing gameplay ru
 - A headless Chromium test opens the actual game with the imported models, verifies both actor handles and the state bridge, checks browser errors, and saves a screenshot artifact.
 
 This is an integration prototype, not final acceptance. Character facing direction, scale, ground contact, animation synchronization and visual quality still require screenshot review. The old procedural main-character meshes are hidden only when the opt-in flag is active; if the overlay fails, the runtime restores the procedural characters.
+
+
+### Candidate model quality audit
+
+The two downloaded GLBs are technically rigged but do not meet the final art budget:
+- Man: 1,852 triangles, 6 material slots, no embedded textures, 31 joints, 11 animation clips.
+- Woman Casual: 2,776 triangles, 8 material slots, no embedded textures, 31 joints, 11 animation clips.
+- The supplied clips have no translation channel on the armature node, which is useful for in-place movement synchronization.
+
+Therefore, these models are approved only for proving the live-game bridge and animation state mapping. They are **not approved as final Minh/Linh visuals**. The loader now reports triangle count, material count, texture count and acceptance warnings so low-detail/untextured assets cannot be mistaken for production-ready art.
