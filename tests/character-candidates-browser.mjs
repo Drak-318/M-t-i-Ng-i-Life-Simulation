@@ -15,6 +15,7 @@ const types = {
 };
 const server = http.createServer((req, res) => {
   const pathname = decodeURIComponent(new URL(req.url, 'http://127.0.0.1').pathname);
+  if (pathname === '/favicon.ico') { res.writeHead(204).end(); return; }
   const file = path.resolve(root, '.' + pathname);
   if (!file.startsWith(root)) { res.writeHead(403).end(); return; }
   fs.readFile(file, (error, data) => {
@@ -38,7 +39,7 @@ try {
   await page.waitForFunction(() => {
     const value = document.querySelector('#status')?.textContent || '';
     return value.includes('Hai GLB đã tải') || value.includes('Có mẫu chưa đạt');
-  }, { timeout: 45000 });
+  }, null, { timeout: 45000 });
   const status = await page.locator('#status').textContent();
   const report = await page.locator('#report').textContent();
   assert.match(status, /Hai GLB đã tải/, 'Both candidate characters must load and pass skeleton checks');
