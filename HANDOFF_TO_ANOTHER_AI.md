@@ -110,3 +110,10 @@ Khi báo cáo một mốc lớn, nói rõ:
 - Cái gì đã được runtime/CI kiểm tra.
 
 Không nói "hoàn thành" nếu phần tương ứng chưa được kiểm tra.
+
+
+## Milestone handoff — 2026-11-04
+
+Stage 1 (reusable 3D asset foundation) is implementation-complete: Three.js adapter, GLTFLoader, isolated lab, pinned GLB fixture and CI validation are committed. This is not a claim of manual browser visual approval or production renderer migration.
+
+Stage 2 is now active: source ordinary adult male/female models, verify CC0 provenance, prepare everyday clothing/hair/materials, validate skeleton and animation compatibility, and visually inspect both before assigning them to Minh/Linh. Quaternius Universal Base Characters and Universal Animation Library are candidate CC0 sources. Do not ship naked/base-only meshes or use the superhero fixture as a production character.
