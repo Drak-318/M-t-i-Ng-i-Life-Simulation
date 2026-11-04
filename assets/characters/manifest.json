@@ -20,8 +20,9 @@
       12000,
       45000
     ],
-    "maxMaterialSlots": 4,
-    "textureResolution": "1K or 2K"
+    "maxMaterialSlots": 32,
+    "textureResolution": "1K or 2K",
+    "preferredMaterialSlots": 4
   },
   "gameCharacters": {
     "minh": {
