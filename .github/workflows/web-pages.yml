@@ -23,6 +23,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Prepare pinned CC0 GLB test fixture
+        run: |
+          mkdir -p assets/dev-fixtures
+          curl --fail --location --silent --show-error \
+            https://raw.githubusercontent.com/programasweights/avatar/e225eee89835d121876b15bf4c887dc20d357950/public/assets/character.glb \
+            --output assets/dev-fixtures/quaternius-superhero-male.glb
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+          path = Path("assets/dev-fixtures/quaternius-superhero-male.glb")
+          data = path.read_bytes()
+          assert data[:4] == b"glTF", "Fixture is not a GLB file"
+          assert struct.unpack_from("<I", data, 4)[0] == 2, "Expected glTF 2.0"
+          assert struct.unpack_from("<I", data, 8)[0] == len(data), "GLB length mismatch"
+          assert len(data) > 100_000, "Fixture download looks incomplete"
+          print(f"GLB fixture verified: {len(data)} bytes")
+          PY
+      - name: Validate Three.js asset pipeline
+        run: |
+          node --check src/three-character-pipeline.mjs
+          node tests/asset-pipeline.test.mjs
       - name: Web 3D smoke test
         run: |
           node <<'NODE'
