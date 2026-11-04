@@ -1,5 +1,13 @@
 (()=>{"use strict";
 const $=id=>document.getElementById(id),canvas=$("world"),clock=$("clock"),locEl=$("loc"),moneyEl=$("money"),energyEl=$("energy"),stressEl=$("stress"),relEl=$("rel"),targetEl=$("target"),labels=$("labels"),modal=$("modal"),meta=$("meta"),story=$("story"),choices=$("choices"),toastEl=$("toast"),panel=$("panel"),panelTitle=$("panelTitle"),panelBody=$("panelBody"),errorEl=$("error"),errorText=$("errorText");
+function showFatalError(reason){
+ if(!errorEl||!errorText){console.error("Life Simulation startup error:",reason);return}
+ errorEl.style.display="grid";
+ errorText.textContent=reason&&reason.stack?reason.stack:String(reason||"Lỗi không xác định");
+}
+window.addEventListener("error",event=>showFatalError(event.error||event.message||"JavaScript runtime error"));
+window.addEventListener("unhandledrejection",event=>showFatalError(event.reason||"Unhandled promise rejection"));
+
 const DAYS=["Chủ nhật","Thứ hai","Thứ ba","Thứ tư","Thứ năm","Thứ sáu","Thứ bảy"],SAVE="mot-doi-nguoi-web3d-v5";
 let state={day:1,min:462,money:15000000,energy:82,stress:18,confidence:52,trust:0,affection:0,understanding:0,closeness:0,respect:0,hurt:0,memories:[],done:[]};
 let player={x:-24,z:14,yaw:0,walk:0},destination=null,paused=false,last=performance.now(),anim=0;
@@ -53,7 +61,7 @@ function interact(){if(paused)return;let n=nearPerson();if(n){const scene=Charac
 function save(){localStorage.setItem(SAVE,JSON.stringify({state,player,linh:{x:linh.x,z:linh.z,yaw:linh.yaw},npcs:npcs.map(n=>({x:n.x,z:n.z,yaw:n.yaw,goal:n.goal})),characterProfiles:CharacterSystem.serialize([linh,...npcs])}));toast("Đã lưu cuộc sống của Minh.")}
 function load(){let raw=localStorage.getItem(SAVE);if(!raw)return toast("Chưa có bản lưu.");try{let d=JSON.parse(raw);Object.assign(state,d.state);Object.assign(player,d.player);if(d.linh)Object.assign(linh,d.linh);if(Array.isArray(d.npcs))d.npcs.forEach((x,i)=>Object.assign(npcs[i],x));CharacterSystem.restore([linh,...npcs],d.characterProfiles);hud();toast("Đã tải bản lưu.")}catch(e){toast("Bản lưu không hợp lệ.")}}
 function reset(){localStorage.removeItem(SAVE);location.reload()}
-const gl=canvas.getContext("webgl",{antialias:true,alpha:false});if(!gl)throw Error("Trình duyệt không hỗ trợ WebGL.");
+const gl=canvas.getContext("webgl",{antialias:true,alpha:false})||canvas.getContext("experimental-webgl");if(!gl)throw Error("Không khởi tạo được WebGL. Hãy bật Hardware Acceleration trong trình duyệt hoặc thử Chrome/Edge mới nhất.");
 const vs=`attribute vec3 aPos;attribute vec3 aNor;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNor;void main(){vec4 w=uModel*vec4(aPos,1.);vNor=mat3(uModel)*aNor;gl_Position=uMVP*w}`;
 const fs=`precision mediump float;uniform vec3 uColor;uniform vec3 uLight;uniform float uNight;varying vec3 vNor;void main(){float d=max(dot(normalize(vNor),normalize(uLight)),0.);vec3 c=uColor*(.42+.58*d);c*=mix(1.,.55,uNight);gl_FragColor=vec4(c,1.)}`;
 function shader(t,s){let x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);if(!gl.getShaderParameter(x,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(x));return x}
@@ -115,4 +123,4 @@ function clickWorld(e){if(paused)return;let best=null,bd=55;for(let n of [linh,.
 canvas.addEventListener("mousedown",e=>{dragging=true;movedMouse=false;lastMouse={x:e.clientX,y:e.clientY};canvas.classList.add("drag")});addEventListener("mouseup",()=>{dragging=false;canvas.classList.remove("drag")});addEventListener("mousemove",e=>{if(!dragging||paused)return;let dx=e.clientX-lastMouse.x,dy=e.clientY-lastMouse.y;if(Math.abs(dx)+Math.abs(dy)>2)movedMouse=true;camYaw+=dx*.006;camPitch=clamp(camPitch-dy*.004,.22,.68);lastMouse={x:e.clientX,y:e.clientY}});canvas.addEventListener("click",e=>{if(!movedMouse)clickWorld(e)});canvas.addEventListener("wheel",e=>{camDist=clamp(camDist+e.deltaY*.008,6,15)});
 addEventListener("keydown",e=>{let k=e.key.toLowerCase();if(["w","a","s","d","q","e","shift","n","p","l","r"," "].includes(k))e.preventDefault();keys.add(k);if(k==="e")interact();if(k==="n")advance(60);if(k==="p")save();if(k==="l")load();if(k==="r"&&!paused)reset();if(k===" "&&!paused){camYaw=player.yaw+.65;toast("Camera bám theo Minh.")}});addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
 $("hour").onclick=()=>{if(!paused)advance(60)};$("save").onclick=save;$("load").onclick=load;setInterval(()=>{let p=nearLocation();panel.style.display=p?"block":"none";if(p){panelTitle.textContent=p.name;panelBody.textContent=p.info}},250);
-function boot(){hud();requestAnimationFrame(render);requestAnimationFrame(tick)}try{boot()}catch(e){errorEl.style.display="grid";errorText.textContent=e&&e.stack?e.stack:String(e)}})();
+function boot(){hud();requestAnimationFrame(render);requestAnimationFrame(tick)}try{boot()}catch(e){showFatalError(e)}})();
