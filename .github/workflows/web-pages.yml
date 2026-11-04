@@ -42,7 +42,7 @@ jobs:
           if (!js.includes('function startFallback(reason)')) throw new Error('Missing 2D compatibility renderer');
           if (!js.includes('function sphereData(') || !js.includes('function ellipsoid(')) throw new Error('Missing detailed 3D mesh renderer');
           if (!js.includes('function person(n,type)') || !js.includes('function parkProps()')) throw new Error('Missing character/environment renderer');
-          if ((js.match(/function building\\(p\\)/g) || []).length !== 1) throw new Error('Duplicate building renderer overrides detailed environment');
+          if (js.split('function building(p)').length !== 2) throw new Error('Duplicate building renderer overrides detailed environment');
           if (!js.includes('const visualScale=n.visualScale||1')) throw new Error('Missing visible character scaling');
           if (!js.includes('"Minh · Bạn"') || !js.includes('"Linh"')) throw new Error('Missing on-screen main character labels');
           if (!js.includes('camDist=7.2')) throw new Error('Default camera is too far from the player');
