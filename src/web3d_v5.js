@@ -270,8 +270,9 @@ function renderLabels(){
  labels.innerHTML="";
  const add=(x,y,z,name,kind)=>{const q=project(x,y,z);if(!q||q.x<-80||q.x>innerWidth+80||q.y<-30||q.y>innerHeight+30)return;const e=document.createElement("div");e.className="label";e.textContent=name;e.style.left=q.x+"px";e.style.top=q.y+"px";e.style.borderColor=kind==="main"?"#8ed7ff":"#ffffff20";e.style.background=kind==="main"?"#092337eF":"#071018d9";e.style.fontWeight=kind==="main"?"800":"500";labels.appendChild(e)};
  for(const p of locations)add(p.x,p.kind==="park"?1:p.h+.7,p.z,p.name,"place");
- add(player.x,2.42*(player.visualScale||1),player.z,"Minh · Bạn","main");
- add(linh.x,2.42*(linh.visualScale||1),linh.z,"Linh","main");
+ const mainLabelHeight=window.__lifeUseImportedCharacters?2.0:null;
+ add(player.x,mainLabelHeight||2.42*(player.visualScale||1),player.z,"Minh · Bạn","main");
+ add(linh.x,mainLabelHeight||2.42*(linh.visualScale||1),linh.z,"Linh","main");
  for(const n of npcs)add(n.x,2.35*(n.visualScale||1),n.z,n.name,"npc");
 }
 let VP=I();
