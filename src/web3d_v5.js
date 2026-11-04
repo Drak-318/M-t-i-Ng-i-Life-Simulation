@@ -12,9 +12,11 @@ const locations=[
 {id:"shop",name:"Cửa hàng",x:2,z:-17,w:8,d:6,h:3.1,c:[.55,.46,.27],kind:"shop",info:"Mua đồ dùng hằng ngày."},
 {id:"restaurant",name:"Nhà hàng",x:3,z:18,w:8,d:6,h:3.4,c:[.48,.30,.30],kind:"restaurant",info:"Ăn uống và những cuộc gặp không được lên lịch."}
 ];
-const npcNames=["Huy","Mai","Tuấn","Vy","Nam","An","Phương","Duy","Trang","Khoa","Thảo","Long"];
-const npcs=Array.from({length:12},(_,i)=>({id:"npc"+i,name:npcNames[i],x:-31+(i*11)%62,z:-26+(i*17)%52,yaw:0,speed:.45+(i%4)*.08,phase:i*1.7,goal:["office","cafe","park","shop"][i%4],role:["đi làm","đi cà phê","đi dạo","mua đồ"][i%4],walk:0}));
-const linh={id:"linh",name:"Linh",x:-20,z:-15,yaw:2.2,speed:.18,phase:4.1,goal:"cafe",role:"công việc riêng",walk:0};
+const CharacterSystem=window.CharacterSystem;
+if(!CharacterSystem)throw new Error("CharacterSystem chưa được tải.");
+const npcs=Array.from({length:12},(_,i)=>({...CharacterSystem.createBackgroundCharacter(i),x:-31+(i*11)%62,z:-26+(i*17)%52,yaw:0,goal:["office","cafe","park","shop"][i%4],role:["đi làm","đi cà phê","đi dạo","mua đồ"][i%4],walk:0}));
+const linh={...CharacterSystem.createLinh(),x:-20,z:-15,yaw:2.2,speed:.18,phase:4.1,goal:"cafe",role:"công việc riêng",walk:0};
+player.appearance={skin:[.78,.58,.46],hair:[.045,.05,.06],top:[.10,.12,.14],bottom:[.07,.08,.09],shoe:[.08,.09,.10],style:"short",height:1};
 const vehicles=Array.from({length:8},(_,i)=>({x:-36+i*10,z:i%2?-2.0:2.0,dir:i%2?1:-1,speed:1.8+(i%3)*.5,color:[[.18,.22,.27],[.55,.17,.16],[.78,.72,.55],[.18,.38,.30]][i%4]}));
 const scenes=[
 [1,"home","Sáng Chủ nhật. Điện thoại nằm trên bàn. Minh không có kế hoạch rõ ràng.",[["Ở nhà nghỉ ngơi",{energy:6,stress:-3,m:"rested"}],["Đi ra ngoài",{energy:-3,m:"went_out"}]]],
@@ -42,14 +44,14 @@ function nearPerson(){let b=null,d=999;for(const n of [linh,...npcs]){let q=Math
 function hud(){clock.textContent=`${DAYS[state.day-1]} · ${timeText()}`;locEl.textContent=nearLocation()?.name||"Đường phố";moneyEl.textContent=money(state.money);energyEl.textContent=`Năng lượng ${Math.round(state.energy)}`;stressEl.textContent=`Stress ${Math.round(state.stress)}`;relEl.textContent=`Quan hệ ${relation()}`}
 function toast(t){toastEl.textContent=t;toastEl.classList.add("on");clearTimeout(toast.timer);toast.timer=setTimeout(()=>toastEl.classList.remove("on"),1700)}
 function remember(m){state.memories.push({id:m,day:state.day,min:state.min})}
-function apply(e){for(const k of ["energy","stress","confidence","trust","affection","understanding","closeness","respect","hurt"])if(Number.isFinite(e[k]))state[k]=clamp(state[k]+e[k]);if(Number.isFinite(e.money))state.money=Math.max(0,state.money+e.money)}
-function advance(minutes){state.min+=minutes;while(state.min>=1440){state.min-=1440;state.day++;state.done=[];if(state.day>7){state.day=1;state.energy=clamp(state.energy+18);state.stress=clamp(state.stress-12);toast(`Một tuần trôi qua · Quan hệ ${relation()}/100`)}}hud()}
+function apply(e){for(const k of ["energy","stress","confidence","trust","affection","understanding","closeness","respect","hurt","irritation","willingness_to_continue"])if(Number.isFinite(e[k]))state[k]=clamp((state[k]||0)+e[k]);if(Number.isFinite(e.money))state.money=Math.max(0,state.money+e.money)}
+function advance(minutes){state.min+=minutes;while(state.min>=1440){state.min-=1440;state.day++;state.done=[];if(state.day>7){state.day=1;state.energy=clamp(state.energy+18);state.stress=clamp(state.stress-12);toast("Một tuần trôi qua · Quan hệ "+relation()+"/100")}}for(const c of [linh,...npcs])CharacterSystem.tick(c,minutes,state.day,state.min/60);hud()}
 function sk(s){return `${state.day}|${s[1]}|${s[2]}`}
-function openScene(s){paused=true;meta.textContent=`${s[1]} · ${DAYS[state.day-1]} · ${timeText()}`;story.textContent=s[2];choices.innerHTML="";for(const ch of s[3]){let b=document.createElement("button");b.className="choice";b.textContent=ch[0];b.onclick=()=>{apply(ch[1]);if(ch[1].m)remember(ch[1].m);state.done.push(sk(s));advance(12);modal.style.display="none";paused=false;destination=null;toast("Lựa chọn đã được ghi nhớ.")};choices.appendChild(b)}modal.style.display="grid"}
+function openScene(s,actor=null){paused=true;meta.textContent=s[1]+" · "+DAYS[state.day-1]+" · "+timeText();story.textContent=s[2];choices.innerHTML="";for(const ch of s[3]){let b=document.createElement("button");b.className="choice";b.textContent=ch[0];b.onclick=()=>{if(!actor||actor===linh)apply(ch[1]);if(actor)CharacterSystem.applyRelationship(actor,ch[1],state.day,state.min);if(ch[1].m)remember((actor?actor.id+":":"")+ch[1].m);state.done.push(sk(s));advance(12);modal.style.display="none";paused=false;destination=null;toast("Lựa chọn đã được ghi nhớ.")};choices.appendChild(b)}modal.style.display="grid"}
 function sceneHere(){let p=nearLocation();return p?scenes.find(s=>s[0]===state.day&&s[1]===p.id&&!state.done.includes(sk(s))):null}
-function interact(){if(paused)return;let n=nearPerson();if(n){if(n===linh)openScene(["linh","Quán cà phê",state.stress>65?"Linh trông khá mệt. Cô ấy vẫn cố giữ nhịp sống của mình.":"Linh nhìn Minh rồi mỉm cười. Cả hai đều có lịch riêng.",[["Hỏi hôm nay thế nào",{trust:1,understanding:1,m:"asked"}],["Kể một chuyện nhỏ",{affection:1,closeness:1,m:"shared"}],["Để cô ấy có không gian",{respect:1,m:"space"}]]]);else openScene(["npc","Đường phố",`${n.name} đang ${n.role}. Người này không biết Minh là trung tâm của câu chuyện — họ chỉ đang sống ngày của mình.`,[["Chào một câu",{confidence:1,m:"greet_"+n.id}],["Đi tiếp",{m:"passed_"+n.id}]]]);return}let s=sceneHere();if(s)return openScene(s);let p=nearLocation();if(p)return openScene(["loc",p.name,p.info,[["Quan sát xung quanh",{understanding:1,m:"observe_"+p.id}],["Rời đi",{m:"leave_"+p.id}]]]);toast("Không có gì đủ gần để tương tác.")}
-function save(){localStorage.setItem(SAVE,JSON.stringify({state,player,linh:{x:linh.x,z:linh.z,yaw:linh.yaw},npcs:npcs.map(n=>({x:n.x,z:n.z,yaw:n.yaw,goal:n.goal}))}));toast("Đã lưu cuộc sống của Minh.")}
-function load(){let raw=localStorage.getItem(SAVE);if(!raw)return toast("Chưa có bản lưu.");try{let d=JSON.parse(raw);Object.assign(state,d.state);Object.assign(player,d.player);if(d.linh)Object.assign(linh,d.linh);if(Array.isArray(d.npcs))d.npcs.forEach((x,i)=>Object.assign(npcs[i],x));hud();toast("Đã tải bản lưu.")}catch(e){toast("Bản lưu không hợp lệ.")}}
+function interact(){if(paused)return;let n=nearPerson();if(n){const scene=CharacterSystem.interaction(n,state);return openScene([scene.sceneId,scene.title,scene.text,scene.choices],n)}let s=sceneHere();if(s)return openScene(s);let p=nearLocation();if(p)return openScene(["loc",p.name,p.info,[["Quan sát xung quanh",{understanding:1,m:"observe_"+p.id}],["Rời đi",{m:"leave_"+p.id}]]]);toast("Không có gì đủ gần để tương tác.")}
+function save(){localStorage.setItem(SAVE,JSON.stringify({state,player,linh:{x:linh.x,z:linh.z,yaw:linh.yaw},npcs:npcs.map(n=>({x:n.x,z:n.z,yaw:n.yaw,goal:n.goal})),characterProfiles:CharacterSystem.serialize([linh,...npcs])}));toast("Đã lưu cuộc sống của Minh.")}
+function load(){let raw=localStorage.getItem(SAVE);if(!raw)return toast("Chưa có bản lưu.");try{let d=JSON.parse(raw);Object.assign(state,d.state);Object.assign(player,d.player);if(d.linh)Object.assign(linh,d.linh);if(Array.isArray(d.npcs))d.npcs.forEach((x,i)=>Object.assign(npcs[i],x));CharacterSystem.restore([linh,...npcs],d.characterProfiles);hud();toast("Đã tải bản lưu.")}catch(e){toast("Bản lưu không hợp lệ.")}}
 function reset(){localStorage.removeItem(SAVE);location.reload()}
 const gl=canvas.getContext("webgl",{antialias:true,alpha:false});if(!gl)throw Error("Trình duyệt không hỗ trợ WebGL.");
 const vs=`attribute vec3 aPos;attribute vec3 aNor;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNor;void main(){vec4 w=uModel*vec4(aPos,1.);vNor=mat3(uModel)*aNor;gl_Position=uMVP*w}`;
@@ -65,7 +67,22 @@ function cubeData(){let f=[[[ -1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]],[[-1,-1,1]
 const cd=cubeData(),vb=gl.createBuffer(),ib=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,cd.v,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,cd.i,gl.STATIC_DRAW);gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(aNor);gl.vertexAttribPointer(aNor,3,gl.FLOAT,false,24,12);gl.enable(gl.DEPTH_TEST);
 function draw(x,y,z,sx,sy,sz,c,yaw=0,pitch=0){let m=model(x,y,z,sx,sy,sz,yaw,pitch);gl.uniformMatrix4fv(uModel,false,new Float32Array(m));gl.uniformMatrix4fv(uMVP,false,new Float32Array(mul(VP,m)));gl.uniform3fv(uColor,new Float32Array(c));gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0)}
 function local(n,ox,oy,oz){let s=Math.sin(n.yaw),c=Math.cos(n.yaw);return{x:n.x+c*ox+s*oz,y:oy,z:n.z-s*ox+c*oz}}function part(n,ox,oy,oz,sx,sy,sz,c,p=0){let q=local(n,ox,oy,oz);draw(q.x,q.y,q.z,sx,sy,sz,c,n.yaw,p)}
-function person(n,type){let L=type==="linh",P=type==="player",skin=L?[.92,.78,.68]:P?[.78,.58,.46]:[.68,.50,.38],hair=L?[.82,.86,.92]:P?[.045,.05,.06]:[.12,.11,.10],top=L?[.91,.94,.96]:P?[.10,.12,.14]:[.28,.32,.36],bottom=L?[.10,.14,.22]:P?[.07,.08,.09]:[.16,.18,.20],shoe=L?[.86,.90,.94]:[.08,.09,.10],step=Math.sin(anim*8+n.phase)*.28*(n.walk||0);part(n,0,.98,0,.28,.38,.20,top);part(n,0,.67,0,.31,.13,.19,top);part(n,-.15,.35,step*.15,.12,.36,.12,bottom,step);part(n,.15,.35,-step*.15,.12,.36,.12,bottom,-step);part(n,-.39,1.02,-step*.12,.09,.34,.10,top,-step*.8);part(n,.39,1.02,step*.12,.09,.34,.10,top,step*.8);part(n,-.42,.69,-step*.20,.08,.14,.09,skin);part(n,.42,.69,step*.20,.08,.14,.09,skin);part(n,0,1.69,0,.27,.30,.25,skin);part(n,0,1.96,0,.31,.18,.28,hair);part(n,0,2.06,-.02,.25,.12,.25,hair);if(L){part(n,-.24,1.72,-.01,.11,.48,.13,hair,.02);part(n,.24,1.72,-.01,.11,.48,.13,hair,-.02);part(n,-.20,2.04,.12,.08,.14,.09,hair);part(n,.20,2.04,.12,.08,.14,.09,hair);part(n,-.09,1.73,.235,.025,.035,.025,[.20,.42,.62]);part(n,.09,1.73,.235,.025,.035,.025,[.20,.42,.62]);part(n,0,1.18,.20,.035,.055,.025,[.68,.82,.92]);}else{part(n,-.17,2.04,.07,.12,.17,.12,hair,.05);part(n,.17,2.04,.07,.12,.17,.12,hair,-.05);part(n,-.09,1.72,.235,.025,.035,.025,[.08,.12,.16]);part(n,.09,1.72,.235,.025,.035,.025,[.08,.12,.16]);}part(n,-.13,.08,0,.14,.06,.22,shoe);part(n,.13,.08,0,.14,.06,.22,shoe)}
+function person(n,type){
+ const a=n.appearance||{},L=type==="linh",skin=a.skin||(L?[.92,.78,.68]:[.78,.58,.46]),hair=a.hair||(L?[.82,.86,.92]:[.045,.05,.06]),top=a.top||(L?[.91,.94,.96]:[.10,.12,.14]),bottom=a.bottom||(L?[.10,.14,.22]:[.07,.08,.09]),shoe=a.shoe||[.08,.09,.10],h=a.height||1,step=Math.sin(anim*8+(n.phase||0))*.28*(n.walk||0);
+ part(n,0,.98*h,0,.28,.38*h,.20,top);part(n,0,.67*h,0,.31,.13,.19,top);
+ part(n,-.15,.35*h,step*.15,.12,.36*h,.12,bottom,step);part(n,.15,.35*h,-step*.15,.12,.36*h,.12,bottom,-step);
+ part(n,-.39,.1*h+1.02*h,-step*.12,.09,.34*h,.10,top,-step*.8);part(n,.39,1.02*h+step*.12,step*.12,.09,.34*h,.10,top,step*.8);
+ part(n,-.42,.69*h-step*.20,.08,.08,.14,.09,skin);part(n,.42,.69*h+step*.20,.08,.08,.14,.09,skin);
+ part(n,0,1.34*h,0,.12,.18,.12,skin);part(n,0,1.69*h,0,.27,.30*h,.25,skin);
+ part(n,0,1.96*h,0,.31,.18,.28,hair);part(n,0,2.06*h,-.02,.25,.12,.25,hair);
+ const style=a.style||"short";
+ if(style==="long"){part(n,-.24,1.72*h,-.01,.11,.48*h,.13,hair,.02);part(n,.24,1.72*h,-.01,.11,.48*h,.13,hair,-.02);part(n,-.20,2.04*h,.12,.08,.14,.09,hair);part(n,.20,2.04*h,.12,.08,.14,.09,hair);}
+ else if(style==="tied"){part(n,0,1.75*h,-.27,.13,.30*h,.13,hair);part(n,0,2.10*h,-.02,.18,.08,.18,hair);}
+ else{part(n,-.17,2.04*h,.07,.12,.17*h,.12,hair,.05);part(n,.17,2.04*h,.07,.12,.17*h,.12,hair,-.05);}
+ part(n,-.09,1.73*h,.235,.025,.035,.025,[.12,.16,.20]);part(n,.09,1.73*h,.235,.025,.035,.025,[.12,.16,.20]);part(n,0,1.64*h,.26,.035,.045,.025,skin);
+ part(n,-.13,.08,0,.14,.06,.22,shoe);part(n,.13,.08,0,.14,.06,.22,shoe);
+ part(n,0,1.27*h,.205,.13,.055,.025,skin); 
+}
 function building(p){if(p.kind==="park"){draw(p.x,.04,p.z,p.w/2,.04,p.d/2,p.c);for(let i=-2;i<=2;i++)draw(p.x+i*3,.07,p.z,.12,.02,p.d/2-.5,[.68,.65,.48]);return}draw(p.x,p.h/2,p.z,p.w/2,p.h/2,p.d/2,p.c);draw(p.x,p.h+.16,p.z,p.w/2+.12,.12,p.d/2+.12,[.08,.12,.16]);for(let i=-2;i<=2;i++)for(let j=0;j<2;j++)draw(p.x+i*p.w*.18,p.h*(.55+.18*j),p.z-p.d/2-.04,.45,.34,.06,[.68,.76,.82])}
 function tree(x,z){draw(x,.85,z,.16,.85,.16,[.28,.19,.12]);draw(x,1.75,z,.85,.95,.85,[.12,.35,.18]);draw(x,2.35,z,.55,.60,.55,[.16,.42,.20])}
 function street(){draw(0,-.03,0,39,.03,31,[.24,.34,.24]);draw(0,.01,0,39,.035,2.9,[.07,.08,.09]);draw(0,.01,0,2.9,.035,31,[.07,.08,.09]);draw(0,.055,3.55,39,.025,.18,[.55,.56,.54]);draw(0,.055,-3.55,39,.025,.18,[.55,.56,.54]);draw(3.55,.055,0,.18,.025,31,[.55,.56,.54]);draw(-3.55,.055,0,.18,.025,31,[.55,.56,.54]);for(let x=-35;x<=35;x+=5)draw(x,.075,0,.9,.018,.035,[.86,.76,.32]);for(let z=-27;z<=27;z+=5)draw(0,.075,z,.035,.018,.9,[.86,.76,.32]);for(let x=-34;x<=34;x+=8){draw(x,.11,7.5,.08,.06,1.6,[.22,.24,.26]);draw(x,.11,-7.5,.08,.06,1.6,[.22,.24,.26])}}
@@ -79,7 +96,18 @@ function render(){resize();anim=performance.now()/1000;gl.viewport(0,0,canvas.wi
 function targetTo(x,z){destination={x,z};player.yaw=Math.atan2(x-player.x,z-player.z)}
 function blocked(x,z){for(let p of locations){if(p.kind==="park")continue;let hw=p.w/2+.5,hd=p.d/2+.5;if(x>p.x-hw&&x<p.x+hw&&z>p.z-hd&&z<p.z+hd)return true}return false}
 function move(dt){if(paused){player.walk=0;return}let f=(keys.has("w")?1:0)-(keys.has("s")?1:0),str=(keys.has("q")?1:0)-(keys.has("e")?1:0);if(keys.has("a"))player.yaw+=dt*1.9;if(keys.has("d"))player.yaw-=dt*1.9;let sp=(keys.has("shift")?7:4.2)*dt;if(destination&&!f&&!str){let dx=destination.x-player.x,dz=destination.z-player.z,d=Math.hypot(dx,dz);if(d>.7){player.yaw=Math.atan2(dx,dz);f=1}else destination=null}let nx=player.x+Math.sin(player.yaw)*f*sp+Math.cos(player.yaw)*str*sp,nz=player.z+Math.cos(player.yaw)*f*sp-Math.sin(player.yaw)*str*sp;if(!blocked(nx,nz)){player.x=clamp(nx,-38,38);player.z=clamp(nz,-30,30)}player.walk=Math.min(1,Math.hypot(f,str))}
-function updateNPC(dt){if(paused){npcs.forEach(n=>n.walk=0);linh.walk=0;return}let hour=state.min/60;for(let n of npcs){let t=hour>=8&&hour<17?locations.find(p=>p.id==="office"):locations.find(p=>p.id===(hour>=17&&hour<20?n.goal:n.goal==="office"?"home":n.goal));if(t){let dx=t.x-n.x,dz=t.z-n.z,d=Math.hypot(dx,dz);n.walk=d>2?1:0;if(d>2){n.x+=dx/d*n.speed*dt;n.z+=dz/d*n.speed*dt;n.yaw=Math.atan2(dx,dz)}}}linh.phase+=dt*.3;if(hour>=17&&hour<21){let dx=-20-linh.x,dz=-18-linh.z;linh.walk=Math.hypot(dx,dz)>.4?1:0;linh.x+=dx*dt*.08;linh.z+=dz*dt*.08;linh.yaw=Math.atan2(dx,dz)}else linh.walk=0}
+function updateNPC(dt){
+ if(paused){npcs.forEach(n=>n.walk=0);linh.walk=0;return}
+ const hour=state.min/60,actors=[linh,...npcs];
+ actors.forEach((n,i)=>{
+  const target=CharacterSystem.targetFor(n,locations,state.day,hour);if(!target)return;
+  const spread=i===0?0:((i%3)-1)*1.25;
+  const tx=target.x+spread,tz=target.z+((i%2)?1.1:-1.1),dx=tx-n.x,dz=tz-n.z,d=Math.hypot(dx,dz);
+  n.walk=d>1.4?1:0;
+  if(d>1.4){const speed=(n.speed||.55)*(n.mood==="tired"?.68:1);n.x+=dx/d*speed*dt;n.z+=dz/d*speed*dt;n.yaw=Math.atan2(dx,dz);}
+  n.currentActivity=target.activity;
+ });
+}
 function updateVehicles(dt){for(let v of vehicles){v.x+=v.dir*v.speed*dt;if(v.x>38)v.x=-38;if(v.x<-38)v.x=38}}
 function updateTarget(){let n=nearPerson(),p=nearLocation();if(n){targetEl.style.display="block";targetEl.textContent=`${n.name} · E / Click để nói chuyện`}else if(p){targetEl.style.display="block";targetEl.textContent=`${p.name} · E / Click để tương tác`}else targetEl.style.display="none"}
 function tick(now){let dt=Math.min(.05,(now-last)/1000);last=now;move(dt);updateNPC(dt);updateVehicles(dt);hud();updateTarget();requestAnimationFrame(tick)}
