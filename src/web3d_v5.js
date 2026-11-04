@@ -186,7 +186,7 @@ function shader(t,s){
 try{
  gl=canvas.getContext("webgl",{antialias:true,alpha:false})||canvas.getContext("experimental-webgl");
  if(!gl)throw new Error("Trình duyệt không cấp phát được WebGL context.");
- const vs=`attribute vec3 aPos;attribute vec3 aNor;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNor;void main(){vec4 w=uModel*vec4(aPos,1.0);vNor=aNor;gl_Position=uMVP*w;}`;
+ const vs=`attribute vec3 aPos;attribute vec3 aNor;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNor;void main(){vec4 w=uModel*vec4(aPos,1.0);vNor=normalize(mat3(uModel)*aNor);gl_Position=uMVP*w;}`;
  const fs=`precision mediump float;uniform vec3 uColor;uniform vec3 uLight;uniform float uNight;varying vec3 vNor;void main(){float d=max(dot(normalize(vNor),normalize(uLight)),0.0);vec3 c=uColor*(0.42+0.58*d);c*=mix(1.0,0.55,uNight);gl_FragColor=vec4(c,1.0);}`;
  prog=gl.createProgram();if(!prog)throw new Error("WebGL createProgram returned null; glError=0x"+gl.getError().toString(16));
  gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);
@@ -211,48 +211,56 @@ gl.bindBuffer(gl.ARRAY_BUFFER,svb);gl.bufferData(gl.ARRAY_BUFFER,sd.v,gl.STATIC_
 bindMesh(vb,ib);
 function uniforms(m,c){gl.uniformMatrix4fv(uModel,false,new Float32Array(m));gl.uniformMatrix4fv(uMVP,false,new Float32Array(mul(VP,m)));gl.uniform3fv(uColor,new Float32Array(c))}
 function draw(x,y,z,sx,sy,sz,c,yaw=0,pitch=0){bindMesh(vb,ib);const m=model(x,y,z,sx,sy,sz,yaw,pitch);uniforms(m,c);gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0)}
-function ellipsoid(x,y,z,sx,sy,sz,c,yaw=0){bindMesh(svb,sib);const m=model(x,y,z,sx,sy,sz,c?yaw:0);uniforms(m,c);gl.drawElements(gl.TRIANGLES,sd.i.length,gl.UNSIGNED_SHORT,0)}
+function ellipsoid(x,y,z,sx,sy,sz,c,yaw=0,pitch=0){bindMesh(svb,sib);const m=model(x,y,z,sx,sy,sz,yaw,pitch);uniforms(m,c);gl.drawElements(gl.TRIANGLES,sd.i.length,gl.UNSIGNED_SHORT,0)}
 function local(n,ox,oy,oz){let s=Math.sin(n.yaw),c=Math.cos(n.yaw);return{x:n.x+c*ox+s*oz,y:oy,z:n.z-s*ox+c*oz}}function part(n,ox,oy,oz,sx,sy,sz,c,p=0){let q=local(n,ox,oy,oz);draw(q.x,q.y,q.z,sx,sy,sz,c,n.yaw,p)}
 function person(n,type){
- const a=n.appearance||{},isLinh=type==="linh",isMinh=type==="player",skin=a.skin||(isLinh?[.94,.78,.69]:[.78,.57,.44]),hair=a.hair||(isLinh?[.82,.87,.94]:[.035,.045,.06]),shirt=a.top||(isLinh?[.72,.84,.94]:[.12,.16,.22]),pants=a.bottom||(isLinh?[.16,.23,.34]:[.09,.11,.14]),shoe=a.shoe||[.07,.08,.10],h=a.height||1;
- const phase=n.phase||0,step=Math.sin(anim*8+phase)*.22*(n.walk||0),sway=Math.sin(anim*3+phase)*.025;
- const P=(ox,oy,oz,sx,sy,sz,c,yaw=0)=>{const q=local(n,ox,oy,oz);ellipsoid(q.x,q.y,q.z,sx,sy,sz,c,n.yaw+yaw)};
- // silhouette: tapered-looking torso, shoulders and hips
- P(0,1.02*h,0,.29,.40*h,.19,shirt);
- P(0,.70*h,0,.245,.18*h,.16,shirt);
- // jacket/cardigan opening and collar
- if(isMinh){P(-.12,1.04*h,.173,.025,.30*h,.018,[.28,.31,.34]);P(.12,1.04*h,.173,.025,.30*h,.018,[.28,.31,.34]);P(0,1.36*h,.18,.11,.07,.035,[.72,.74,.76]);P(0,1.20*h,.198,.025,.025,.02,[.72,.74,.76]);P(0,1.08*h,.198,.025,.025,.02,[.72,.74,.76]);}
- else if(isLinh){P(-.12,1.30*h,.10,.12,.10,.08,[.88,.91,.94]);P(.12,1.30*h,.10,.12,.10,.08,[.88,.91,.94]);P(0,.79*h,.165,.12,.10,.025,[.55,.68,.80]);}
- else{P(0,1.30*h,.08,.15,.07,.08,[.86,.83,.76]);}
- // neck and head
- P(0,1.43*h,0,.105,.16,.10,skin);
- P(0,1.72*h,0,.235,.285*h,.22,skin);
- // ears
- P(-.235,1.72*h,0,.045,.075,.055,skin);P(.235,1.72*h,0,.045,.075,.055,skin);
- // hair cap and bangs
- P(0,1.91*h,-.005,.245,.145*h,.225,hair);
- if(isLinh){
-  P(-.205,1.67*h,-.015,.075,.39*h,.09,hair,-.05);P(.205,1.67*h,-.015,.075,.39*h,.09,hair,.05);
-  P(-.12,1.91*h,.155,.10,.13,.085,hair,-.25);P(.015,1.94*h,.17,.10,.12,.075,hair,.10);P(.14,1.90*h,.15,.085,.11,.07,hair,.30);
+ const a=n.appearance||{},isLinh=type==="linh",isMinh=type==="player";
+ const skin=a.skin||(isLinh?[.91,.73,.63]:[.78,.57,.44]),hair=a.hair||(isLinh?[.80,.84,.88]:[.035,.045,.06]);
+ const shirt=a.top||(isLinh?[.66,.78,.88]:[.12,.16,.22]),pants=a.bottom||(isLinh?[.16,.23,.34]:[.09,.11,.14]),shoe=a.shoe||[.08,.09,.10],h=a.height||1;
+ const phase=n.phase||0,cycle=anim*7.4+phase,walk=n.walk||0;
+ const stride=Math.sin(cycle)*.30*walk,armSwing=Math.sin(cycle+Math.PI)*.25*walk,bob=Math.abs(Math.sin(cycle))*.035*walk+Math.sin(anim*2.2+phase)*.012;
+ const P=(x,y,z,sx,sy,sz,c,yaw=0,pitch=0)=>{const q=local(n,x,y+bob,z);ellipsoid(q.x,q.y,q.z,sx,sy,sz,c,n.yaw+yaw,pitch)};
+ const limbPart=(a0,b0,r,c)=>{const A=local(n,a0[0],a0[1]+bob,a0[2]),B=local(n,b0[0],b0[1]+bob,b0[2]),dx=B.x-A.x,dy=B.y-A.y,dz=B.z-A.z,len=Math.hypot(dx,dy,dz),yaw=Math.atan2(dx,dz),pitch=Math.atan2(Math.hypot(dx,dz),dy);ellipsoid((A.x+B.x)/2,(A.y+B.y)/2,(A.z+B.z)/2,r,len*.57,r,c,yaw,pitch)};
+ P(0,.83*h,0,.255,.20*h,.17,pants);
+ P(0,1.12*h,0,.30,.36*h,.19,shirt);
+ P(0,1.34*h,-.005,.255,.13*h,.18,shirt);
+ P(0,1.48*h,0,.095,.15*h,.095,skin);
+ P(0,1.76*h,.005,.205,.255*h,.19,skin);
+ P(-.205,1.76*h,0,.042,.068,.045,skin);P(.205,1.76*h,0,.042,.068,.045,skin);
+ P(0,1.965*h,-.025,.218,.125*h,.205,hair);P(0,1.80*h,-.155,.205,.235*h,.075,hair);
+ if(isLinh||a.style==="long"){
+  P(-.185,1.63*h,-.065,.065,.37*h,.085,hair,-.06);P(.185,1.63*h,-.065,.065,.37*h,.085,hair,.06);
+  P(-.12,1.96*h,.105,.095,.115,.075,hair,-.28);P(.015,1.99*h,.13,.10,.12,.075,hair,.04);P(.14,1.96*h,.105,.09,.11,.07,hair,.28);
  }else{
-  P(-.16,1.91*h,.10,.12,.09,.12,hair,-.25);P(-.035,1.96*h,.12,.14,.075,.11,hair,.05);P(.105,1.93*h,.10,.12,.085,.10,hair,.28);
-  if(a.style==="long"){P(-.20,1.65*h,-.02,.065,.34*h,.075,hair);P(.20,1.65*h,-.02,.065,.34*h,.075,hair);}
+  P(-.15,1.98*h,.08,.105,.075,.10,hair,-.25);P(-.025,2.015*h,.10,.12,.065,.10,hair,.04);P(.105,1.985*h,.08,.10,.075,.09,hair,.25);P(.19,1.91*h,-.015,.06,.12,.09,hair,.2);
  }
- // eyes, eyebrows, nose and mouth on the front (+Z)
- P(-.083,1.755*h,.205,.027,.025,.018,[.10,.12,.15]);P(.083,1.755*h,.205,.027,.025,.018,[.10,.12,.15]);
- P(-.083,1.80*h,.207,.045,.012,.012,hair);P(.083,1.80*h,.207,.045,.012,.012,hair);
- P(0,1.695*h,.225,.025,.038,.025,skin);
- P(0,1.625*h,.211,.052,.012,.012,isLinh?[.63,.31,.35]:[.42,.22,.20]);
- // arms with shoulders, upper/lower sections and hands
- const arm=(side)=>{const x=side*.34,angle=step*(side===-1?1:-1);P(x,1.12*h,0,.115,.16,.12,shirt,angle*.25);P(x+angle*.18,.91*h,.015,.085,.20,.085,shirt,angle);P(x+angle*.28,.73*h,.035,.072,.10,.07,skin,angle);};
- arm(-1);arm(1);
- // trousers and articulated legs
- P(-.13,.47*h,0,.125,.27*h,.125,pants,step*.28);P(.13,.47*h,0,.125,.27*h,.125,pants,-step*.28);
- P(-.13,.20*h,step*.12,.095,.20*h,.10,pants,step*.5);P(.13,.20*h,-step*.12,.095,.20*h,.10,pants,-step*.5);
- P(-.13,.075,step*.12+.055,.13,.075,.23,shoe);P(.13,.075,-step*.12+.055,.13,.075,.23,shoe);
- // subtle accessories distinguish the protagonists
- if(isMinh){P(0,1.36*h,.19,.14,.035,.025,[.18,.22,.28]);}
- if(isLinh){P(0,1.40*h,.12,.09,.035,.035,[.72,.78,.84]);}
+ for(const side of [-1,1]){
+  P(side*.078,1.79*h,.179,.047,.033,.018,[.94,.92,.86]);P(side*.078,1.79*h,.196,.018,.022,.009,[.24,.31,.34]);
+  P(side*.078,1.79*h,.204,.009,.013,.006,[.035,.045,.05]);P(side*.078,1.835*h,.187,.052,.012,.012,hair,side*-.08);
+ }
+ P(0,1.715*h,.198,.027,.045,.025,skin);P(0,1.645*h,.185,.047,.012,.012,isLinh?[.57,.25,.31]:[.40,.20,.18]);
+ if(isLinh){P(-.125,1.70*h,.169,.035,.018,.012,[.82,.55,.55]);P(.125,1.70*h,.169,.035,.018,.012,[.82,.55,.55]);}
+ if(isMinh){
+  P(-.095,1.38*h,.16,.075,.105,.035,[.24,.29,.34],-.18);P(.095,1.38*h,.16,.075,.105,.035,[.24,.29,.34],.18);
+  P(-.125,1.12*h,.185,.018,.25*h,.012,[.34,.39,.43]);P(.125,1.12*h,.185,.018,.25*h,.012,[.34,.39,.43]);
+  for(const y of [1.22,1.08,.94])P(.015,y*h,.195,.012,.012,.009,[.78,.76,.67]);
+  P(-.17,1.12*h,.17,.07,.075,.018,[.18,.23,.28]);
+ }else if(isLinh){
+  P(-.10,1.40*h,.12,.10,.075,.035,[.88,.91,.93],-.24);P(.10,1.40*h,.12,.10,.075,.035,[.88,.91,.93],.24);
+  P(0,.91*h,.177,.13,.055,.018,[.54,.67,.79]);P(-.19,1.12*h,.11,.018,.20*h,.012,[.82,.87,.91]);P(.19,1.12*h,.11,.018,.20*h,.012,[.82,.87,.91]);
+ }else{P(-.10,1.39*h,.15,.075,.075,.025,[.84,.82,.76]);P(.10,1.39*h,.15,.075,.025,[.84,.82,.76]);}
+ for(const side of [-1,1]){
+  const swing=armSwing*side,shoulder=[side*.285,1.34*h,0],elbow=[side*(.36+Math.abs(swing)*.08),1.02*h,swing*.36],wrist=[side*(.39+Math.abs(swing)*.12),.78*h,swing*.72],hand=[wrist[0],.69*h,wrist[2]+.025];
+  limbPart(shoulder,elbow,.095,shirt);P(...elbow,.096,.095,.096,shirt);limbPart(elbow,wrist,.071,shirt);P(...wrist,.067,.07,.067,skin);limbPart(wrist,hand,.055,skin);
+  P(hand[0],hand[1]+.055,hand[2],.075,.035,.075,isMinh?[.30,.34,.38]:isLinh?[.88,.90,.91]:shirt);
+ }
+ for(const side of [-1,1]){
+  const phaseStep=stride*side,hip=[side*.125,.78*h,0],knee=[side*.135,.43*h,Math.max(0,phaseStep)*.52],ankle=[side*.14,.105*h,phaseStep],foot=[side*.14,.075*h,phaseStep+.085];
+  limbPart(hip,knee,.115,pants);P(...knee,.115,.12,.115,pants);limbPart(knee,ankle,.082,pants);P(...ankle,.082,.085,.082,shoe);
+  P(foot[0],foot[1]-.015,foot[2],.115,.065,.205,shoe);P(foot[0],foot[1]-.065,foot[2]+.012,.12,.018,.205,[.72,.72,.68]);
+ }
+ if(isMinh)P(.205,1.34*h,-.01,.035,.065,.035,[.16,.19,.22]);
+ if(isLinh)P(.205,1.68*h,-.015,.035,.055,.035,[.72,.78,.84]);
 }function building(p){if(p.kind==="park"){draw(p.x,.04,p.z,p.w/2,.04,p.d/2,p.c);for(let i=-2;i<=2;i++)draw(p.x+i*3,.07,p.z,.12,.02,p.d/2-.5,[.68,.65,.48]);return}draw(p.x,p.h/2,p.z,p.w/2,p.h/2,p.d/2,p.c);draw(p.x,p.h+.16,p.z,p.w/2+.12,.12,p.d/2+.12,[.08,.12,.16]);for(let i=-2;i<=2;i++)for(let j=0;j<2;j++)draw(p.x+i*p.w*.18,p.h*(.55+.18*j),p.z-p.d/2-.04,.45,.34,.06,[.68,.76,.82])}
 function tree(x,z){draw(x,.85,z,.16,.85,.16,[.28,.19,.12]);draw(x,1.75,z,.85,.95,.85,[.12,.35,.18]);draw(x,2.35,z,.55,.60,.55,[.16,.42,.20])}
 function street(){draw(0,-.03,0,39,.03,31,[.24,.34,.24]);draw(0,.01,0,39,.035,2.9,[.07,.08,.09]);draw(0,.01,0,2.9,.035,31,[.07,.08,.09]);draw(0,.055,3.55,39,.025,.18,[.55,.56,.54]);draw(0,.055,-3.55,39,.025,.18,[.55,.56,.54]);draw(3.55,.055,0,.18,.025,31,[.55,.56,.54]);draw(-3.55,.055,0,.18,.025,31,[.55,.56,.54]);for(let x=-35;x<=35;x+=5)draw(x,.075,0,.9,.018,.035,[.86,.76,.32]);for(let z=-27;z<=27;z+=5)draw(0,.075,z,.035,.018,.9,[.86,.76,.32]);for(let x=-34;x<=34;x+=8){draw(x,.11,7.5,.08,.06,1.6,[.22,.24,.26]);draw(x,.11,-7.5,.08,.06,1.6,[.22,.24,.26])}}
