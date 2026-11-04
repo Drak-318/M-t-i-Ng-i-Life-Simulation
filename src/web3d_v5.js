@@ -1,3 +1,4 @@
+(()=>{"use strict";
 function building(p){
  if(p.kind==="park"){
   draw(p.x,.025,p.z,p.w/2,.025,p.d/2,[.25,.43,.27]);
@@ -66,7 +67,8 @@ function parkProps(){
   draw(x,.78,-15,.07,.32,.07,[.24,.25,.24]);
  }
  for(let x=12;x<=28;x+=8)for(let z=-24;z<=-12;z+=6){ellipsoid(x,.22,z,.20,.22,.20,[.88,.48,.42]);ellipsoid(x+.4,.2,z+.2,.18,.20,.18,[.95,.72,.36]);}
-}(()=>{"use strict";
+}
+
 const $=id=>document.getElementById(id),canvas=$("world"),clock=$("clock"),locEl=$("loc"),moneyEl=$("money"),energyEl=$("energy"),stressEl=$("stress"),relEl=$("rel"),targetEl=$("target"),labels=$("labels"),modal=$("modal"),meta=$("meta"),story=$("story"),choices=$("choices"),toastEl=$("toast"),panel=$("panel"),panelTitle=$("panelTitle"),panelBody=$("panelBody"),errorEl=$("error"),errorText=$("errorText");
 function showFatalError(reason){
  if(!errorEl||!errorText){console.error("Life Simulation startup error:",reason);return}
