@@ -125,3 +125,12 @@ Stage 2 is now active: source ordinary adult male/female models, verify CC0 prov
 - Pages workflow downloads the candidate GLBs from pinned source revision `5716dcc99c3f00391ea67d8ca080529d195d2889` and validates glTF 2.0 container, visible mesh and humanoid skeleton joint count.
 - Candidate provenance is recorded in `assets/characters/manifest.json`; production Minh/Linh manifest asset fields remain null.
 - Next: wait for CI/deployment, inspect actual browser render, verify motion clips, then decide whether to customize/retarget or reject either candidate. Do not migrate to production renderer until both visuals and movement pass.
+
+
+## Staged Three.js gameplay integration — 2026-11-04
+
+- Runtime exports `window.__lifeVisualBridge.getSnapshot()` with read-only main actor positions, yaw, walk state and view-projection matrix.
+- `src/three-character-overlay.mjs` loads the two candidate GLBs and syncs imported actors to the game.
+- `web.html?threeCharacters=1` enables the opt-in overlay. Default page still uses the legacy renderer.
+- Playwright test `tests/game-three-overlay-browser.mjs` verifies both actors attach to the game and captures a screenshot; workflow runs this after candidate asset downloads.
+- Next: inspect screenshots/CI, tune forward axis and scale, confirm idle/walk timing and collision/ground contact. Only after visual acceptance should the imported models become default. Do not alter CharacterSystem/save schema for renderer work.
