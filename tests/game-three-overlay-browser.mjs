@@ -27,12 +27,12 @@ try {
   const info=await page.evaluate(()=>{
     const bridge=window.__lifeVisualBridge?.getSnapshot?.();
     const overlay=window.__lifeThreeOverlay;
-    return {actorIds:[...overlay.actors.keys()],actorCount:overlay.actors.size,bridgeActors:bridge?.actors?.map(x=>x.id),canvas:!!document.getElementById('character-overlay')};
+    const motions=[...overlay.actors.entries()].map(([id,entry])=>({id,idle:entry.handle.setMotion('idle'),walk:entry.handle.setMotion('walk'),run:entry.handle.setMotion('run')}));\n    const reports=[...overlay.actors.entries()].map(([id,entry])=>({id,triangles:entry.handle.report.triangleCount,materials:entry.handle.report.materialCount,textures:entry.handle.report.textureCount,hasSkeleton:entry.handle.report.hasSkeleton}));\n    return {actorIds:[...overlay.actors.keys()],actorCount:overlay.actors.size,bridgeActors:bridge?.actors?.map(x=>x.id),canvas:!!document.getElementById('character-overlay'),motions,reports};
   });
   assert.deepEqual(info.actorIds,['minh','linh']);
   assert.deepEqual(info.bridgeActors,['minh','linh']);
   assert.equal(info.actorCount,2);
-  assert.equal(info.canvas,true);
+  assert.equal(info.canvas,true);\n  assert.ok(info.motions.every(x=>x.idle&&x.walk&&x.run),'Both imported characters must expose idle, walk and run clips');\n  assert.ok(info.reports.every(x=>x.hasSkeleton&&x.triangles>0),'Both imported characters must report valid mesh/skeleton diagnostics');
   assert.deepEqual(errors,[],'Game overlay should not emit browser errors');
   fs.mkdirSync('artifacts',{recursive:true});
   await page.screenshot({path:'artifacts/game-three-character-overlay.png',fullPage:true});
