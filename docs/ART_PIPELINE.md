@@ -136,3 +136,17 @@ Two clothed pedestrian candidates have been identified from a pinned source revi
 The source repository's model credit ledger identifies both as Quaternius CC0 1.0. This is a candidate source record, not final production approval. CI now parses each GLB container and requires a visible mesh plus a humanoid skeleton of at least 20 joints. The review page loads both through the same GLTFLoader pipeline and reports skeleton/material/animation metadata. A browser screenshot and art-direction review are still required; neither asset is assigned to the live game yet.
 
 Candidate review URL: https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/character-candidates-test.html
+
+
+### Stage 2 — first in-game integration slice
+
+A staged Three.js character overlay is now connected to the existing gameplay runtime behind the URL flag `?threeCharacters=1`.
+
+- The legacy simulation remains authoritative for actor position, yaw, walking state, day/time and pause state.
+- The renderer exposes a read-only visual snapshot; the Three.js layer consumes it and does not own or mutate gameplay state.
+- Minh and Linh can be loaded as imported GLB actors while background NPCs and the environment continue using the existing renderer.
+- Imported characters switch between discovered idle and walk clips based on gameplay movement.
+- The default game remains unchanged until the opt-in visual and gameplay checks pass.
+- A headless Chromium test opens the actual game with the imported models, verifies both actor handles and the state bridge, checks browser errors, and saves a screenshot artifact.
+
+This is an integration prototype, not final acceptance. Character facing direction, scale, ground contact, animation synchronization and visual quality still require screenshot review. The old procedural main-character meshes are hidden only when the opt-in flag is active; if the overlay fails, the runtime restores the procedural characters.
