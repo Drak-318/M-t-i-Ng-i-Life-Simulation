@@ -23,6 +23,10 @@ Bản thử nghiệm hiện tại dùng hình thể người 3D procedural cách
 
 **[Mở phòng đánh giá Minh và Linh candidate](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/character-candidates-test.html)**
 
+**[Chơi thử bản Three.js với model Minh và Linh](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/web.html?threeCharacters=1)**
+
+Bản Three.js hiện là chế độ thử nghiệm bật bằng tham số URL; bản mặc định vẫn giữ renderer ổn định. Mô hình nhân vật sẽ chỉ được bật mặc định sau khi kiểm tra hình ảnh, chuyển động và gameplay đạt yêu cầu.
+
 Asset Lab là khu vực kỹ thuật tách biệt để kiểm tra GLB, humanoid skeleton, tỷ lệ model và animation. Model trong phòng lab là fixture kỹ thuật CC0, không phải Minh hoặc Linh. Nhân vật chính chỉ được gán model sau khi có asset phù hợp và vượt qua kiểm thử.
 
 Tài liệu kỹ thuật: docs/ART_PIPELINE.md. Danh sách model chính thức: assets/characters/manifest.json.
