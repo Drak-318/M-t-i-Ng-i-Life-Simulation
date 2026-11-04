@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Một Đời Người — 3D Asset Lab</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;color:#f4f6f8;font:14px Inter,system-ui,sans-serif}canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;inset:0;pointer-events:none;padding:18px;background:linear-gradient(180deg,#071018aa,transparent 32%,transparent 70%,#07101888)}
+h1{margin:0 0 6px;font-size:18px}p{margin:0 0 12px;color:#bdc8d1}#status{display:inline-block;background:#142c3a;border:1px solid #416176;border-radius:8px;padding:8px 10px}#report{position:absolute;left:18px;bottom:18px;max-width:min(540px,calc(100vw - 36px));white-space:pre-wrap;background:#071018e8;border:1px solid #ffffff24;border-radius:10px;padding:12px;font:12px/1.5 ui-monospace,monospace}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<div id="hud"><h1>MỘT ĐỜI NGƯỜI · 3D ASSET LAB</h1><p>Phòng kiểm tra kỹ thuật GLB — model bên dưới chỉ là fixture thử rig, không phải Minh hoặc Linh.</p><span id="status">Đang khởi tạo Three.js…</span><pre id="report">Chờ tải mô hình.</pre></div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { loadCharacterAsset } from './src/three-character-pipeline.mjs';
+const status = document.querySelector('#status'), report = document.querySelector('#report');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#9ab5cb');
+scene.fog = new THREE.Fog('#9ab5cb', 14, 42);
+const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 100);
+camera.position.set(3.2, 2.4, 5.2);
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+document.body.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xe8f2ff, 0x53604c, 2.0));
+const key = new THREE.DirectionalLight(0xffe4c2, 3.0);
+key.position.set(-3, 7, 4); key.castShadow = true; key.shadow.mapSize.set(2048, 2048); scene.add(key);
+const fill = new THREE.DirectionalLight(0xb9d8ff, 1.1);
+fill.position.set(4, 3, -4); scene.add(fill);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({color:'#65756d', roughness:0.92}));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+const grid = new THREE.GridHelper(30, 30, 0x71877d, 0x839187); grid.position.y = 0.006; scene.add(grid);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0.9, 0); controls.enableDamping = true; controls.minDistance = 2; controls.maxDistance = 12; controls.maxPolarAngle = Math.PI * 0.49;
+let character = null;
+try {
+  status.textContent = 'Đang tải GLB fixture…';
+  character = await loadCharacterAsset('./assets/dev-fixtures/quaternius-superhero-male.glb', {
+    name: 'RigPipelineFixture', targetHeight: 1.72,
+    onProgress: (loaded, total) => { if (total) status.textContent = 'Đang tải mô hình: ' + Math.round(loaded / total * 100) + '%'; }
+  });
+  scene.add(character.actor);
+  character.setMotion('idle');
+  status.textContent = 'GLB đã tải · Skeleton hợp lệ';
+  report.textContent = JSON.stringify(character.report, null, 2) + '\n\nGhi chú: fixture kỹ thuật, không dùng làm nhân vật trong game.';
+} catch (error) {
+  status.textContent = 'Không tải được GLB';
+  report.textContent = error.stack || String(error);
+  console.error(error);
+}
+let previous = performance.now();
+function frame(now) {
+  requestAnimationFrame(frame);
+  const delta = Math.min((now - previous) / 1000, 0.1); previous = now;
+  if (character) character.update(delta);
+  controls.update(); renderer.render(scene, camera);
+}
+requestAnimationFrame(frame);
+addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+</script>
+</body></html>
