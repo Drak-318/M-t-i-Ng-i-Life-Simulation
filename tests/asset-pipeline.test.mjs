@@ -8,8 +8,8 @@ const worldAdapter = fs.readFileSync('src/three-world-adapter.mjs', 'utf8');
 const fixture = fs.readFileSync('assets/dev-fixtures/quaternius-superhero-male.glb');
 
 assert.equal(manifest.runtimeFormat, 'glTF 2.0 / GLB');
-assert.equal(manifest.gameCharacters.minh.asset, null);
-assert.equal(manifest.gameCharacters.linh.asset, null);
+assert.equal(manifest.gameCharacters.minh.asset, 'assets/characters/generated/Minh.glb');
+assert.equal(manifest.gameCharacters.linh.asset, 'assets/characters/generated/Linh.glb');
 assert.match(manifest.developmentFixtures[0].purpose, /Never assign this fixture to Minh or Linh/);
 assert.match(loader, /GLTFLoader/);
 assert.match(loader, /isSkinnedMesh/);
