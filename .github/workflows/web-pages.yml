@@ -40,6 +40,23 @@ jobs:
           assert len(data) > 100_000, "Fixture download looks incomplete"
           print(f"GLB fixture verified: {len(data)} bytes")
           PY
+      - name: Prepare candidate everyday human characters
+        run: |
+          mkdir -p assets/characters/candidates
+          BASE=https://raw.githubusercontent.com/KingArthur207/kite/5716dcc99c3f00391ea67d8ca080529d195d2889/sim/public/models
+          curl --fail --location --silent --show-error "$BASE/ped_man.glb" --output assets/characters/candidates/minh-base-ped-man.glb
+          curl --fail --location --silent --show-error "$BASE/ped_casual_woman.glb" --output assets/characters/candidates/linh-base-casual-woman.glb
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+          for path in Path("assets/characters/candidates").glob("*.glb"):
+              data = path.read_bytes()
+              assert data[:4] == b"glTF", f"{path} is not a GLB file"
+              assert struct.unpack_from("<I", data, 4)[0] == 2, f"{path} is not glTF 2.0"
+              assert struct.unpack_from("<I", data, 8)[0] == len(data), f"{path} length mismatch"
+              assert len(data) > 100_000, f"{path} download looks incomplete"
+              print(f"Candidate GLB verified: {path} ({len(data)} bytes)")
+          PY
       - name: Validate Three.js asset pipeline
         run: |
           node --check src/three-character-pipeline.mjs
