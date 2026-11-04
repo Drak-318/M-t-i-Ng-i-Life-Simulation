@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "project": "Một Đời Người — Life Simulation",
+  "status": "foundation-in-progress",
+  "runtimeFormat": "glTF 2.0 / GLB",
+  "characterRequirements": {
+    "minimumAge": 18,
+    "mustBeSkinned": true,
+    "mustHaveHumanoidSkeleton": true,
+    "preferredAnimations": ["idle", "walk", "run", "sit", "talk"],
+    "preferredMaterials": "PBR",
+    "targetHeightMeters": 1.72,
+    "targetTriangleRange": [12000, 45000],
+    "maxMaterialSlots": 4,
+    "textureResolution": "1K or 2K"
+  },
+  "gameCharacters": {
+    "minh": {
+      "status": "awaiting-approved-production-model",
+      "asset": null,
+      "design": "Vietnamese adult man, 24, ordinary office employee, contemporary everyday clothing"
+    },
+    "linh": {
+      "status": "awaiting-approved-production-model",
+      "asset": null,
+      "design": "Vietnamese adult woman, 24, content designer, contemporary everyday clothing"
+    },
+    "backgroundNpcs": {
+      "status": "awaiting-approved-character-variants",
+      "asset": null
+    }
+  },
+  "developmentFixtures": [
+    {
+      "id": "quaternius-superhero-male-rig-test",
+      "asset": "assets/dev-fixtures/quaternius-superhero-male.glb",
+      "purpose": "Validate GLB loading, skinned mesh detection, skeleton inspection and scale normalization only. Never assign this fixture to Minh or Linh.",
+      "author": "Quaternius",
+      "source": "https://quaternius.com/packs/universalbasecharacters.html",
+      "license": "CC0-1.0",
+      "licenseFile": "assets/dev-fixtures/QUATERNIUS-LICENSE.txt",
+      "upstreamRepository": "programasweights/avatar",
+      "upstreamCommit": "e225eee89835d121876b15bf4c887dc20d357950"
+    }
+  ]
+}
