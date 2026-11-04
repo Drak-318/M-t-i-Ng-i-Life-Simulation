@@ -63,6 +63,56 @@ jobs:
               assert doc.get("meshes"), f"{path} has no visible mesh"
               print(f"Candidate rig verified: {path} ({len(data)} bytes, {len(doc['skins'])} skin(s), {len(doc.get('animations', []))} animation(s))")
           PY
+      - name: Set up character generation toolchain
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch pinned Ara 3D Gen character generator
+        run: |
+          mkdir -p tools
+          git clone --filter=blob:none https://github.com/olatunde85/3d-gen.git tools/ara3dgen
+          git -C tools/ara3dgen fetch --depth 1 origin a4947ffdd14acf2ff018cb3568c941595f86d86e
+          git -C tools/ara3dgen checkout --detach a4947ffdd14acf2ff018cb3568c941595f86d86e
+      - name: Cache CC0 MakeHuman source and generated library
+        uses: actions/cache@v4
+        with:
+          path: |
+            tools/ara3dgen/vendor
+            tools/ara3dgen/public/assets
+            tools/ara3dgen/node_modules
+          key: ara3dgen-assets-a4947ffdd14acf2ff018cb3568c941595f86d86e-v1
+      - name: Install Ara 3D Gen dependencies and CC0 assets
+        run: |
+          npm install --prefix tools/ara3dgen
+          npm run setup-assets --prefix tools/ara3dgen
+      - name: Generate Minh and Linh production-quality character GLBs
+        run: |
+          mkdir -p assets/characters/generated
+          npm run export --prefix tools/ara3dgen -- --params ../../assets/characters/source/minh.params.json --out ../../assets/characters/generated --formats glb --detail medium
+          npm run export --prefix tools/ara3dgen -- --params ../../assets/characters/source/linh.params.json --out ../../assets/characters/generated --formats glb --detail medium
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, struct
+          for name in ("Minh", "Linh"):
+              path = Path(f"assets/characters/generated/{name}.glb")
+              data = path.read_bytes()
+              assert data[:4] == b"glTF", f"{name}: invalid GLB"
+              assert struct.unpack_from("<I", data, 4)[0] == 2, f"{name}: expected glTF 2.0"
+              assert struct.unpack_from("<I", data, 8)[0] == len(data), f"{name}: GLB length mismatch"
+              length, kind = struct.unpack_from("<II", data, 12)
+              assert kind == 0x4E4F534A, f"{name}: missing JSON chunk"
+              doc = json.loads(data[20:20+length].decode("utf-8").rstrip(" \\t\\r\\n\\0"))
+              assert doc.get("skins") and max(len(s.get("joints", [])) for s in doc["skins"]) >= 60, f"{name}: expected game humanoid rig"
+              assert doc.get("animations"), f"{name}: animations missing"
+              names = [a.get("name", "").lower() for a in doc["animations"]]
+              assert any("idle" in n for n in names), f"{name}: idle clip missing"
+              assert any("walk" in n for n in names), f"{name}: walk clip missing"
+              assert any("run" in n for n in names), f"{name}: run clip missing"
+              assert doc.get("images"), f"{name}: embedded skin/clothing textures missing"
+              tris = sum((doc["accessors"][p["indices"]]["count"] // 3) for mesh in doc.get("meshes", []) for p in mesh.get("primitives", []) if "indices" in p)
+              assert 12000 <= tris <= 50000, f"{name}: triangle count {tris} outside medium-detail target"
+              print(f"{name}: {len(data)/1e6:.1f} MB, {tris} triangles, {len(doc['skins'][0]['joints'])} bones, {len(names)} clips, {len(doc['images'])} images")
+          PY
       - name: Validate Three.js asset pipeline
         run: |
           node --check src/three-character-pipeline.mjs
