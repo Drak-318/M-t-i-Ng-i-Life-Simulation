@@ -79,6 +79,7 @@ for (const name of ['Minh', 'Linh']) {
   assert.ok(params.asian >= 0.8, name + ' should use the project Asian character direction');
   const gltf = readGlbJson(`assets/characters/generated/${name}.glb`);
   assert.ok(gltf.images?.length, name + ' must include photo-based textures');
+  assert.ok((gltf.materials?.length || 0) <= 32, name + ' exceeds the material-slot hard limit');
   assert.ok(gltf.animations?.some(clip => /idle/i.test(clip.name)), name + ' idle clip missing');
   assert.ok(gltf.animations?.some(clip => /walk/i.test(clip.name)), name + ' walk clip missing');
   assert.ok(gltf.animations?.some(clip => /run/i.test(clip.name)), name + ' run clip missing');
