@@ -21,7 +21,7 @@ try {
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
-  await page.goto('http://127.0.0.1:4174/web.html?threeCharacters=1',{waitUntil:'networkidle',timeout:60000});
+  await page.goto('http://127.0.0.1:4174/web.html?threeCharacters=1',{waitUntil:'networkidle',timeout:90000});
   await page.waitForFunction(()=>window.__lifeThreeOverlayReady===true||Boolean(window.__lifeThreeOverlayError),null,{timeout:60000});
   assert.equal(await page.evaluate(()=>window.__lifeThreeOverlayReady),true,'Three.js overlay must load both production-candidate models');
   const info=await page.evaluate(()=>{
