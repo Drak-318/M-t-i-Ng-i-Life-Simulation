@@ -4,6 +4,7 @@ import fs from 'node:fs';
 const manifest = JSON.parse(fs.readFileSync('assets/characters/manifest.json', 'utf8'));
 const loader = fs.readFileSync('src/three-character-pipeline.mjs', 'utf8');
 const lab = fs.readFileSync('art-pipeline-test.html', 'utf8');
+const worldAdapter = fs.readFileSync('src/three-world-adapter.mjs', 'utf8');
 const fixture = fs.readFileSync('assets/dev-fixtures/quaternius-superhero-male.glb');
 
 assert.equal(manifest.runtimeFormat, 'glTF 2.0 / GLB');
