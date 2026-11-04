@@ -35,7 +35,7 @@ jobs:
           }
           if (!html.includes('src="src/character-system.js')) throw new Error('Missing character system script');
           if (!html.includes('src="src/web3d_v5.js')) throw new Error('Missing active Web 3D runtime script');
-          if (!js.includes('getContext(\'webgl\'')) throw new Error('Missing WebGL runtime');
+          if (!js.includes('getContext("webgl"')) throw new Error('Missing WebGL runtime');
           if (!js.includes('function interact()')) throw new Error('Missing interaction system');
           if (!js.includes('canvas.addEventListener(\'mousedown\'')) throw new Error('Missing mouse camera control');
           if (!js.includes('function updateNPC')) throw new Error('Missing NPC simulation');
