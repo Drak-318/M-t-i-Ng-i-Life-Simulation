@@ -37,8 +37,8 @@ const floor=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshStandard
 floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
 const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,.9,0);controls.enableDamping=true;controls.minDistance=3;controls.maxDistance=13;controls.maxPolarAngle=Math.PI*.49;
 const candidates=[
- {name:'Minh',url:'./assets/characters/candidates/./assets/characters/generated/Minh.glb',position:new THREE.Vector3(-1.05,0,0)},
- {name:'Linh',url:'./assets/characters/candidates/./assets/characters/generated/Linh.glb',position:new THREE.Vector3(1.05,0,0)}
+ {name:'Minh',url:'./assets/characters/generated/Minh.glb',position:new THREE.Vector3(-1.05,0,0)},
+ {name:'Linh',url:'./assets/characters/generated/Linh.glb',position:new THREE.Vector3(1.05,0,0)}
 ];
 const results=[];
 for(const item of candidates){
