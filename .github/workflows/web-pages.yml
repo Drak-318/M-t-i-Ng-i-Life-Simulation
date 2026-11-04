@@ -85,6 +85,13 @@ jobs:
         run: |
           GENERATOR_DIR="$RUNNER_TEMP/ara3dgen"
           npm install --prefix "$GENERATOR_DIR"
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path(__import__("os").environ["RUNNER_TEMP"]) / "ara3dgen/scripts/setup-assets.ts"
+          source = path.read_text()
+          assert "await fetchMocap();" in source
+          path.write_text(source.replace("await fetchMocap();", "// Skip source-take downloads: the generator's baked clip data is already committed."))
+          PY
           npm --prefix "$GENERATOR_DIR" run setup-assets
       - name: Generate Minh and Linh production-quality character GLBs
         run: |
