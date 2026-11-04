@@ -119,6 +119,12 @@
     "restPose": "T",
     "ethnicityMix": "Asian 88%, Caucasian 12% for fictional Vietnamese adult character direction",
     "buildWorkflow": ".github/workflows/web-pages.yml",
-    "assetsStored": "Generated into the GitHub Pages build artifact; source parameter files are versioned in this repository."
+    "assetsStored": "Generated into the GitHub Pages build artifact; source parameter files are versioned in this repository.",
+    "animations": [
+      "idle",
+      "walk",
+      "run"
+    ],
+    "exportPackaging": "Embedded GLB; only required gameplay clips to keep downloads lean"
   }
 }
