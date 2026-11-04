@@ -100,6 +100,12 @@ Important limitation:
 - Production GLB files for Minh/Linh, their final outfits/hair, full animation clips, environment kit and browser visual regression remain outstanding.
 - The new loader is syntax-checked and has static/binary fixture tests; actual browser rendering still requires visual verification.
 
+## 2B. Milestone ledger — 2026-11-04
+
+- **Stage 1 — Reusable 3D asset foundation: implementation complete.** Three.js adapter, GLTFLoader wrapper, isolated asset lab, pinned technical GLB fixture and CI validation are committed. Latest recorded validation: Web 3D smoke test + asset pipeline tests + GitHub Pages deployment PASS.
+- Stage 1 is limited to the technical foundation. Manual visual review is still pending; production Minh/Linh assets have not been assigned; the active gameplay renderer is still custom WebGL.
+- **Stage 2 — Production character assets: in progress.** Quaternius Universal Base Characters (CC0) is the leading candidate because it provides rigged male/female humanoid bases in regular proportions. Appropriate everyday outfits, hair, textures and skeleton/animation compatibility must be checked before production use. The superhero GLB remains test-only.
+
 ## 3. Những gì CHƯA phải sản phẩm cuối
 
 - Model 3D nhân vật production, facial rig và skeletal animation; hiện dùng procedural stylized primitives với màu sắc/tóc/trang phục phân biệt.
