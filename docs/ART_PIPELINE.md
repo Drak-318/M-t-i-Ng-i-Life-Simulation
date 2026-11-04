@@ -125,3 +125,14 @@ Stage 2 exit criteria:
 Official source references:
 - https://quaternius.com/packs/universalbasecharacters.html
 - https://quaternius.com/packs/universalanimationlibrary.html
+
+
+### Stage 2 update — candidate assets acquired for review
+
+Two clothed pedestrian candidates have been identified from a pinned source revision and are fetched into the Pages build artifact:
+- Quaternius “Man” candidate for Minh review.
+- Quaternius “Woman Casual” candidate for Linh review.
+
+The source repository's model credit ledger identifies both as Quaternius CC0 1.0. This is a candidate source record, not final production approval. CI now parses each GLB container and requires a visible mesh plus a humanoid skeleton of at least 20 joints. The review page loads both through the same GLTFLoader pipeline and reports skeleton/material/animation metadata. A browser screenshot and art-direction review are still required; neither asset is assigned to the live game yet.
+
+Candidate review URL: https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/character-candidates-test.html
