@@ -43,6 +43,7 @@ jobs:
       - name: Validate Three.js asset pipeline
         run: |
           node --check src/three-character-pipeline.mjs
+          node --check src/three-world-adapter.mjs
           node tests/asset-pipeline.test.mjs
       - name: Web 3D smoke test
         run: |
