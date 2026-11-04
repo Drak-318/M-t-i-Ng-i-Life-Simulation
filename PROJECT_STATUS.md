@@ -136,3 +136,12 @@ Important limitation:
 GitHub repository là nguồn kỹ thuật hiện tại. Project/Kho là nguồn thiết kế. AI tiếp theo phải đọc file này, README, HANDOFF_TO_ANOTHER_AI.md và các tài liệu thiết kế trước khi thay đổi kiến trúc.
 
 Không được coi placeholder là sản phẩm cuối.
+
+
+## 3D character integration — 2026-11-04
+
+- Added a read-only bridge from the existing gameplay renderer to the imported-character layer.
+- Added an opt-in Three.js overlay for Minh and Linh, enabled at `web.html?threeCharacters=1`.
+- The overlay consumes the current game positions/yaw/walk state and plays imported idle/walk clips. It does not change save data, relationship state, schedules or story logic.
+- Default gameplay still uses the established renderer. The opt-in overlay is not yet approved as the default visual runtime.
+- Added Playwright browser coverage for the actual game page and a screenshot artifact. CI result is pending for this revision; do not report this integration as visually approved until the workflow passes and the screenshot is reviewed.
