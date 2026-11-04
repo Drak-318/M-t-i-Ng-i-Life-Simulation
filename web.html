@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Một Đời Người — Life Simulation · Web 3D</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10161b;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}canvas{display:block;width:100%;height:100%;cursor:grab}canvas.drag{cursor:grabbing}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10161b;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}canvas{display:block;width:100%;height:100%;cursor:grab}#character-overlay{position:fixed;inset:0;z-index:1;pointer-events:none}canvas.drag{cursor:grabbing}
 #hud{position:fixed;inset:0;color:#fff;pointer-events:none;text-shadow:0 2px 5px #000}.top{display:flex;justify-content:space-between;align-items:center;padding:14px 18px 8px;font-weight:800;font-size:13px}.brand{font-size:16px;letter-spacing:.08em}.chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 18px}.chip,.btn,.hint{background:#071018df;border:1px solid #ffffff22;border-radius:9px;padding:7px 10px}.chip{font-size:11px}.hint{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);white-space:nowrap}.controls{position:fixed;right:14px;bottom:14px;display:flex;gap:6px;pointer-events:auto}.btn{color:#fff;cursor:pointer}.btn:hover{background:#1a2b37}
 #cross{position:fixed;left:50%;top:50%;width:12px;height:12px;transform:translate(-50%,-50%);opacity:.55}.cross1,.cross2{position:absolute;background:#fff}.cross1{left:5px;top:0;width:2px;height:12px}.cross2{left:0;top:5px;width:12px;height:2px}#target{position:fixed;left:50%;top:calc(50% + 32px);transform:translateX(-50%);background:#071018d9;border:1px solid #ffffff22;border-radius:9px;padding:7px 10px;font-size:12px;display:none}#labels{position:fixed;inset:0;pointer-events:none}.label{position:absolute;transform:translate(-50%,-50%);padding:5px 8px;border-radius:7px;background:#071018d9;border:1px solid #ffffff20;font-size:11px;white-space:nowrap;opacity:.9}.toast{position:fixed;top:74px;left:50%;transform:translateX(-50%);padding:9px 13px;border-radius:10px;background:#071018ed;color:#fff;opacity:0;transition:.2s;pointer-events:none}.toast.on{opacity:1}
 .modal{position:fixed;inset:0;background:#0009;display:none;place-items:end center;padding:22px;z-index:10}.card{width:min(780px,100%);background:#101820f7;color:#fff;border:1px solid #ffffff25;border-radius:18px;padding:20px;box-shadow:0 20px 70px #000a}.meta{font-size:11px;font-weight:800;opacity:.62;text-transform:uppercase;letter-spacing:.08em}.text{font-size:18px;line-height:1.55;margin:9px 0 16px}.choices{display:grid;gap:8px}.choice{border:1px solid #ffffff22;background:#ffffff0b;color:#fff;border-radius:10px;padding:12px;text-align:left;cursor:pointer;font-size:14px}.choice:hover{background:#ffffff18}
@@ -12,7 +12,7 @@
 </style>
 </head>
 <body>
-<canvas id="world"></canvas><div id="labels"></div>
+<canvas id="world"></canvas><canvas id="character-overlay"></canvas><div id="labels"></div>
 <div id="hud"><div class="top"><div class="brand">MỘT ĐỜI NGƯỜI</div><div id="clock"></div></div>
 <div class="chips"><span class="chip">Nguyễn Minh · 24</span><span class="chip" id="loc"></span><span class="chip" id="money"></span><span class="chip" id="energy"></span><span class="chip" id="stress"></span><span class="chip" id="rel"></span></div>
 <div id="cross"><i class="cross1"></i><i class="cross2"></i></div><div id="target"></div>
@@ -23,4 +23,20 @@
 <div class="error" id="error"><div class="box"><h2>Web 3D MVP gặp lỗi khởi động</h2><p>Bản chơi thử không thể khởi động.</p><pre id="errorText"></pre></div></div>
 <script src="src/character-system.js?v=20261104-9"></script>
 <script src="src/web3d_v5.js?v=20261104-9"></script>
+<script type="module">
+import { attachLifeCharacterOverlay } from './src/three-character-overlay.mjs';
+const enabled = new URLSearchParams(location.search).get('threeCharacters') === '1';
+if (enabled) {
+  window.__lifeUseImportedCharacters = true;
+  const start = () => attachLifeCharacterOverlay(document.getElementById('character-overlay'))
+    .then(api => { window.__lifeThreeOverlay = api; window.__lifeThreeOverlayReady = true; })
+    .catch(error => {
+      window.__lifeThreeOverlayError = error.message;
+      window.__lifeUseImportedCharacters = false;
+      console.error('Three.js character overlay failed:', error);
+    });
+  const wait = () => window.__lifeVisualBridge ? start() : requestAnimationFrame(wait);
+  wait();
+}
+</script>
 </body></html>
