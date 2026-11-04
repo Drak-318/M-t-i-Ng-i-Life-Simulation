@@ -226,6 +226,10 @@ jobs:
           require('./tests/character-system.test.js');
           console.log('Web 3D + Character System smoke test: PASS');
           NODE
+      - name: Remove test-only files before publishing Pages
+        if: always()
+        run: |
+          rm -rf node_modules package-lock.json artifacts
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
