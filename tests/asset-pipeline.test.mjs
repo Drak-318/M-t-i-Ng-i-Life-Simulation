@@ -63,3 +63,7 @@ console.log('Staged live-game Three.js character bridge checks: PASS');
 
 assert.match(overlay, /state\.run \? 'run' : 'walk'/);
 assert.match(gameRuntime, /run:keys\.has\("shift"\)/);
+
+assert.match(loader, /triangleCount/);
+assert.match(loader, /materialCount/);
+assert.match(loader, /acceptanceWarnings/);
