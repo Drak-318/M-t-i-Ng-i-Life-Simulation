@@ -60,3 +60,6 @@ assert.match(overlay, /state\.walk > 0\.12 \? 'walk' : 'idle'/);
 assert.match(gameRuntime, /window\.__lifeVisualBridge=/);
 assert.match(gameRuntime, /__lifeUseImportedCharacters/);
 console.log('Staged live-game Three.js character bridge checks: PASS');
+
+assert.match(overlay, /state\.run \? 'run' : 'walk'/);
+assert.match(gameRuntime, /run:keys\.has\("shift"\)/);
