@@ -117,3 +117,11 @@ Không nói "hoàn thành" nếu phần tương ứng chưa được kiểm tra.
 Stage 1 (reusable 3D asset foundation) is implementation-complete: Three.js adapter, GLTFLoader, isolated lab, pinned GLB fixture and CI validation are committed. This is not a claim of manual browser visual approval or production renderer migration.
 
 Stage 2 is now active: source ordinary adult male/female models, verify CC0 provenance, prepare everyday clothing/hair/materials, validate skeleton and animation compatibility, and visually inspect both before assigning them to Minh/Linh. Quaternius Universal Base Characters and Universal Animation Library are candidate CC0 sources. Do not ship naked/base-only meshes or use the superhero fixture as a production character.
+
+
+### Stage 2 implementation update
+
+- Added `character-candidates-test.html` to review two everyday Quaternius pedestrian candidates side-by-side.
+- Pages workflow downloads the candidate GLBs from pinned source revision `5716dcc99c3f00391ea67d8ca080529d195d2889` and validates glTF 2.0 container, visible mesh and humanoid skeleton joint count.
+- Candidate provenance is recorded in `assets/characters/manifest.json`; production Minh/Linh manifest asset fields remain null.
+- Next: wait for CI/deployment, inspect actual browser render, verify motion clips, then decide whether to customize/retarget or reject either candidate. Do not migrate to production renderer until both visuals and movement pass.
