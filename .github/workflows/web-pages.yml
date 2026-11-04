@@ -79,6 +79,14 @@ jobs:
           name: character-candidate-review
           path: artifacts/character-candidates.png
           if-no-files-found: error
+      - name: Browser test the live game with imported main characters
+        run: node tests/game-three-overlay-browser.mjs
+      - name: Upload gameplay character overlay screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-three-character-overlay
+          path: artifacts/game-three-character-overlay.png
+          if-no-files-found: error
       - name: Web 3D smoke test
         run: |
           node <<'NODE'
