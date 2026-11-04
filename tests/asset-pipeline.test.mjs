@@ -21,3 +21,10 @@ assert.equal(fixture.toString('ascii', 0, 4), 'glTF');
 assert.equal(fixture.readUInt32LE(4), 2);
 assert.equal(fixture.readUInt32LE(8), fixture.length);
 console.log('3D asset pipeline foundation checks: PASS');
+
+assert.ok(fs.existsSync('character-candidates-test.html'), 'Candidate review lab must exist');
+const candidateLab = fs.readFileSync('character-candidates-test.html', 'utf8');
+assert.ok(candidateLab.includes('minh-base-ped-man.glb'), 'Male candidate must be loaded in review lab');
+assert.ok(candidateLab.includes('linh-base-casual-woman.glb'), 'Female candidate must be loaded in review lab');
+assert.ok(candidateLab.includes('loadCharacterAsset'), 'Review lab must use production GLB loader');
+assert.ok(candidateLab.includes('candidate only'), 'Candidate lab must not imply production approval');
