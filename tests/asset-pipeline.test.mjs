@@ -47,3 +47,16 @@ for (const path of [
   assert.ok(gltf.skins?.some(skin => (skin.joints?.length || 0) >= 20), path + ' must contain a usable humanoid skeleton');
 }
 console.log('Everyday character candidate GLB/skeleton checks: PASS');
+
+const overlay = fs.readFileSync('src/three-character-overlay.mjs', 'utf8');
+const gameHtml = fs.readFileSync('web.html', 'utf8');
+const gameRuntime = fs.readFileSync('src/web3d_v5.js', 'utf8');
+assert.match(gameHtml, /threeCharacters/);
+assert.match(gameHtml, /id="character-overlay"/);
+assert.match(gameHtml, /type="importmap"/);
+assert.match(overlay, /loadCharacterAsset/);
+assert.match(overlay, /setMotion\('idle'\)/);
+assert.match(overlay, /state\.walk > 0\.12 \? 'walk' : 'idle'/);
+assert.match(gameRuntime, /window\.__lifeVisualBridge=/);
+assert.match(gameRuntime, /__lifeUseImportedCharacters/);
+console.log('Staged live-game Three.js character bridge checks: PASS');
