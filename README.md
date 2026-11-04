@@ -9,13 +9,13 @@ Game mô phỏng cuộc sống 3D trên **Web**, với cốt truyện phân nhá
 - WASD: di chuyển; kéo chuột: xoay camera; cuộn chuột: zoom.
 - E: tương tác; N hoặc nút `+1 giờ`: tua thời gian.
 - P: lưu; L: tải; R: bắt đầu lại.
-- Bản hiện tại có Character System cho Linh và 12 NPC nền. Ngoại hình vẫn là procedural stylized placeholder.
+- Bản mặc định hiện vẫn giữ renderer procedural để bảo toàn độ ổn định. Chế độ Three.js bật riêng đã được nối với pipeline sinh nhân vật Minh và Linh có rig, texture và animation; đang chờ kiểm thử hình ảnh trước khi thay thế mặc định.
 
 ## Bản Web để chơi thử
 
 **[Mở Một Đời Người — Web 3D](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/web.html?v=20261104-9)**
 
-Bản thử nghiệm hiện tại dùng hình thể người 3D procedural cách điệu, có khuôn mặt, tóc, trang phục và chuyển động cơ bản. Đây vẫn là prototype đồ họa, chưa phải model nhân vật sản xuất cuối cùng.
+Bản Web mặc định vẫn dùng hình thể người 3D procedural cách điệu. Có thể bật chế độ Three.js thử nghiệm để tải model Minh và Linh được sinh ở medium detail, có texture, humanoid rig và animation; chế độ này chưa được nghiệm thu trực quan.
 
 ## 3D Asset Lab — nền tảng nhân vật
 
