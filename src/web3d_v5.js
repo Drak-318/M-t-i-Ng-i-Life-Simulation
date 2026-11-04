@@ -41,7 +41,7 @@ function street(){
  draw(0,.005,0,39,.04,4.8,[.11,.12,.13]);draw(0,.005,0,4.8,.04,31,[.11,.12,.13]);
  draw(0,.045,3.0,39,.045,.62,[.53,.53,.50]);draw(0,.045,-3.0,39,.045,.62,[.53,.53,.50]);
  draw(3.0,.045,0,.62,.045,31,[.53,.53,.50]);draw(-3.0,.045,0,.62,.045,31,[.53,.53,.50]);
- draw(0,.08,0,39,.02,3.6,[.075,.082,.09]);draw(0,.08,0,3.6,.02,31,[.075,.082,.09]);
+ draw(0,.08,0,39,.02,3.6,[.17,.19,.21]);draw(0,.08,0,3.6,.02,31,[.17,.19,.21]);
  for(let x=-36;x<=36;x+=4){draw(x,.11,0,1.15,.018,.045,[.88,.76,.39]);}
  for(let z=-28;z<=28;z+=4){draw(0,.11,z,.045,.018,1.15,[.88,.76,.39]);}
  // pedestrian crossings on all four approaches
@@ -80,8 +80,8 @@ window.addEventListener("unhandledrejection",event=>showFatalError(event.reason|
 
 const DAYS=["Chủ nhật","Thứ hai","Thứ ba","Thứ tư","Thứ năm","Thứ sáu","Thứ bảy"],SAVE="mot-doi-nguoi-web3d-v5";
 let state={day:1,min:462,money:15000000,energy:82,stress:18,confidence:52,trust:0,affection:0,understanding:0,closeness:0,respect:0,hurt:0,memories:[],done:[]};
-let player={x:-24,z:14,yaw:0,walk:0},destination=null,paused=false,last=performance.now(),anim=0;
-const keys=new Set();let dragging=false,movedMouse=false,lastMouse={x:0,y:0},camYaw=.65,camPitch=.48,camDist=7.2;
+let player={x:-26.2,z:14.0,yaw:0,walk:0,visualScale:1.55},destination=null,paused=false,last=performance.now(),anim=0;
+const keys=new Set();let dragging=false,movedMouse=false,lastMouse={x:0,y:0},camYaw=.35,camPitch=.34,camDist=5.4;
 const locations=[
 {id:"home",name:"Nhà Minh",x:-24,z:20,w:11,d:9,h:3.8,c:[.38,.50,.58],kind:"home",info:"Căn hộ của Minh."},
 {id:"office",name:"Văn phòng",x:24,z:19,w:14,d:9,h:4.5,c:[.30,.40,.48],kind:"office",info:"Nơi Minh làm việc."},
@@ -93,8 +93,8 @@ const locations=[
 const CharacterSystem=window.CharacterSystem;
 if(!CharacterSystem)throw new Error("CharacterSystem chưa được tải.");
 const npcs=Array.from({length:12},(_,i)=>({...CharacterSystem.createBackgroundCharacter(i),x:-31+(i*11)%62,z:-26+(i*17)%52,yaw:0,visualScale:1.12,goal:["office","cafe","park","shop"][i%4],role:["đi làm","đi cà phê","đi dạo","mua đồ"][i%4],walk:0}));
-const linh={...CharacterSystem.createLinh(),x:-24,z:13.8,yaw:2.2,speed:.18,phase:4.1,visualScale:1.28,goal:"cafe",role:"công việc riêng",walk:0};
-player.visualScale=1.28;player.appearance={skin:[.78,.58,.46],hair:[.045,.05,.06],top:[.10,.12,.14],bottom:[.07,.08,.09],shoe:[.08,.09,.10],style:"short",height:1};
+const linh={...CharacterSystem.createLinh(),x:-21.8,z:14.0,yaw:2.2,speed:.18,phase:4.1,visualScale:1.55,goal:"cafe",role:"công việc riêng",walk:0};
+player.visualScale=1.55;player.appearance={skin:[.78,.58,.46],hair:[.045,.05,.06],top:[.10,.12,.14],bottom:[.07,.08,.09],shoe:[.08,.09,.10],style:"short",height:1};
 const vehicles=Array.from({length:8},(_,i)=>({x:-36+i*10,z:i%2?-2.0:2.0,dir:i%2?1:-1,speed:1.8+(i%3)*.5,color:[[.18,.22,.27],[.55,.17,.16],[.78,.72,.55],[.18,.38,.30]][i%4]}));
 const scenes=[
 [1,"home","Sáng Chủ nhật. Điện thoại nằm trên bàn. Minh không có kế hoạch rõ ràng.",[["Ở nhà nghỉ ngơi",{energy:6,stress:-3,m:"rested"}],["Đi ra ngoài",{energy:-3,m:"went_out"}]]],
@@ -275,7 +275,7 @@ function renderLabels(){
  for(const n of npcs)add(n.x,2.35*(n.visualScale||1),n.z,n.name,"npc");
 }
 let VP=I();
-function render(){resize();anim=performance.now()/1000;gl.viewport(0,0,canvas.width,canvas.height);let h=state.min/1440,night=h<.25||h>.78?1:0;gl.clearColor(.48-.15*night,.64-.17*night,.82-.20*night,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);let cp=Math.cos(camPitch),sp=Math.sin(camPitch),cy=Math.cos(camYaw),sy=Math.sin(camYaw),cam=[player.x+sy*camDist*cp,2.8+camDist*sp,player.z+cy*camDist*cp];VP=mul(persp(1.05,canvas.width/canvas.height,.1,160),lookAt(cam,[player.x,.8,player.z]));gl.uniform3fv(uLight,new Float32Array([-.45,1,.35]));gl.uniform1f(uNight,night);street();locations.forEach(building);parkProps();for(let v of vehicles)vehicle(v);npcs.forEach(n=>person(n,"npc"));person(linh,"linh");person(player,"player");renderLabels();requestAnimationFrame(render)}
+function render(){resize();anim=performance.now()/1000;gl.viewport(0,0,canvas.width,canvas.height);let h=state.min/1440,night=h<.25||h>.78?1:0;gl.clearColor(.48-.15*night,.64-.17*night,.82-.20*night,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);let cp=Math.cos(camPitch),sp=Math.sin(camPitch),cy=Math.cos(camYaw),sy=Math.sin(camYaw),cam=[player.x+sy*camDist*cp,2.8+camDist*sp,player.z+cy*camDist*cp];VP=mul(persp(1.05,canvas.width/canvas.height,.1,160),lookAt(cam,[player.x,.8,player.z]));gl.uniform3fv(uLight,new Float32Array([-.25,1,.45]));gl.uniform1f(uNight,night);street();locations.forEach(building);parkProps();for(let v of vehicles)vehicle(v);npcs.forEach(n=>person(n,"npc"));person(linh,"linh");person(player,"player");renderLabels();requestAnimationFrame(render)}
 function targetTo(x,z){destination={x,z};player.yaw=Math.atan2(x-player.x,z-player.z)}
 function blocked(x,z){for(let p of locations){if(p.kind==="park")continue;let hw=p.w/2+.5,hd=p.d/2+.5;if(x>p.x-hw&&x<p.x+hw&&z>p.z-hd&&z<p.z+hd)return true}return false}
 function move(dt){if(paused){player.walk=0;return}let f=(keys.has("w")?1:0)-(keys.has("s")?1:0),str=(keys.has("q")?1:0)-(keys.has("e")?1:0);if(keys.has("a"))player.yaw+=dt*1.9;if(keys.has("d"))player.yaw-=dt*1.9;let sp=(keys.has("shift")?7:4.2)*dt;if(destination&&!f&&!str){let dx=destination.x-player.x,dz=destination.z-player.z,d=Math.hypot(dx,dz);if(d>.7){player.yaw=Math.atan2(dx,dz);f=1}else destination=null}let nx=player.x+Math.sin(player.yaw)*f*sp+Math.cos(player.yaw)*str*sp,nz=player.z+Math.cos(player.yaw)*f*sp-Math.sin(player.yaw)*str*sp;if(!blocked(nx,nz)){player.x=clamp(nx,-38,38);player.z=clamp(nz,-30,30)}player.walk=Math.min(1,Math.hypot(f,str))}
