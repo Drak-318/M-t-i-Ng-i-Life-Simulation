@@ -73,6 +73,30 @@
         "intendedReview": "Everyday adult female candidate; not assigned to Linh"
       }
     ],
-    "restriction": "Candidate assets are downloaded into the Pages build artifact from a pinned source commit. Keep gameCharacters.minh.asset and gameCharacters.linh.asset null until visual, clothing, rig and animation review passes."
+    "restriction": "Candidate assets are downloaded into the Pages build artifact from a pinned source commit. Keep gameCharacters.minh.asset and gameCharacters.linh.asset null until visual, clothing, rig and animation review passes.",
+    "technicalReview": {
+      "inspection": "Parsed GLB JSON chunks at pinned upstream revision",
+      "findings": [
+        {
+          "id": "quaternius-ped-man",
+          "triangleCount": 1852,
+          "materialSlots": 6,
+          "embeddedTextures": 0,
+          "skeletonJoints": 31,
+          "animationClips": 11,
+          "rootMotion": "No armature-root translation channels found in supplied clips"
+        },
+        {
+          "id": "quaternius-ped-casual-woman",
+          "triangleCount": 2776,
+          "materialSlots": 8,
+          "embeddedTextures": 0,
+          "skeletonJoints": 31,
+          "animationClips": 11,
+          "rootMotion": "No armature-root translation channels found in supplied clips"
+        }
+      ],
+      "acceptance": "Not approved as final production models. Both are suitable for rig/animation integration tests but are below the target 12k–45k triangle budget, exceed the preferred four material slots and contain no embedded textures. Keep them as integration candidates until a higher-detail textured everyday-human asset or custom art pass closes these gaps."
+    }
   }
 }
