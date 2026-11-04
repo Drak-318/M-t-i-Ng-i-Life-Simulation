@@ -83,5 +83,6 @@ for (const name of ['Minh', 'Linh']) {
   assert.ok(gltf.animations?.some(clip => /idle/i.test(clip.name)), name + ' idle clip missing');
   assert.ok(gltf.animations?.some(clip => /walk/i.test(clip.name)), name + ' walk clip missing');
   assert.ok(gltf.animations?.some(clip => /run/i.test(clip.name)), name + ' run clip missing');
+  assert.equal(gltf.animations.length, 3, name + ' should ship only idle/walk/run gameplay clips');
 }
 console.log('Generated textured production character checks: PASS');
