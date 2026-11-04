@@ -18,6 +18,27 @@
 
 
 
+## 3D asset pipeline foundation — 2026-11-04
+
+A repository audit found the active Web v5 renderer is hand-written WebGL, not Three.js. The production preview still draws procedural geometry. A separate Three.js asset lab and GLB loader foundation have now been added:
+- docs/ART_PIPELINE.md
+- assets/characters/manifest.json
+- src/three-character-pipeline.mjs
+- art-pipeline-test.html
+- assets/dev-fixtures/README.md and CC0 license record
+- tests/asset-pipeline.test.mjs
+- GitHub Pages workflow downloads a pinned GLB test fixture into the deployment artifact and checks its glTF 2.0 header.
+
+The lab fixture is a Quaternius superhero male rig used only for technical validation. It is not Minh, Linh, or an approved character design. Minh and Linh remain unassigned in the manifest. Do not claim the production game has migrated to Three.js until the world adapter and browser visual tests are complete.
+
+Next technical gates:
+1. Verify the deployed asset lab renders the GLB and reports a valid skeleton.
+2. Obtain/approve suitable ordinary contemporary adult character models for Minh and Linh, with documented license and matching humanoid rigs.
+3. Validate idle/walk/run animation clips and foot contact.
+4. Migrate the active renderer in stages while preserving CharacterSystem, time, story, relationships, save/load and NPC schedules.
+5. Add environment GLB/PBR assets and collision proxies.
+6. Add browser screenshot/visual regression coverage before declaring the art milestone complete.
+
 ## Trạng thái hiện tại
 
 MVP gameplay vertical slice đã hoàn thành về mặt hệ thống và đã được GitHub Actions kiểm tra bằng Godot 4.3 headless:
