@@ -150,3 +150,12 @@ Không được coi placeholder là sản phẩm cuối.
 ### Character asset quality gate
 
 Measured candidate GLBs are 1,852 and 2,776 triangles, with 6 and 8 material slots respectively and no embedded textures. Both have 31-joint humanoid rigs and 11 animation clips. These are low-poly technical integration candidates, not final character art; production Minh/Linh remain unassigned pending higher-detail textured models or a custom art pass.
+
+
+### Higher-quality Minh/Linh generation pipeline — 2026-11-04
+
+- Added project-authored adult Asian-dominant character parameter files for Minh and Linh.
+- Added a pinned Ara 3D Gen build pipeline to create medium-detail, textured, rigged GLBs with facial shapes and baked idle/walk/run clips.
+- The deploy workflow caches CC0 MakeHuman source/build assets, generates the two GLBs, validates textures/rig/clips/triangle budget, and then runs browser checks against the playable game.
+- The opt-in overlay now references generated GLBs rather than the low-poly pedestrian candidates. The low-poly assets remain technical fixtures.
+- Generated models are produced during Pages deployment and are not committed as binary files. The first successful generation and browser screenshot are pending; do not mark final visual acceptance yet.
