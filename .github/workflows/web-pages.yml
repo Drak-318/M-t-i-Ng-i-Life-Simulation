@@ -28,17 +28,21 @@ jobs:
           node <<'NODE'
           const fs = require('fs');
           const html = fs.readFileSync('web.html', 'utf8');
-          const js = fs.readFileSync('src/web3d.js', 'utf8');
+          const js = fs.readFileSync('src/web3d_v5.js', 'utf8');
+          const characters = fs.readFileSync('src/character-system.js', 'utf8');
           for (const id of ['world','clock','loc','money','energy','stress','rel','modal','story','choices','hour','save','load','error']) {
             if (!html.includes(`id="${id}"`)) throw new Error(`Missing UI element: ${id}`);
           }
-          if (!html.includes('src="src/web3d.js')) throw new Error('Missing 3D runtime script');
+          if (!html.includes('src="src/character-system.js')) throw new Error('Missing character system script');
+          if (!html.includes('src="src/web3d_v5.js')) throw new Error('Missing active Web 3D runtime script');
           if (!js.includes('getContext(\'webgl\'')) throw new Error('Missing WebGL runtime');
           if (!js.includes('function interact()')) throw new Error('Missing interaction system');
           if (!js.includes('canvas.addEventListener(\'mousedown\'')) throw new Error('Missing mouse camera control');
           if (!js.includes('function updateNPC')) throw new Error('Missing NPC simulation');
+          new Function(characters);
           new Function(js);
-          console.log('Web 3D smoke test: PASS');
+          require('./tests/character-system.test.js');
+          console.log('Web 3D + Character System smoke test: PASS');
           NODE
       - name: Setup Pages
         uses: actions/configure-pages@v5
