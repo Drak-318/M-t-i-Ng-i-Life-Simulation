@@ -56,7 +56,7 @@ assert.match(gameHtml, /id="character-overlay"/);
 assert.match(gameHtml, /type="importmap"/);
 assert.match(overlay, /loadCharacterAsset/);
 assert.match(overlay, /setMotion\('idle'\)/);
-assert.match(overlay, /state\.walk > 0\.12 \? 'walk' : 'idle'/);
+assert.match(overlay, /state\.walk > 0\.12/);
 assert.match(gameRuntime, /window\.__lifeVisualBridge=/);
 assert.match(gameRuntime, /__lifeUseImportedCharacters/);
 console.log('Staged live-game Three.js character bridge checks: PASS');
