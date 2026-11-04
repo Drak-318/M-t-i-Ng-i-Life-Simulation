@@ -69,7 +69,7 @@ function startFallback(reason){
  const ctx=fallback.getContext("2d");
  if(!ctx){showFatalError(new Error("Cả WebGL và Canvas 2D đều không khả dụng: "+String(reason)));return}
  const notice=document.createElement("div");notice.textContent="CHẾ ĐỘ TƯƠNG THÍCH · ĐỒ HỌA 2D";notice.style.cssText="position:fixed;top:12px;left:12px;z-index:3;padding:7px 10px;border-radius:8px;background:#101820dd;color:#fff;font:11px system-ui;pointer-events:none";document.body.appendChild(notice);
- let zoom=1,cx=0,cz=0,drag=false,lastX=0,lastY=0;
+ let zoom=1,cx=0,cz=0,drag=false,moved=false,lastX=0,lastY=0;
  function resize(){const d=Math.min(devicePixelRatio||1,2),w=Math.floor(innerWidth*d),h=Math.floor(innerHeight*d);if(fallback.width!==w||fallback.height!==h){fallback.width=w;fallback.height=h}ctx.setTransform(d,0,0,d,0,0)}
  function point(x,z,s){return{x:innerWidth/2+(x-cx)*s,y:innerHeight/2+(z-cz)*s}}
  function rect(x,z,w,h,s,color){const p=point(x-w/2,z-h/2,s);ctx.fillStyle=color;ctx.fillRect(p.x,p.y,w*s,h*s)}
@@ -95,10 +95,10 @@ function startFallback(reason){
   ctx.fillStyle="#fff";ctx.font="12px system-ui";ctx.textAlign="left";ctx.fillText("WASD di chuyển · A/D xoay · Q/E đi ngang · Click di chuyển · E tương tác · N +1 giờ",22,innerHeight-22);
   requestAnimationFrame(renderFallback);
  }
- fallback.addEventListener("pointerdown",e=>{drag=true;lastX=e.clientX;lastY=e.clientY;fallback.setPointerCapture(e.pointerId)});
- fallback.addEventListener("pointermove",e=>{if(!drag)return;const s=Math.min(innerWidth/88,innerHeight/68)*zoom;cx-=(e.clientX-lastX)/s;cz-=(e.clientY-lastY)/s;lastX=e.clientX;lastY=e.clientY});
+ fallback.addEventListener("pointerdown",e=>{drag=true;moved=false;lastX=e.clientX;lastY=e.clientY;fallback.setPointerCapture(e.pointerId)});
+ fallback.addEventListener("pointermove",e=>{if(!drag)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;if(Math.abs(dx)+Math.abs(dy)>3)moved=true;const s=Math.min(innerWidth/88,innerHeight/68)*zoom;cx-=dx/s;cz-=dy/s;lastX=e.clientX;lastY=e.clientY});
  fallback.addEventListener("pointerup",()=>drag=false);
- fallback.addEventListener("click",e=>{if(drag)return;const s=Math.min(innerWidth/88,innerHeight/68)*zoom;targetTo(cx+(e.clientX-innerWidth/2)/s,cz+(e.clientY-innerHeight/2)/s)});
+ fallback.addEventListener("click",e=>{if(moved){moved=false;return}const s=Math.min(innerWidth/88,innerHeight/68)*zoom;targetTo(cx+(e.clientX-innerWidth/2)/s,cz+(e.clientY-innerHeight/2)/s)});
  fallback.addEventListener("wheel",e=>{zoom=clamp(zoom+(e.deltaY<0?.1:-.1),.65,1.8);e.preventDefault()},{passive:false});
  addEventListener("keydown",e=>{const k=e.key.toLowerCase();if(["w","a","s","d","q","e","shift","n","p","l","r"," "].includes(k))e.preventDefault();keys.add(k);if(k==="e")interact();if(k==="n")advance(60);if(k==="p")save();if(k==="l")load();if(k==="r"&&!paused)reset()});
  addEventListener("keyup",e=>keys.delete(e.key.toLowerCase()));
