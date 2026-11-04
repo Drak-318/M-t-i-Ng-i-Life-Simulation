@@ -1,4 +1,72 @@
-(()=>{"use strict";
+function building(p){
+ if(p.kind==="park"){
+  draw(p.x,.025,p.z,p.w/2,.025,p.d/2,[.25,.43,.27]);
+  draw(p.x,.055,p.z,.9,.018,p.d/2,[.72,.65,.48]);draw(p.x,.055,p.z, p.w/2,.018,.75,[.72,.65,.48]);
+  for(let x=-1;x<=1;x++)for(let z=-1;z<=1;z++)draw(p.x+x*4,.07,p.z+z*3,1.25,.025,.10,[.82,.75,.60]);
+  return;
+ }
+ const wall=p.c,front=p.z-p.d/2-.05;
+ draw(p.x,p.h/2,p.z,p.w/2,p.h/2,p.d/2,wall);
+ draw(p.x,p.h+.13,p.z,p.w/2+.22,.13,p.d/2+.22,[.12,.16,.19]);
+ draw(p.x,p.h+.30,p.z,p.w*.25,.09,p.d*.22,p.kind==="home"?[.38,.48,.56]:p.kind==="cafe"?[.62,.32,.22]:[.22,.34,.43]);
+ // ground-floor shopfront, door and framed windows
+ for(let i=-1;i<=1;i++){
+  const wx=p.x+i*p.w*.27;
+  draw(wx,p.h*.59,front,.56,.47,.055,[.25,.39,.48]);
+  draw(wx,p.h*.59,front-.065,.46,.37,.018,[.56,.72,.78]);
+  draw(wx,p.h*.59,front-.09,.035,.39,.025,[.88,.85,.72]);
+ }
+ draw(p.x+p.w*.34,p.h*.34,front-.08,.48,.72,.07,[.20,.24,.27]);
+ draw(p.x+p.w*.34,p.h*.34,front-.13,.34,.58,.02,[.38,.53,.59]);
+ // upper windows, balconies and sill lines
+ if(p.h>3.3)for(let floor=1;floor<=2;floor++)for(let i=-1;i<=1;i++){
+  const wx=p.x+i*p.w*.27,wy=p.h*(.48+floor*.22);
+  draw(wx,wy,front,.62,.39,.06,[.16,.25,.31]);
+  draw(wx,wy,front-.07,.50,.29,.02,[.48,.67,.74]);
+  draw(wx,wy-.20,front-.12,.58,.035,.08,[.72,.74,.70]);
+ }
+ draw(p.x,p.h+.52,front-.15,p.w*.34,.20,.06,p.kind==="cafe"?[.72,.32,.20]:[.14,.23,.30]);
+}
+function tree(x,z){
+ draw(x,.58,z,.13,.58,.13,[.30,.20,.13]);
+ ellipsoid(x,.1+1.25,z,.68,.78,.68,[.17,.40,.22]);
+ ellipsoid(x-.38,1.35,z+.08,.48,.53,.48,[.20,.47,.24]);
+ ellipsoid(x+.38,1.42,z-.05,.46,.55,.46,[.16,.39,.20]);
+ ellipsoid(x,1.86,z,.42,.48,.42,[.25,.52,.27]);
+}
+function street(){
+ draw(0,-.08,0,39,.08,31,[.27,.38,.28]);
+ // sidewalks, curbs and asphalt crossroads
+ draw(0,.005,0,39,.04,4.8,[.11,.12,.13]);draw(0,.005,0,4.8,.04,31,[.11,.12,.13]);
+ draw(0,.045,3.0,39,.045,.62,[.53,.53,.50]);draw(0,.045,-3.0,39,.045,.62,[.53,.53,.50]);
+ draw(3.0,.045,0,.62,.045,31,[.53,.53,.50]);draw(-3.0,.045,0,.62,.045,31,[.53,.53,.50]);
+ draw(0,.08,0,39,.02,3.6,[.075,.082,.09]);draw(0,.08,0,3.6,.02,31,[.075,.082,.09]);
+ for(let x=-36;x<=36;x+=4){draw(x,.11,0,1.15,.018,.045,[.88,.76,.39]);}
+ for(let z=-28;z<=28;z+=4){draw(0,.11,z,.045,.018,1.15,[.88,.76,.39]);}
+ // pedestrian crossings on all four approaches
+ for(let i=-3;i<=3;i++){draw(i*.48,.12,4.2,.20,.025,.72,[.88,.88,.82]);draw(i*.48,.12,-4.2,.20,.025,.72,[.88,.88,.82]);draw(4.2,.12,i*.48,.72,.025,.20,[.88,.88,.82]);draw(-4.2,.12,i*.48,.72,.025,.20,[.88,.88,.82]);}
+ // sidewalk paving joints and street lamps
+ for(let x=-32;x<=32;x+=8){draw(x,.105,3.35,.025,.018,.24,[.37,.38,.36]);draw(x,.105,-3.35,.025,.018,.24,[.37,.38,.36]);}
+ for(let x=-30;x<=30;x+=15){draw(x,.10,5.1,.055,1.9,.055,[.18,.20,.21]);draw(x,.10,5.1,.42,.045,.20,[.18,.20,.21]);ellipsoid(x,2.05,5.1,.24,.08,.15,[.95,.82,.56]);}
+}
+function vehicle(v){
+ draw(v.x,.28,v.z,1.20,.25,.56,v.color);
+ draw(v.x-.12,.58,v.z,.70,.25,.48,[.46,.57,.63]);
+ draw(v.x-.12,.60,v.z+.49,.42,.18,.025,[.70,.82,.85]);
+ draw(v.x-.12,.60,v.z-.49,.42,.18,.025,[.70,.82,.85]);
+ for(const x of [-.78,.62])for(const z of [-.38,.38])ellipsoid(v.x+x,.12,v.z+z,.19,.16,.10,[.055,.06,.065]);
+ draw(v.x+1.02,.30,v.z,.06,.10,.32,[.78,.18,.12]);
+}
+function parkProps(){
+ for(let x=10;x<=30;x+=5)for(let z=-25;z<=-11;z+=5)tree(x,z);
+ // curved paths, benches, flower beds and lamp posts
+ for(let z=-24;z<=-12;z+=4)draw(20,.085,z,.32,.025,1.7,[.78,.72,.59]);
+ for(let x=12;x<=28;x+=8){
+  draw(x,.22,-15,.95,.12,.28,[.42,.27,.16]);draw(x,.43,-15,.09,.10,.82,[.34,.22,.13]);
+  draw(x,.78,-15,.07,.32,.07,[.24,.25,.24]);
+ }
+ for(let x=12;x<=28;x+=8)for(let z=-24;z<=-12;z+=6){ellipsoid(x,.22,z,.20,.22,.20,[.88,.48,.42]);ellipsoid(x+.4,.2,z+.2,.18,.20,.18,[.95,.72,.36]);}
+}(()=>{"use strict";
 const $=id=>document.getElementById(id),canvas=$("world"),clock=$("clock"),locEl=$("loc"),moneyEl=$("money"),energyEl=$("energy"),stressEl=$("stress"),relEl=$("rel"),targetEl=$("target"),labels=$("labels"),modal=$("modal"),meta=$("meta"),story=$("story"),choices=$("choices"),toastEl=$("toast"),panel=$("panel"),panelTitle=$("panelTitle"),panelBody=$("panelBody"),errorEl=$("error"),errorText=$("errorText");
 function showFatalError(reason){
  if(!errorEl||!errorText){console.error("Life Simulation startup error:",reason);return}
@@ -131,26 +199,61 @@ function tr(x,y,z){let m=I();m[12]=x;m[13]=y;m[14]=z;return m}function sc(x,y,z)
 function model(x,y,z,sx,sy,sz,yaw=0,pitch=0){return mul(mul(mul(tr(x,y,z),ry(yaw)),rx(pitch)),sc(sx,sy,sz))}function persp(f,asp,n,far){let t=1/Math.tan(f/2),nf=1/(n-far);return[t/asp,0,0,0,0,t,0,0,0,0,(far+n)*nf,-1,0,0,2*far*n*nf,0]}
 function lookAt(e,t){let f=[t[0]-e[0],t[1]-e[1],t[2]-e[2]],fl=Math.hypot(...f);f=f.map(v=>v/fl);let up=[0,1,0],s=[f[1]*up[2]-f[2]*up[1],f[2]*up[0]-f[0]*up[2],f[0]*up[1]-f[1]*up[0]],sl=Math.hypot(...s);s=s.map(v=>v/sl);let u=[s[1]*f[2]-s[2]*f[1],s[2]*f[0]-s[0]*f[2],s[0]*f[1]-s[1]*f[0]];return[s[0],u[0],-f[0],0,s[1],u[1],-f[1],0,s[2],u[2],-f[2],0,-(s[0]*e[0]+s[1]*e[1]+s[2]*e[2]),-(u[0]*e[0]+u[1]*e[1]+u[2]*e[2]),f[0]*e[0]+f[1]*e[1]+f[2]*e[2],1]}
 function cubeData(){let f=[[[ -1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1]],[[-1,-1,1],[-1,1,1],[1,1,1],[1,-1,1]],[[-1,-1,-1],[-1,1,-1],[-1,1,1],[-1,-1,1]],[[1,-1,-1],[1,-1,1],[1,1,1],[1,1,-1]],[[-1,1,-1],[1,1,-1],[1,1,1],[-1,1,1]],[[-1,-1,-1],[-1,-1,1],[1,-1,1],[1,-1,-1]]],ns=[[0,0,-1],[0,0,1],[-1,0,0],[1,0,0],[0,1,0],[0,-1,0]],v=[],i=[];for(let k=0;k<6;k++){let b=k*4;for(let p of f[k])v.push(...p,...ns[k]);i.push(b,b+1,b+2,b,b+2,b+3)}return{v:new Float32Array(v),i:new Uint16Array(i)}}
-const cd=cubeData(),vb=gl.createBuffer(),ib=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,cd.v,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,cd.i,gl.STATIC_DRAW);gl.enableVertexAttribArray(aPos);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(aNor);gl.vertexAttribPointer(aNor,3,gl.FLOAT,false,24,12);gl.enable(gl.DEPTH_TEST);
-function draw(x,y,z,sx,sy,sz,c,yaw=0,pitch=0){let m=model(x,y,z,sx,sy,sz,yaw,pitch);gl.uniformMatrix4fv(uModel,false,new Float32Array(m));gl.uniformMatrix4fv(uMVP,false,new Float32Array(mul(VP,m)));gl.uniform3fv(uColor,new Float32Array(c));gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0)}
+const cd=cubeData(),vb=gl.createBuffer(),ib=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,cd.v,gl.STATIC_DRAW);
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,cd.i,gl.STATIC_DRAW);
+function sphereData(lat=12,lon=16){const v=[],idx=[];for(let y=0;y<=lat;y++){const a=y*Math.PI/lat,sy=Math.cos(a),r=Math.sin(a);for(let x=0;x<=lon;x++){const b=x*2*Math.PI/lon,nx=r*Math.cos(b),nz=r*Math.sin(b);v.push(nx,sy,nz,nx,sy,nz)}}for(let y=0;y<lat;y++)for(let x=0;x<lon;x++){const a=y*(lon+1)+x,b=a+lon+1;idx.push(a,b,a+1,b,b+1,a+1)}return{v:new Float32Array(v),i:new Uint16Array(idx)}}
+const sd=sphereData(),svb=gl.createBuffer(),sib=gl.createBuffer();
+gl.enableVertexAttribArray(aPos);gl.enableVertexAttribArray(aNor);gl.enable(gl.DEPTH_TEST);
+function bindMesh(vbuf,ibuf){gl.bindBuffer(gl.ARRAY_BUFFER,vbuf);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibuf);gl.vertexAttribPointer(aPos,3,gl.FLOAT,false,24,0);gl.vertexAttribPointer(aNor,3,gl.FLOAT,false,24,12)}
+bindMesh(vb,ib);gl.bufferData(gl.ARRAY_BUFFER,cd.v,gl.STATIC_DRAW);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,cd.i,gl.STATIC_DRAW);
+gl.bindBuffer(gl.ARRAY_BUFFER,svb);gl.bufferData(gl.ARRAY_BUFFER,sd.v,gl.STATIC_DRAW);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,sib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,sd.i,gl.STATIC_DRAW);
+bindMesh(vb,ib);
+function uniforms(m,c){gl.uniformMatrix4fv(uModel,false,new Float32Array(m));gl.uniformMatrix4fv(uMVP,false,new Float32Array(mul(VP,m)));gl.uniform3fv(uColor,new Float32Array(c))}
+function draw(x,y,z,sx,sy,sz,c,yaw=0,pitch=0){bindMesh(vb,ib);const m=model(x,y,z,sx,sy,sz,yaw,pitch);uniforms(m,c);gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0)}
+function ellipsoid(x,y,z,sx,sy,sz,c,yaw=0){bindMesh(svb,sib);const m=model(x,y,z,sx,sy,sz,c?yaw:0);uniforms(m,c);gl.drawElements(gl.TRIANGLES,sd.i.length,gl.UNSIGNED_SHORT,0)}
 function local(n,ox,oy,oz){let s=Math.sin(n.yaw),c=Math.cos(n.yaw);return{x:n.x+c*ox+s*oz,y:oy,z:n.z-s*ox+c*oz}}function part(n,ox,oy,oz,sx,sy,sz,c,p=0){let q=local(n,ox,oy,oz);draw(q.x,q.y,q.z,sx,sy,sz,c,n.yaw,p)}
 function person(n,type){
- const a=n.appearance||{},L=type==="linh",skin=a.skin||(L?[.92,.78,.68]:[.78,.58,.46]),hair=a.hair||(L?[.82,.86,.92]:[.045,.05,.06]),top=a.top||(L?[.91,.94,.96]:[.10,.12,.14]),bottom=a.bottom||(L?[.10,.14,.22]:[.07,.08,.09]),shoe=a.shoe||[.08,.09,.10],h=a.height||1,step=Math.sin(anim*8+(n.phase||0))*.28*(n.walk||0);
- part(n,0,.98*h,0,.28,.38*h,.20,top);part(n,0,.67*h,0,.31,.13,.19,top);
- part(n,-.15,.35*h,step*.15,.12,.36*h,.12,bottom,step);part(n,.15,.35*h,-step*.15,.12,.36*h,.12,bottom,-step);
- part(n,-.39,.1*h+1.02*h,-step*.12,.09,.34*h,.10,top,-step*.8);part(n,.39,1.02*h+step*.12,step*.12,.09,.34*h,.10,top,step*.8);
- part(n,-.42,.69*h-step*.20,.08,.08,.14,.09,skin);part(n,.42,.69*h+step*.20,.08,.08,.14,.09,skin);
- part(n,0,1.34*h,0,.12,.18,.12,skin);part(n,0,1.69*h,0,.27,.30*h,.25,skin);
- part(n,0,1.96*h,0,.31,.18,.28,hair);part(n,0,2.06*h,-.02,.25,.12,.25,hair);
- const style=a.style||"short";
- if(style==="long"){part(n,-.24,1.72*h,-.01,.11,.48*h,.13,hair,.02);part(n,.24,1.72*h,-.01,.11,.48*h,.13,hair,-.02);part(n,-.20,2.04*h,.12,.08,.14,.09,hair);part(n,.20,2.04*h,.12,.08,.14,.09,hair);}
- else if(style==="tied"){part(n,0,1.75*h,-.27,.13,.30*h,.13,hair);part(n,0,2.10*h,-.02,.18,.08,.18,hair);}
- else{part(n,-.17,2.04*h,.07,.12,.17*h,.12,hair,.05);part(n,.17,2.04*h,.07,.12,.17*h,.12,hair,-.05);}
- part(n,-.09,1.73*h,.235,.025,.035,.025,[.12,.16,.20]);part(n,.09,1.73*h,.235,.025,.035,.025,[.12,.16,.20]);part(n,0,1.64*h,.26,.035,.045,.025,skin);
- part(n,-.13,.08,0,.14,.06,.22,shoe);part(n,.13,.08,0,.14,.06,.22,shoe);
- part(n,0,1.27*h,.205,.13,.055,.025,skin); 
-}
-function building(p){if(p.kind==="park"){draw(p.x,.04,p.z,p.w/2,.04,p.d/2,p.c);for(let i=-2;i<=2;i++)draw(p.x+i*3,.07,p.z,.12,.02,p.d/2-.5,[.68,.65,.48]);return}draw(p.x,p.h/2,p.z,p.w/2,p.h/2,p.d/2,p.c);draw(p.x,p.h+.16,p.z,p.w/2+.12,.12,p.d/2+.12,[.08,.12,.16]);for(let i=-2;i<=2;i++)for(let j=0;j<2;j++)draw(p.x+i*p.w*.18,p.h*(.55+.18*j),p.z-p.d/2-.04,.45,.34,.06,[.68,.76,.82])}
+ const a=n.appearance||{},isLinh=type==="linh",isMinh=type==="player",skin=a.skin||(isLinh?[.94,.78,.69]:[.78,.57,.44]),hair=a.hair||(isLinh?[.82,.87,.94]:[.035,.045,.06]),shirt=a.top||(isLinh?[.72,.84,.94]:[.12,.16,.22]),pants=a.bottom||(isLinh?[.16,.23,.34]:[.09,.11,.14]),shoe=a.shoe||[.07,.08,.10],h=a.height||1;
+ const phase=n.phase||0,step=Math.sin(anim*8+phase)*.22*(n.walk||0),sway=Math.sin(anim*3+phase)*.025;
+ const P=(ox,oy,oz,sx,sy,sz,c,yaw=0)=>{const q=local(n,ox,oy,oz);ellipsoid(q.x,q.y,q.z,sx,sy,sz,c,n.yaw+yaw)};
+ // silhouette: tapered-looking torso, shoulders and hips
+ P(0,1.02*h,0,.29,.40*h,.19,shirt);
+ P(0,.70*h,0,.245,.18*h,.16,shirt);
+ // jacket/cardigan opening and collar
+ if(isMinh){P(-.12,1.04*h,.173,.025,.30*h,.018,[.28,.31,.34]);P(.12,1.04*h,.173,.025,.30*h,.018,[.28,.31,.34]);P(0,1.36*h,.18,.11,.07,.035,[.72,.74,.76]);P(0,1.20*h,.198,.025,.025,.02,[.72,.74,.76]);P(0,1.08*h,.198,.025,.025,.02,[.72,.74,.76]);}
+ else if(isLinh){P(-.12,1.30*h,.10,.12,.10,.08,[.88,.91,.94]);P(.12,1.30*h,.10,.12,.10,.08,[.88,.91,.94]);P(0,.79*h,.165,.12,.10,.025,[.55,.68,.80]);}
+ else{P(0,1.30*h,.08,.15,.07,.08,[.86,.83,.76]);}
+ // neck and head
+ P(0,1.43*h,0,.105,.16,.10,skin);
+ P(0,1.72*h,0,.235,.285*h,.22,skin);
+ // ears
+ P(-.235,1.72*h,0,.045,.075,.055,skin);P(.235,1.72*h,0,.045,.075,.055,skin);
+ // hair cap and bangs
+ P(0,1.91*h,-.005,.245,.145*h,.225,hair);
+ if(isLinh){
+  P(-.205,1.67*h,-.015,.075,.39*h,.09,hair,-.05);P(.205,1.67*h,-.015,.075,.39*h,.09,hair,.05);
+  P(-.12,1.91*h,.155,.10,.13,.085,hair,-.25);P(.015,1.94*h,.17,.10,.12,.075,hair,.10);P(.14,1.90*h,.15,.085,.11,.07,hair,.30);
+ }else{
+  P(-.16,1.91*h,.10,.12,.09,.12,hair,-.25);P(-.035,1.96*h,.12,.14,.075,.11,hair,.05);P(.105,1.93*h,.10,.12,.085,.10,hair,.28);
+  if(a.style==="long"){P(-.20,1.65*h,-.02,.065,.34*h,.075,hair);P(.20,1.65*h,-.02,.065,.34*h,.075,hair);}
+ }
+ // eyes, eyebrows, nose and mouth on the front (+Z)
+ P(-.083,1.755*h,.205,.027,.025,.018,[.10,.12,.15]);P(.083,1.755*h,.205,.027,.025,.018,[.10,.12,.15]);
+ P(-.083,1.80*h,.207,.045,.012,.012,hair);P(.083,1.80*h,.207,.045,.012,.012,hair);
+ P(0,1.695*h,.225,.025,.038,.025,skin);
+ P(0,1.625*h,.211,.052,.012,.012,isLinh?[.63,.31,.35]:[.42,.22,.20]);
+ // arms with shoulders, upper/lower sections and hands
+ const arm=(side)=>{const x=side*.34,angle=step*(side===-1?1:-1);P(x,1.12*h,0,.115,.16,.12,shirt,angle*.25);P(x+angle*.18,.91*h,.015,.085,.20,.085,shirt,angle);P(x+angle*.28,.73*h,.035,.072,.10,.07,skin,angle);};
+ arm(-1);arm(1);
+ // trousers and articulated legs
+ P(-.13,.47*h,0,.125,.27*h,.125,pants,step*.28);P(.13,.47*h,0,.125,.27*h,.125,pants,-step*.28);
+ P(-.13,.20*h,step*.12,.095,.20*h,.10,pants,step*.5);P(.13,.20*h,-step*.12,.095,.20*h,.10,pants,-step*.5);
+ P(-.13,.075,step*.12+.055,.13,.075,.23,shoe);P(.13,.075,-step*.12+.055,.13,.075,.23,shoe);
+ // subtle accessories distinguish the protagonists
+ if(isMinh){P(0,1.36*h,.19,.14,.035,.025,[.18,.22,.28]);}
+ if(isLinh){P(0,1.40*h,.12,.09,.035,.035,[.72,.78,.84]);}
+}function building(p){if(p.kind==="park"){draw(p.x,.04,p.z,p.w/2,.04,p.d/2,p.c);for(let i=-2;i<=2;i++)draw(p.x+i*3,.07,p.z,.12,.02,p.d/2-.5,[.68,.65,.48]);return}draw(p.x,p.h/2,p.z,p.w/2,p.h/2,p.d/2,p.c);draw(p.x,p.h+.16,p.z,p.w/2+.12,.12,p.d/2+.12,[.08,.12,.16]);for(let i=-2;i<=2;i++)for(let j=0;j<2;j++)draw(p.x+i*p.w*.18,p.h*(.55+.18*j),p.z-p.d/2-.04,.45,.34,.06,[.68,.76,.82])}
 function tree(x,z){draw(x,.85,z,.16,.85,.16,[.28,.19,.12]);draw(x,1.75,z,.85,.95,.85,[.12,.35,.18]);draw(x,2.35,z,.55,.60,.55,[.16,.42,.20])}
 function street(){draw(0,-.03,0,39,.03,31,[.24,.34,.24]);draw(0,.01,0,39,.035,2.9,[.07,.08,.09]);draw(0,.01,0,2.9,.035,31,[.07,.08,.09]);draw(0,.055,3.55,39,.025,.18,[.55,.56,.54]);draw(0,.055,-3.55,39,.025,.18,[.55,.56,.54]);draw(3.55,.055,0,.18,.025,31,[.55,.56,.54]);draw(-3.55,.055,0,.18,.025,31,[.55,.56,.54]);for(let x=-35;x<=35;x+=5)draw(x,.075,0,.9,.018,.035,[.86,.76,.32]);for(let z=-27;z<=27;z+=5)draw(0,.075,z,.035,.018,.9,[.86,.76,.32]);for(let x=-34;x<=34;x+=8){draw(x,.11,7.5,.08,.06,1.6,[.22,.24,.26]);draw(x,.11,-7.5,.08,.06,1.6,[.22,.24,.26])}}
 function vehicle(v){draw(v.x,.25,v.z,1.15,.24,.52,v.color);draw(v.x,.55,v.z,.58,.25,.42,[.48,.58,.64]);draw(v.x-.72,.08,v.z-.38,.18,.12,.08,[.05,.05,.05]);draw(v.x+.72,.08,v.z-.38,.18,.12,.08,[.05,.05,.05])}
