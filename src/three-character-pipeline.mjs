@@ -5,25 +5,47 @@ const loader = new GLTFLoader();
 
 export function inspectCharacter(gltf) {
   const meshes = [], skinnedMeshes = [], bones = [];
+  const materials = new Set(), textures = new Set();
+  let triangleCount = 0;
   gltf.scene.traverse((node) => {
-    if (node.isMesh || node.isSkinnedMesh) meshes.push(node);
+    if (node.isMesh || node.isSkinnedMesh) {
+      meshes.push(node);
+      const indexCount = node.geometry?.index?.count;
+      const vertexCount = node.geometry?.attributes?.position?.count || 0;
+      triangleCount += (indexCount ?? vertexCount) / 3;
+      const slots = Array.isArray(node.material) ? node.material : [node.material];
+      slots.filter(Boolean).forEach((material) => {
+        materials.add(material);
+        Object.values(material).forEach((value) => {
+          if (value?.isTexture) textures.add(value);
+        });
+      });
+    }
     if (node.isSkinnedMesh) skinnedMeshes.push(node);
     if (node.isBone) bones.push(node);
   });
   const bounds = new THREE.Box3().setFromObject(gltf.scene);
   const size = bounds.getSize(new THREE.Vector3());
+  const hasPbrMaterials = [...materials].some((material) => 'roughness' in material);
+  const acceptanceWarnings = [
+    ...(triangleCount < 12000 ? ['below target triangle budget'] : []),
+    ...(materials.size > 4 ? ['above preferred material-slot count'] : []),
+    ...(textures.size === 0 ? ['no embedded material textures'] : [])
+  ];
   return {
     meshCount: meshes.length,
+    triangleCount: Math.round(triangleCount),
+    materialCount: materials.size,
+    textureCount: textures.size,
     skinnedMeshCount: skinnedMeshes.length,
     boneCount: bones.length,
     animationCount: gltf.animations.length,
     animationNames: gltf.animations.map((clip) => clip.name),
     height: Number(size.y.toFixed(3)),
     hasSkeleton: skinnedMeshes.some((mesh) => mesh.skeleton?.bones?.length > 0),
-    hasPbrMaterials: meshes.some((mesh) => {
-      const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-      return materials.some((material) => material && 'roughness' in material);
-    })
+    hasPbrMaterials,
+    hasTextures: textures.size > 0,
+    acceptanceWarnings
   };
 }
 
