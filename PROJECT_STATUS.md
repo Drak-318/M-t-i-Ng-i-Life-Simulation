@@ -1,6 +1,6 @@
 # PROJECT STATUS — Một Đời Người
 
-Cập nhật: 2026-11-03
+Cập nhật: 2026-11-04
 
 ## 1. Trạng thái hiện tại
 
@@ -23,6 +23,15 @@ Repository có một vòng chơi 1 tuần: Nguyễn Minh sống trong khu phố 
 - Linh: 24 tuổi, nhân viên thiết kế nội dung, có profile, nhu cầu, ranh giới, mục tiêu và lịch riêng.
 - Traffic nền.
 - Chu kỳ ánh sáng ngày/đêm.
+
+### Character System — Web v5 (2026-11-04)
+- `src/character-system.js` quản lý hồ sơ dữ liệu độc lập cho Linh và 12 NPC nền.
+- Hồ sơ gồm tuổi (đều là người trưởng thành), nghề nghiệp, tính cách, nhu cầu, ranh giới, cách giao tiếp, sở thích ẩn, mục tiêu, lịch sinh hoạt và ngoại hình.
+- Trạng thái sống: mood, energy, workload, family pressure, social energy, emotional availability và hoạt động hiện tại.
+- NPC di chuyển theo lịch cá nhân; trạng thái mệt mỏi/áp lực ảnh hưởng nhịp di chuyển và cách trò chuyện.
+- Tương tác tạo phản ứng theo cảm xúc và ký ức; relationship lưu riêng theo từng nhân vật với nhiều lớp.
+- Save/load lưu thêm trạng thái tâm lý, relationship và memories của từng nhân vật.
+- Ngoại hình Web v5 hiện là procedural stylized model với bảng màu/trang phục/tóc khác nhau; chưa phải model 3D production hoặc skeletal rig.
 
 ### Life simulation
 - TimeSystem: ngày/giờ/phút, bắt đầu Chủ Nhật 07:42.
@@ -58,6 +67,9 @@ Repository có một vòng chơi 1 tuần: Nguyễn Minh sống trong khu phố 
 - Kết thúc dựa trên relationship + state + memory.
 
 ### Validation
+- GitHub Actions kiểm tra Web v5 runtime thực tế, Character System syntax và unit tests: PASS (2026-11-04).
+- Character System unit tests: profile, schedule, mood, interaction, relationship, memory, save/restore: PASS.
+- GitHub Pages deployment: PASS; bản thử nghiệm: https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/.
 - GitHub Actions cài Godot 4.3.
 - Headless editor parse: PASS.
 - Headless game boot: PASS.
@@ -65,7 +77,7 @@ Repository có một vòng chơi 1 tuần: Nguyễn Minh sống trong khu phố 
 
 ## 3. Những gì CHƯA phải sản phẩm cuối
 
-- Model 3D nhân vật cuối cùng; hiện vẫn dùng primitive placeholder.
+- Model 3D nhân vật production, facial rig và skeletal animation; hiện dùng procedural stylized primitives với màu sắc/tóc/trang phục phân biệt.
 - Animation nhân vật chất lượng production.
 - Xe cộ/traffic chưa có va chạm và luật giao thông gameplay.
 - Audio/music/SFX.
@@ -79,14 +91,15 @@ Repository có một vòng chơi 1 tuần: Nguyễn Minh sống trong khu phố 
 
 ## 4. Giai đoạn tiếp theo
 
-1. Playtest thủ công trên máy có Godot.
-2. Sửa lỗi UX/logic sau playtest thực tế.
-3. Nâng cấp character art + animation.
+1. Playtest thủ công bản Web v5 trên trình duyệt: https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/.
+2. Ghi nhận lỗi UX/logic và cân bằng Character System sau playtest.
+3. Sửa lỗi UX/logic sau playtest thực tế.
+4. Nâng cấp character art + animation bằng model/rig chuyên dụng.
 4. Xe cộ, traffic gameplay, audio, hiệu ứng thời tiết.
-5. Mở rộng work/money/family/friends/hobbies/social media.
-6. Mở rộng character simulation và quan hệ NPC-NPC.
-7. Replayability, hidden consequences và nhiều tuần sống.
-8. Sau khi gameplay ổn định mới cân nhắc mobile/cloud/expansion.
+6. Mở rộng work/money/family/friends/hobbies/social media.
+7. Mở rộng character simulation và quan hệ NPC-NPC.
+8. Replayability, hidden consequences và nhiều tuần sống.
+9. Sau khi gameplay ổn định mới cân nhắc mobile/cloud/expansion.
 
 ## 5. Quy tắc bàn giao
 
