@@ -7,10 +7,19 @@
     "minimumAge": 18,
     "mustBeSkinned": true,
     "mustHaveHumanoidSkeleton": true,
-    "preferredAnimations": ["idle", "walk", "run", "sit", "talk"],
+    "preferredAnimations": [
+      "idle",
+      "walk",
+      "run",
+      "sit",
+      "talk"
+    ],
     "preferredMaterials": "PBR",
     "targetHeightMeters": 1.72,
-    "targetTriangleRange": [12000, 45000],
+    "targetTriangleRange": [
+      12000,
+      45000
+    ],
     "maxMaterialSlots": 4,
     "textureResolution": "1K or 2K"
   },
@@ -42,5 +51,28 @@
       "upstreamRepository": "programasweights/avatar",
       "upstreamCommit": "e225eee89835d121876b15bf4c887dc20d357950"
     }
-  ]
+  ],
+  "candidateAssets": {
+    "status": "awaiting-visual-and-rig-approval",
+    "sourceRepository": "https://github.com/KingArthur207/kite/tree/5716dcc99c3f00391ea67d8ca080529d195d2889/sim/public/models",
+    "sourceRepositoryCommit": "5716dcc99c3f00391ea67d8ca080529d195d2889",
+    "license": "CC0-1.0 (as identified in source repository model credits)",
+    "assets": [
+      {
+        "id": "quaternius-ped-man",
+        "path": "assets/characters/candidates/minh-base-ped-man.glb",
+        "sourceFile": "ped_man.glb",
+        "sourcePage": "https://poly.pizza/m/HMnuH5geEG",
+        "intendedReview": "Everyday adult male candidate; not assigned to Minh"
+      },
+      {
+        "id": "quaternius-ped-casual-woman",
+        "path": "assets/characters/candidates/linh-base-casual-woman.glb",
+        "sourceFile": "ped_casual_woman.glb",
+        "sourcePage": "https://poly.pizza/m/jpKRgGDxhk",
+        "intendedReview": "Everyday adult female candidate; not assigned to Linh"
+      }
+    ],
+    "restriction": "Candidate assets are downloaded into the Pages build artifact from a pinned source commit. Keep gameCharacters.minh.asset and gameCharacters.linh.asset null until visual, clothing, rig and animation review passes."
+  }
 }
