@@ -2,6 +2,15 @@
 
 Game mô phỏng cuộc sống 3D trên **Web**, với cốt truyện phân nhánh và thế giới có trạng thái.
 
+## Bản Web để chơi thử
+
+**[Mở Một Đời Người — Web 3D](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/)**
+
+- WASD: di chuyển; kéo chuột: xoay camera; cuộn chuột: zoom.
+- E: tương tác; N hoặc nút `+1 giờ`: tua thời gian.
+- P: lưu; L: tải; R: bắt đầu lại.
+- Bản hiện tại có Character System cho Linh và 12 NPC nền. Ngoại hình vẫn là procedural stylized placeholder.
+
 ## Mục tiêu
 
 Tạo một thế giới hiện đại nơi người chơi là một người trưởng thành bình thường. Người chơi lựa chọn dựa trên những gì mình biết ở thời điểm đó; thế giới, NPC và các mối quan hệ phản ứng theo thời gian.
