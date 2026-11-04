@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { loadCharacterAsset } from './three-character-pipeline.mjs';
 
 const MODEL_URLS = {
-  minh: './assets/characters/candidates/minh-base-ped-man.glb',
-  linh: './assets/characters/candidates/linh-base-casual-woman.glb'
+  minh: './assets/characters/generated/Minh.glb',
+  linh: './assets/characters/generated/Linh.glb'
 };
 
 export async function attachLifeCharacterOverlay(canvas, options = {}) {
