@@ -82,6 +82,24 @@ Repository có một vòng chơi 1 tuần: Nguyễn Minh sống trong khu phố 
 - Headless game boot: PASS.
 - Scene-based gameplay logic smoke test: PASS.
 
+## 2A. 3D Art Pipeline Foundation — 2026-11-04
+
+Audit confirmed that the active Web v5 renderer is custom WebGL, not Three.js. It renders procedural boxes/ellipsoids and does not load external character GLB files. The README's previous Three.js description was inaccurate and has been corrected.
+
+Foundation added:
+- assets/characters/manifest.json: production character contract; Minh and Linh intentionally remain unassigned.
+- src/three-character-pipeline.mjs: Three.js GLTFLoader wrapper, skinned-mesh/skeleton inspection, scale/ground normalization, AnimationMixer and motion cross-fade interface.
+- art-pipeline-test.html: isolated Three.js GLB lab, separate from the live gameplay renderer.
+- docs/ART_PIPELINE.md: character art direction, asset requirements, environment pipeline and acceptance gates.
+- assets/dev-fixtures: CC0 fixture provenance and license record.
+- GitHub Pages workflow downloads a pinned development-only GLB fixture and validates its glTF 2.0 header before deployment.
+
+Important limitation:
+- The GLB fixture is a superhero male model used only to prove the loader/rig pipeline. It is not Minh, Linh or an approved art direction.
+- The asset lab is not yet a migration of the production renderer.
+- Production GLB files for Minh/Linh, their final outfits/hair, full animation clips, environment kit and browser visual regression remain outstanding.
+- The new loader is syntax-checked and has static/binary fixture tests; actual browser rendering still requires visual verification.
+
 ## 3. Những gì CHƯA phải sản phẩm cuối
 
 - Model 3D nhân vật production, facial rig và skeletal animation; hiện dùng procedural stylized primitives với màu sắc/tóc/trang phục phân biệt.
