@@ -36,7 +36,7 @@ function readGlbJson(path) {
   assert.equal(data.readUInt32LE(8), data.length);
   const jsonLength = data.readUInt32LE(12);
   assert.equal(data.readUInt32LE(16), 0x4E4F534A);
-  return JSON.parse(data.toString('utf8', 20, 20 + jsonLength).replace(/[\\0 ]+$/g, ''));
+  return JSON.parse(data.toString('utf8', 20, 20 + jsonLength).trim());
 }
 for (const path of [
   'assets/characters/candidates/minh-base-ped-man.glb',
