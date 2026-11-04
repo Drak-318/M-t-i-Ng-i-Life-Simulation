@@ -79,7 +79,7 @@ window.addEventListener("unhandledrejection",event=>showFatalError(event.reason|
 const DAYS=["Chủ nhật","Thứ hai","Thứ ba","Thứ tư","Thứ năm","Thứ sáu","Thứ bảy"],SAVE="mot-doi-nguoi-web3d-v5";
 let state={day:1,min:462,money:15000000,energy:82,stress:18,confidence:52,trust:0,affection:0,understanding:0,closeness:0,respect:0,hurt:0,memories:[],done:[]};
 let player={x:-24,z:14,yaw:0,walk:0},destination=null,paused=false,last=performance.now(),anim=0;
-const keys=new Set();let dragging=false,movedMouse=false,lastMouse={x:0,y:0},camYaw=.65,camPitch=.48,camDist=10;
+const keys=new Set();let dragging=false,movedMouse=false,lastMouse={x:0,y:0},camYaw=.65,camPitch=.48,camDist=7.2;
 const locations=[
 {id:"home",name:"Nhà Minh",x:-24,z:20,w:11,d:9,h:3.8,c:[.38,.50,.58],kind:"home",info:"Căn hộ của Minh."},
 {id:"office",name:"Văn phòng",x:24,z:19,w:14,d:9,h:4.5,c:[.30,.40,.48],kind:"office",info:"Nơi Minh làm việc."},
@@ -90,9 +90,9 @@ const locations=[
 ];
 const CharacterSystem=window.CharacterSystem;
 if(!CharacterSystem)throw new Error("CharacterSystem chưa được tải.");
-const npcs=Array.from({length:12},(_,i)=>({...CharacterSystem.createBackgroundCharacter(i),x:-31+(i*11)%62,z:-26+(i*17)%52,yaw:0,goal:["office","cafe","park","shop"][i%4],role:["đi làm","đi cà phê","đi dạo","mua đồ"][i%4],walk:0}));
-const linh={...CharacterSystem.createLinh(),x:-20,z:-15,yaw:2.2,speed:.18,phase:4.1,goal:"cafe",role:"công việc riêng",walk:0};
-player.appearance={skin:[.78,.58,.46],hair:[.045,.05,.06],top:[.10,.12,.14],bottom:[.07,.08,.09],shoe:[.08,.09,.10],style:"short",height:1};
+const npcs=Array.from({length:12},(_,i)=>({...CharacterSystem.createBackgroundCharacter(i),x:-31+(i*11)%62,z:-26+(i*17)%52,yaw:0,visualScale:1.12,goal:["office","cafe","park","shop"][i%4],role:["đi làm","đi cà phê","đi dạo","mua đồ"][i%4],walk:0}));
+const linh={...CharacterSystem.createLinh(),x:-24,z:13.8,yaw:2.2,speed:.18,phase:4.1,visualScale:1.28,goal:"cafe",role:"công việc riêng",walk:0};
+player.visualScale=1.28;player.appearance={skin:[.78,.58,.46],hair:[.045,.05,.06],top:[.10,.12,.14],bottom:[.07,.08,.09],shoe:[.08,.09,.10],style:"short",height:1};
 const vehicles=Array.from({length:8},(_,i)=>({x:-36+i*10,z:i%2?-2.0:2.0,dir:i%2?1:-1,speed:1.8+(i%3)*.5,color:[[.18,.22,.27],[.55,.17,.16],[.78,.72,.55],[.18,.38,.30]][i%4]}));
 const scenes=[
 [1,"home","Sáng Chủ nhật. Điện thoại nằm trên bàn. Minh không có kế hoạch rõ ràng.",[["Ở nhà nghỉ ngơi",{energy:6,stress:-3,m:"rested"}],["Đi ra ngoài",{energy:-3,m:"went_out"}]]],
@@ -212,15 +212,15 @@ bindMesh(vb,ib);
 function uniforms(m,c){gl.uniformMatrix4fv(uModel,false,new Float32Array(m));gl.uniformMatrix4fv(uMVP,false,new Float32Array(mul(VP,m)));gl.uniform3fv(uColor,new Float32Array(c))}
 function draw(x,y,z,sx,sy,sz,c,yaw=0,pitch=0){bindMesh(vb,ib);const m=model(x,y,z,sx,sy,sz,yaw,pitch);uniforms(m,c);gl.drawElements(gl.TRIANGLES,36,gl.UNSIGNED_SHORT,0)}
 function ellipsoid(x,y,z,sx,sy,sz,c,yaw=0,pitch=0){bindMesh(svb,sib);const m=model(x,y,z,sx,sy,sz,yaw,pitch);uniforms(m,c);gl.drawElements(gl.TRIANGLES,sd.i.length,gl.UNSIGNED_SHORT,0)}
-function local(n,ox,oy,oz){let s=Math.sin(n.yaw),c=Math.cos(n.yaw);return{x:n.x+c*ox+s*oz,y:oy,z:n.z-s*ox+c*oz}}function part(n,ox,oy,oz,sx,sy,sz,c,p=0){let q=local(n,ox,oy,oz);draw(q.x,q.y,q.z,sx,sy,sz,c,n.yaw,p)}
+function local(n,ox,oy,oz){let s=Math.sin(n.yaw),c=Math.cos(n.yaw),k=n.visualScale||1;return{x:n.x+(c*ox+s*oz)*k,y:oy*k,z:n.z+(-s*ox+c*oz)*k}}function part(n,ox,oy,oz,sx,sy,sz,c,p=0){let q=local(n,ox,oy,oz);draw(q.x,q.y,q.z,sx,sy,sz,c,n.yaw,p)}
 function person(n,type){
  const a=n.appearance||{},isLinh=type==="linh",isMinh=type==="player";
  const skin=a.skin||(isLinh?[.91,.73,.63]:[.78,.57,.44]),hair=a.hair||(isLinh?[.80,.84,.88]:[.035,.045,.06]);
  const shirt=a.top||(isLinh?[.66,.78,.88]:[.12,.16,.22]),pants=a.bottom||(isLinh?[.16,.23,.34]:[.09,.11,.14]),shoe=a.shoe||[.08,.09,.10],h=a.height||1;
  const phase=n.phase||0,cycle=anim*7.4+phase,walk=n.walk||0;
  const stride=Math.sin(cycle)*.30*walk,armSwing=Math.sin(cycle+Math.PI)*.25*walk,bob=Math.abs(Math.sin(cycle))*.035*walk+Math.sin(anim*2.2+phase)*.012;
- const P=(x,y,z,sx,sy,sz,c,yaw=0,pitch=0)=>{const q=local(n,x,y+bob,z);ellipsoid(q.x,q.y,q.z,sx,sy,sz,c,n.yaw+yaw,pitch)};
- const limbPart=(a0,b0,r,c)=>{const A=local(n,a0[0],a0[1]+bob,a0[2]),B=local(n,b0[0],b0[1]+bob,b0[2]),dx=B.x-A.x,dy=B.y-A.y,dz=B.z-A.z,len=Math.hypot(dx,dy,dz),yaw=Math.atan2(dx,dz),pitch=Math.atan2(Math.hypot(dx,dz),dy);ellipsoid((A.x+B.x)/2,(A.y+B.y)/2,(A.z+B.z)/2,r,len*.57,r,c,yaw,pitch)};
+ const visualScale=n.visualScale||1;const P=(x,y,z,sx,sy,sz,c,yaw=0,pitch=0)=>{const q=local(n,x,y+bob,z);ellipsoid(q.x,q.y,q.z,sx*visualScale,sy*visualScale,sz*visualScale,c,n.yaw+yaw,pitch)};
+ const limbPart=(a0,b0,r,c)=>{const A=local(n,a0[0],a0[1]+bob,a0[2]),B=local(n,b0[0],b0[1]+bob,b0[2]),dx=B.x-A.x,dy=B.y-A.y,dz=B.z-A.z,len=Math.hypot(dx,dy,dz),yaw=Math.atan2(dx,dz),pitch=Math.atan2(Math.hypot(dx,dz),dy);ellipsoid((A.x+B.x)/2,(A.y+B.y)/2,(A.z+B.z)/2,r*visualScale,len*.57*visualScale,r*visualScale,c,yaw,pitch)};
  P(0,.83*h,0,.255,.20*h,.17,pants);
  P(0,1.12*h,0,.30,.36*h,.19,shirt);
  P(0,1.34*h,-.005,.255,.13*h,.18,shirt);
@@ -261,14 +261,17 @@ function person(n,type){
  }
  if(isMinh)P(.205,1.34*h,-.01,.035,.065,.035,[.16,.19,.22]);
  if(isLinh)P(.205,1.68*h,-.015,.035,.055,.035,[.72,.78,.84]);
-}function building(p){if(p.kind==="park"){draw(p.x,.04,p.z,p.w/2,.04,p.d/2,p.c);for(let i=-2;i<=2;i++)draw(p.x+i*3,.07,p.z,.12,.02,p.d/2-.5,[.68,.65,.48]);return}draw(p.x,p.h/2,p.z,p.w/2,p.h/2,p.d/2,p.c);draw(p.x,p.h+.16,p.z,p.w/2+.12,.12,p.d/2+.12,[.08,.12,.16]);for(let i=-2;i<=2;i++)for(let j=0;j<2;j++)draw(p.x+i*p.w*.18,p.h*(.55+.18*j),p.z-p.d/2-.04,.45,.34,.06,[.68,.76,.82])}
-function tree(x,z){draw(x,.85,z,.16,.85,.16,[.28,.19,.12]);draw(x,1.75,z,.85,.95,.85,[.12,.35,.18]);draw(x,2.35,z,.55,.60,.55,[.16,.42,.20])}
-function street(){draw(0,-.03,0,39,.03,31,[.24,.34,.24]);draw(0,.01,0,39,.035,2.9,[.07,.08,.09]);draw(0,.01,0,2.9,.035,31,[.07,.08,.09]);draw(0,.055,3.55,39,.025,.18,[.55,.56,.54]);draw(0,.055,-3.55,39,.025,.18,[.55,.56,.54]);draw(3.55,.055,0,.18,.025,31,[.55,.56,.54]);draw(-3.55,.055,0,.18,.025,31,[.55,.56,.54]);for(let x=-35;x<=35;x+=5)draw(x,.075,0,.9,.018,.035,[.86,.76,.32]);for(let z=-27;z<=27;z+=5)draw(0,.075,z,.035,.018,.9,[.86,.76,.32]);for(let x=-34;x<=34;x+=8){draw(x,.11,7.5,.08,.06,1.6,[.22,.24,.26]);draw(x,.11,-7.5,.08,.06,1.6,[.22,.24,.26])}}
-function vehicle(v){draw(v.x,.25,v.z,1.15,.24,.52,v.color);draw(v.x,.55,v.z,.58,.25,.42,[.48,.58,.64]);draw(v.x-.72,.08,v.z-.38,.18,.12,.08,[.05,.05,.05]);draw(v.x+.72,.08,v.z-.38,.18,.12,.08,[.05,.05,.05])}
-function parkProps(){for(let x=10;x<=30;x+=5)for(let z=-25;z<=-11;z+=5)tree(x,z);for(let x=12;x<=28;x+=8){draw(x,.18,-15,.9,.12,.25,[.30,.22,.15]);draw(x,.38,-15,.08,.10,.85,[.30,.22,.15])}}
+}
 function resize(){let d=Math.min(devicePixelRatio||1,2),w=Math.floor(innerWidth*d),h=Math.floor(innerHeight*d);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h}}
 function project(x,y,z){let a=[x,y,z,1],r=[0,0,0,0];for(let c=0;c<4;c++)for(let rr=0;rr<4;rr++)r[c]+=VP[c*4+rr]*a[rr];if(r[3]<=0)return null;return{x:(r[0]/r[3]*.5+.5)*innerWidth,y:(-.5*r[1]/r[3]+.5)*innerHeight}}
-function renderLabels(){labels.innerHTML="";for(let p of locations){let q=project(p.x,p.kind==="park"?1:p.h+.7,p.z);if(q&&q.x>-100&&q.x<innerWidth+100&&q.y>-30&&q.y<innerHeight+30){let e=document.createElement("div");e.className="label";e.textContent=p.name;e.style.left=q.x+"px";e.style.top=q.y+"px";labels.appendChild(e)}}}
+function renderLabels(){
+ labels.innerHTML="";
+ const add=(x,y,z,name,kind)=>{const q=project(x,y,z);if(!q||q.x<-80||q.x>innerWidth+80||q.y<-30||q.y>innerHeight+30)return;const e=document.createElement("div");e.className="label";e.textContent=name;e.style.left=q.x+"px";e.style.top=q.y+"px";e.style.borderColor=kind==="main"?"#8ed7ff":"#ffffff20";e.style.background=kind==="main"?"#092337eF":"#071018d9";e.style.fontWeight=kind==="main"?"800":"500";labels.appendChild(e)};
+ for(const p of locations)add(p.x,p.kind==="park"?1:p.h+.7,p.z,p.name,"place");
+ add(player.x,2.42*(player.visualScale||1),player.z,"Minh · Bạn","main");
+ add(linh.x,2.42*(linh.visualScale||1),linh.z,"Linh","main");
+ for(const n of npcs)add(n.x,2.35*(n.visualScale||1),n.z,n.name,"npc");
+}
 let VP=I();
 function render(){resize();anim=performance.now()/1000;gl.viewport(0,0,canvas.width,canvas.height);let h=state.min/1440,night=h<.25||h>.78?1:0;gl.clearColor(.48-.15*night,.64-.17*night,.82-.20*night,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);let cp=Math.cos(camPitch),sp=Math.sin(camPitch),cy=Math.cos(camYaw),sy=Math.sin(camYaw),cam=[player.x+sy*camDist*cp,2.8+camDist*sp,player.z+cy*camDist*cp];VP=mul(persp(1.05,canvas.width/canvas.height,.1,160),lookAt(cam,[player.x,.8,player.z]));gl.uniform3fv(uLight,new Float32Array([-.45,1,.35]));gl.uniform1f(uNight,night);street();locations.forEach(building);parkProps();for(let v of vehicles)vehicle(v);npcs.forEach(n=>person(n,"npc"));person(linh,"linh");person(player,"player");renderLabels();requestAnimationFrame(render)}
 function targetTo(x,z){destination={x,z};player.yaw=Math.atan2(x-player.x,z-player.z)}
