@@ -104,7 +104,7 @@ Important limitation:
 
 - **Stage 1 — Reusable 3D asset foundation: implementation complete.** Three.js adapter, GLTFLoader wrapper, isolated asset lab, pinned technical GLB fixture and CI validation are committed. Latest recorded validation: Web 3D smoke test + asset pipeline tests + GitHub Pages deployment PASS.
 - Stage 1 is limited to the technical foundation. Manual visual review is still pending; production Minh/Linh assets have not been assigned; the active gameplay renderer is still custom WebGL.
-- **Stage 2 — Production character assets: in progress.** Quaternius Universal Base Characters (CC0) is the leading candidate because it provides rigged male/female humanoid bases in regular proportions. Appropriate everyday outfits, hair, textures and skeleton/animation compatibility must be checked before production use. The superhero GLB remains test-only.
+- **Stage 2 — Production character assets: in progress.** Two clothed Quaternius pedestrian candidates (Man and Woman Casual) are now fetched from a pinned source revision into the Pages artifact. Their source credit ledger identifies them as CC0 1.0. CI now checks the GLB container, visible mesh and humanoid skeleton; an isolated review page loads both with the Three.js pipeline. They remain candidates only: visual inspection, animation compatibility and fit with Minh/Linh's identity are not yet approved. The superhero GLB remains test-only.
 
 ## 3. Những gì CHƯA phải sản phẩm cuối
 
