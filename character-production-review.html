@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Một Đời Người — Production Character Review</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101820;color:#f4f6f8;font:14px Inter,system-ui,sans-serif}canvas{display:block;width:100%;height:100%}
+#hud{position:fixed;inset:0;pointer-events:none;padding:18px;background:linear-gradient(180deg,#071018d9,transparent 32%,transparent 68%,#071018aa)}
+h1{margin:0 0 7px;font-size:19px}p{margin:0 0 10px;color:#c4d0d9;max-width:760px;line-height:1.5}
+#status{display:inline-block;background:#142c3a;border:1px solid #416176;border-radius:8px;padding:8px 10px}
+#report{position:absolute;left:18px;bottom:18px;max-width:min(620px,calc(100vw - 36px));max-height:38vh;overflow:auto;white-space:pre-wrap;background:#071018e8;border:1px solid #ffffff24;border-radius:10px;padding:12px;font:12px/1.5 ui-monospace,monospace}
+#names{position:absolute;left:0;right:0;bottom:42px;display:flex;justify-content:space-around;font-weight:700;text-shadow:0 2px 6px #000}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<canvas id="world"></canvas>
+<div id="hud">
+<h1>MỘT ĐỜI NGƯỜI · PRODUCTION CHARACTER REVIEW</h1>
+<p>Đây là hai nhân vật được sinh từ tham số thiết kế của Minh và Linh. Trang này dùng để kiểm tra model, texture, rig, animation và tỷ lệ trước khi bật mặc định trong game. Kéo chuột để xoay camera, cuộn để phóng to.</p>
+<span id="status">Đang khởi tạo…</span>
+<div id="names"><span>MINH · GENERATED CHARACTER</span><span>LINH · GENERATED CHARACTER</span></div>
+<pre id="report">Đang chờ tải mô hình…</pre>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { loadCharacterAsset } from './src/three-character-pipeline.mjs';
+import { createThreeWorld } from './src/three-world-adapter.mjs';
+const status=document.querySelector('#status'),report=document.querySelector('#report');
+const world=createThreeWorld(document.querySelector('#world'),{background:'#9ab5cb',fogNear:18,fogFar:48});
+const {scene,camera,renderer}=world;
+camera.position.set(0,2.3,7.6);camera.fov=38;camera.updateProjectionMatrix();camera.lookAt(0,0.9,0);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshStandardMaterial({color:'#778078',roughness:.95}));
+floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,.9,0);controls.enableDamping=true;controls.minDistance=3;controls.maxDistance=13;controls.maxPolarAngle=Math.PI*.49;
+const candidates=[
+ {name:'Minh',url:'./assets/characters/candidates/./assets/characters/generated/Minh.glb',position:new THREE.Vector3(-1.05,0,0)},
+ {name:'Linh',url:'./assets/characters/candidates/./assets/characters/generated/Linh.glb',position:new THREE.Vector3(1.05,0,0)}
+];
+const results=[];
+for(const item of candidates){
+ try{
+  const actor=await loadCharacterAsset(item.url,{name:item.name,targetHeight:1.72,position:item.position});
+  world.addActor(actor);
+  const idle=actor.setMotion('idle');
+  results.push({name:item.name,status:'loaded',idleClipStarted:idle,...actor.report});
+ }catch(error){results.push({name:item.name,status:'failed',error:error.message});}
+}
+status.textContent=results.every(x=>x.status==='loaded'&&x.hasSkeleton)?'Hai GLB đã tải · kiểm tra rig hoàn tất':'Có mẫu chưa đạt · xem báo cáo';
+report.textContent=JSON.stringify(results,null,2)+'\n\nLưu ý: Generated build asset — cần kiểm tra trực quan trước khi chấp nhận.';
+let previous=performance.now();
+function frame(now){requestAnimationFrame(frame);const delta=Math.min((now-previous)/1000,.1);previous=now;world.update(delta);controls.update();world.render();}
+requestAnimationFrame(frame);
+addEventListener('resize',()=>world.resize(innerWidth,innerHeight));
+</script>
+</body></html>
