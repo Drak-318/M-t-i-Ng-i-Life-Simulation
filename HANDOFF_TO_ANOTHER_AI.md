@@ -2,6 +2,14 @@
 
 ## Cập nhật mới nhất — 2026-11-04
 
+### Visual Upgrade
+- src/web3d_v5.js: reusable UV sphere mesh and ellipsoid-based detailed humanoid construction for Minh, Linh and background NPCs; facial features, hair, clothing layers, arms/hands, legs/shoes.
+- Environment pass: more detailed building façades, windows, doors/signs, sidewalks, crosswalks, lamps, park paths/benches/flower beds, fuller trees and vehicles.
+- Procedural stylized geometry is an improved prototype art pass, not production GLB characters or skeletal animation. Exact matching to earlier visual references still needs a direct side-by-side review.
+- web.html cache token 20261104-5; Web smoke test and Pages deploy PASS; Godot validation and Windows playable build PASS.
+- Test: https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/web.html?v=20261104-5.
+
+
 - Character System Web v5 đã được tách thành `src/character-system.js` và tích hợp vào `src/web3d_v5.js`.
 - Có Linh + 12 NPC nền, profile cá nhân, lịch sống, mood/needs, relationship nhiều lớp, memory và save/load.
 - Unit test Character System PASS; Web 3D smoke test PASS; Godot Validation PASS; Playable Build PASS; GitHub Pages deployment PASS.
