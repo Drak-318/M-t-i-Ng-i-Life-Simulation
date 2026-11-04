@@ -71,16 +71,22 @@ function targetFor(c,locations,day,hour){
 function record(c,id,day,minute,weight=1){c.memories.push({id,day,minute,weight});if(c.memories.length>80)c.memories.splice(0,c.memories.length-80);c.lastAction=id;c.lastDecisionDay=day;}
 function hasMemory(c,id){return c.memories.some(m=>m.id===id);}
 function interaction(c,state){
- const r=c.relationship||{},isLinh=c.id==="linh",mood=c.mood||"calm",intro=c.name;let line="";
+ const r=c.relationship||{},personality=c.personality||{},needs=c.needs||{},isLinh=c.id==="linh",mood=c.mood||"calm",intro=c.name;let line="";
+ const needsSpace=(needs.space||0)>.68,needsAttention=(needs.attention||0)>.66,isDirect=(personality.directness||0)>.65,isIntroverted=(personality.introversion||0)>.65;
  if(mood==="tired")line=intro+" có vẻ mệt. "+(isLinh?"Cô ấy":"Người này")+" vẫn dừng lại một chút, nhưng không có nhiều năng lượng cho một cuộc trò chuyện dài.";
  else if(mood==="worried")line=intro+" đang có chuyện phải nghĩ. Câu trả lời có thể ngắn hơn thường ngày.";
  else if(mood==="withdrawn")line=intro+" có vẻ muốn giữ một khoảng riêng hôm nay.";
  else if(mood==="guarded")line=intro+" vẫn lịch sự, nhưng có chút dè dặt từ những chuyện trước đó.";
  else if(hasMemory(c,"player_greeted")||hasMemory(c,"player_shared"))line=intro+" nhận ra Minh. Cuộc trò chuyện tiếp tục từ những lần gặp trước, không phải bắt đầu lại từ đầu.";
  else line=intro+" đang "+(c.currentActivity||"dành thời gian riêng")+". Hai người có một khoảng ngắn để trò chuyện.";
+ if(needsSpace)line+=" Người ấy coi trọng không gian riêng và không thích bị hỏi dồn.";
+ if(needsAttention)line+=" Một lời hỏi han chân thành có thể khiến người ấy cảm thấy được quan tâm.";
+ if(isIntroverted)line+=" Người ấy thường cần thời gian để thoải mái trong những cuộc trò chuyện.";
+ if(isDirect)line+=" Người ấy có xu hướng nói thẳng điều mình nghĩ.";
+ if(hasMemory(c,"player_respected_space"))line+=" Người ấy vẫn nhớ lần trước Minh đã tôn trọng khoảng riêng của mình.";
  const choices=[];
- if(mood==="tired"||mood==="withdrawn"){choices.push(["Hỏi thăm ngắn gọn",{trust:1,understanding:2,respect:1,m:"player_checked_in"}],["Để người ấy nghỉ ngơi",{respect:2,irritation:-1,m:"player_respected_space"}],["Tiếp tục hỏi chuyện",{affection:-1,irritation:2,m:"player_pushed_conversation"}]);}
- else{choices.push(["Hỏi về ngày hôm nay",{trust:1,understanding:2,m:"player_asked_day"}],["Chia sẻ một chuyện của Minh",{affection:1,closeness:1,trust:1,m:"player_shared"}],["Rủ gặp vào dịp khác",{affection:1,willingness_to_continue:1,m:"player_suggested_meet"}],["Chào rồi để người ấy tiếp tục việc riêng",{respect:1,m:"player_respected_time"}]);}
+ if(mood==="tired"||mood==="withdrawn"){choices.push(["Hỏi thăm ngắn gọn",{trust:needsAttention?2:1,understanding:2,respect:1,m:"player_checked_in"}],["Để người ấy nghỉ ngơi",{respect:needsSpace?3:2,irritation:-1,m:"player_respected_space"}],["Tiếp tục hỏi chuyện",{affection:-1,irritation:needsSpace?3:2,m:"player_pushed_conversation"}]);}
+ else{choices.push(["Hỏi về ngày hôm nay",{trust:needsAttention?2:1,understanding:isIntroverted?2:1,m:"player_asked_day"}],["Chia sẻ một chuyện của Minh",{affection:1,closeness:1,trust:isDirect?2:1,m:"player_shared"}],["Rủ gặp vào dịp khác",{affection:1,willingness_to_continue:c.emotionalAvailability>.55?2:1,m:"player_suggested_meet"}],["Chào rồi để người ấy tiếp tục việc riêng",{respect:needsSpace?2:1,m:"player_respected_time"}]);}
  if(r.hurt>20)line+=" Có lẽ người ấy vẫn nhớ một vài chuyện chưa được giải quyết.";
  if(isLinh&&state.stress>65)line+=" Linh nhận ra Minh cũng đang chịu áp lực.";
  return{sceneId:"character_"+c.id,title:c.name,text:line,choices};
