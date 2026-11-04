@@ -92,14 +92,13 @@ Repository có một vòng chơi 1 tuần: Nguyễn Minh sống trong khu phố 
 ## 4. Giai đoạn tiếp theo
 
 1. Playtest thủ công bản Web v5 trên trình duyệt: https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/.
-2. Ghi nhận lỗi UX/logic và cân bằng Character System sau playtest.
-3. Sửa lỗi UX/logic sau playtest thực tế.
-4. Nâng cấp character art + animation bằng model/rig chuyên dụng.
-4. Xe cộ, traffic gameplay, audio, hiệu ứng thời tiết.
-6. Mở rộng work/money/family/friends/hobbies/social media.
-7. Mở rộng character simulation và quan hệ NPC-NPC.
-8. Replayability, hidden consequences và nhiều tuần sống.
-9. Sau khi gameplay ổn định mới cân nhắc mobile/cloud/expansion.
+2. Ghi nhận và sửa lỗi UX/logic; cân bằng phản ứng của từng nhân vật.
+3. Nâng cấp character art bằng model 3D, rig và animation chuyên dụng.
+4. Hoàn thiện xe cộ/traffic gameplay, audio và hiệu ứng thời tiết.
+5. Mở rộng work/money/family/friends/hobbies/social media.
+6. Mở rộng mô phỏng quan hệ NPC-NPC và các quyết định độc lập.
+7. Replayability, hidden consequences và nhiều tuần sống.
+8. Sau khi gameplay ổn định mới cân nhắc mobile/cloud/expansion.
 
 ## 5. Quy tắc bàn giao
 
