@@ -42,6 +42,8 @@ jobs:
           if (!js.includes('function startFallback(reason)')) throw new Error('Missing 2D compatibility renderer');
           if (!js.includes('function sphereData(') || !js.includes('function ellipsoid(')) throw new Error('Missing detailed 3D mesh renderer');
           if (!js.includes('function person(n,type)') || !js.includes('function parkProps()')) throw new Error('Missing character/environment renderer');
+          if (!js.includes('const limbPart=') || !js.includes('Articulated arms')) throw new Error('Missing articulated character rig');
+          if (!js.includes('vNor=normalize(mat3(uModel)*aNor)')) throw new Error('Missing transformed character normals');
           if (!js.includes('createShader returned null')) throw new Error('Missing WebGL allocation diagnostics');
           if (!js.includes('requestAnimationFrame(fallbackTick)')) throw new Error('Missing fallback simulation loop');
           new Function(characters);
