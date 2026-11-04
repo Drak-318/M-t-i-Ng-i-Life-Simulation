@@ -72,7 +72,7 @@ export async function loadCharacterAsset(url, options = {}) {
     actor, mixer, actions, clips: gltf.animations, report, source: url,
     setMotion(kind, fade = 0.2) {
       if (!mixer) return false;
-      const patterns = { idle: /idle|stand|breath/, walk: /walk|walking|locomotion/, run: /run|jog|sprint/ };
+      const patterns = { idle: /idle|stand|breath/i, walk: /walk|walking|locomotion/i, run: /run|jog|sprint/i };
       const pattern = patterns[kind] || new RegExp(kind, 'i');
       const clip = gltf.animations.find((item) => pattern.test(item.name));
       if (!clip) return false;
