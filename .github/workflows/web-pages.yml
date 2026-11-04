@@ -68,6 +68,8 @@ jobs:
           node --check src/three-character-pipeline.mjs
           node --check src/three-world-adapter.mjs
           node --check src/three-character-overlay.mjs
+          node --check tests/character-candidates-browser.mjs
+          node --check tests/game-three-overlay-browser.mjs
           node tests/asset-pipeline.test.mjs
       - name: Browser render test for candidate characters
         run: |
