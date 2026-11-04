@@ -160,3 +160,16 @@ The two downloaded GLBs are technically rigged but do not meet the final art bud
 - The supplied clips have no translation channel on the armature node, which is useful for in-place movement synchronization.
 
 Therefore, these models are approved only for proving the live-game bridge and animation state mapping. They are **not approved as final Minh/Linh visuals**. The loader now reports triangle count, material count, texture count and acceptance warnings so low-detail/untextured assets cannot be mistaken for production-ready art.
+
+
+### Stage 2 — upgraded production character generation
+
+The first pedestrian GLBs are retained as rig-integration fixtures only. For the actual Minh/Linh art pass, the build now uses the pinned Ara 3D Gen generator:
+
+- Versioned parameters: `assets/characters/source/minh.params.json` and `linh.params.json`.
+- Fictional adult characters with an Asian-dominant appearance mix, age parameter calibrated to 24, everyday casual outfits, dark hair and neutral facial expression.
+- Medium-detail MakeHuman geometry, game humanoid rig, PBR/photo-based skin and clothing textures, facial shapes and baked animation clips.
+- Generator source pinned to Ara 3D Gen commit `a4947ffdd14acf2ff018cb3568c941595f86d86e`; MakeHuman source data is CC0 1.0; generator code is MIT. Embedded CMU-derived motion clips retain the CMU database use terms.
+- GitHub Pages workflow caches the generator dependencies and CC0 asset library, builds `Minh.glb` and `Linh.glb`, validates their texture images, humanoid skeleton, idle/walk/run clips and 12k–50k triangle budget, then runs the browser tests.
+
+The production review page and opt-in gameplay overlay now point at these generated GLBs. The generator is build-time only; no visitor downloads MakeHuman source data or calls an external generator at runtime. The first successful build and screenshot review are still required before marking these models visually approved or enabling them by default.
