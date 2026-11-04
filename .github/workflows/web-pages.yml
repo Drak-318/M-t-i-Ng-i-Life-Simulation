@@ -85,12 +85,12 @@ jobs:
         run: |
           GENERATOR_DIR="$RUNNER_TEMP/ara3dgen"
           npm install --prefix "$GENERATOR_DIR"
-          npm run setup-assets --prefix "$GENERATOR_DIR"
+          npm --prefix "$GENERATOR_DIR" run setup-assets
       - name: Generate Minh and Linh production-quality character GLBs
         run: |
           mkdir -p assets/characters/generated
           GENERATOR_DIR="$RUNNER_TEMP/ara3dgen"
-          npm run export --prefix "$GENERATOR_DIR" -- --params "$GITHUB_WORKSPACE/assets/characters/source/minh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated" --formats glb --detail medium
+          npm --prefix "$GENERATOR_DIR" run export -- --params "$GITHUB_WORKSPACE/assets/characters/source/minh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated" --formats glb --detail medium
           npm run export --prefix "$GENERATOR_DIR" -- --params "$GITHUB_WORKSPACE/assets/characters/source/linh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated" --formats glb --detail medium
           python3 - <<'PY'
           from pathlib import Path
