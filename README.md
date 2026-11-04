@@ -13,9 +13,9 @@ Game mô phỏng cuộc sống 3D trên **Web**, với cốt truyện phân nhá
 
 ## Bản Web để chơi thử
 
-**[Mở Một Đời Người — Web 3D](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/web.html?v=20261104-5)**
+**[Mở Một Đời Người — Web 3D](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/web.html?v=20261104-7)**
 
-Bản cập nhật 2026-11-04 bổ sung hình thể 3D cách điệu cho Minh và Linh, chi tiết khuôn mặt/tóc/trang phục và môi trường khu phố. Đây là hình họa procedural đang phát triển, chưa phải model 3D sản xuất cuối cùng.
+Bản thử nghiệm hiện tại dùng hình thể người 3D procedural cách điệu, có khuôn mặt, tóc, trang phục và chuyển động cơ bản. Đây vẫn là prototype đồ họa, chưa phải model nhân vật sản xuất cuối cùng.
 
 ## Mục tiêu
 
