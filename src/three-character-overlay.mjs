@@ -74,7 +74,7 @@ export async function attachLifeCharacterOverlay(canvas, options = {}) {
       if (!entry) continue;
       const { handle } = entry;
       handle.actor.position.set(state.x, 0, state.z);
-      handle.actor.rotation.y = state.yaw + (options.forwardOffset ?? Math.PI);
+      handle.actor.rotation.y = state.yaw + (options.forwardOffset ?? 0);
       const motion = state.walk > 0.12 ? (state.run ? 'run' : 'walk') : 'idle';
       if (motion !== entry.motion) {
         if (handle.setMotion(motion)) entry.motion = motion;
