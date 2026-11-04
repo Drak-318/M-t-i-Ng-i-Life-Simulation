@@ -38,7 +38,7 @@ export async function attachLifeCharacterOverlay(canvas, options = {}) {
     try {
       const actor = await loadCharacterAsset(MODEL_URLS[id], {
         name: id === 'minh' ? 'Minh — imported GLB' : 'Linh — imported GLB',
-        targetHeight: options.targetHeight || 3.05
+        targetHeight: options.targetHeight || 1.72
       });
       actor.actor.rotation.y = options.forwardOffset ?? 0;
       actor.setMotion('idle');
