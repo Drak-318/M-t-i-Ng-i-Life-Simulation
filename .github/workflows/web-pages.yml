@@ -39,6 +39,9 @@ jobs:
           if (!js.includes('function interact()')) throw new Error('Missing interaction system');
           if (!js.includes('canvas.addEventListener("mousedown"')) throw new Error('Missing mouse camera control');
           if (!js.includes('function updateNPC')) throw new Error('Missing NPC simulation');
+          if (!js.includes('function startFallback(reason)')) throw new Error('Missing 2D compatibility renderer');
+          if (!js.includes('createShader returned null')) throw new Error('Missing WebGL allocation diagnostics');
+          if (!js.includes('requestAnimationFrame(fallbackTick)')) throw new Error('Missing fallback simulation loop');
           new Function(characters);
           new Function(js);
           require('./tests/character-system.test.js');
