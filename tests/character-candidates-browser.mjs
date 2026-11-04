@@ -49,6 +49,29 @@ try {
   assert.deepEqual(errors, [], 'Browser must not report page or console errors');
   fs.mkdirSync('artifacts', { recursive: true });
   await page.screenshot({ path: 'artifacts/character-candidates.png', fullPage: true });
+  await page.goto('http://127.0.0.1:4173/character-production-review.html', { waitUntil: 'networkidle', timeout: 90000 });
+  await page.waitForFunction(() => {
+    const value = document.querySelector('#status')?.textContent || '';
+    return value.includes('Hai GLB đã tải') || value.includes('Có mẫu chưa đạt');
+  }, null, { timeout: 90000 });
+  const productionStatus = await page.locator('#status').textContent();
+  const productionReport = await page.locator('#report').textContent();
+  assert.match(productionStatus, /Hai GLB đã tải/, 'Generated Minh and Linh must load in the production review lab');
+  const productionResults = JSON.parse(productionReport.split('\\n\\n')[0]);
+  assert.equal(productionResults.length, 2);
+  for (const character of productionResults) {
+    assert.equal(character.status, 'loaded');
+    assert.equal(character.hasSkeleton, true);
+    assert.ok(character.textureCount > 0, character.name + ' must have embedded textures');
+    assert.ok(character.triangleCount >= 12000 && character.triangleCount <= 50000, character.name + ' must meet medium-detail triangle budget');
+    assert.ok(character.animationCount >= 3, character.name + ' must contain animation clips');
+    assert.equal(character.idleClipStarted, true);
+  }
+  assert.deepEqual(errors, [], 'Production review lab must not report browser errors');
+  await page.screenshot({ path: 'artifacts/character-production-review.png', fullPage: true });
+  console.log('Browser generated production character render: PASS');
+  console.log(productionStatus);
+  console.log(productionReport);
   console.log('Browser candidate character render: PASS');
   console.log(status);
   console.log(report);
