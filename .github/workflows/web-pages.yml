@@ -69,27 +69,29 @@ jobs:
           node-version: 20
       - name: Fetch pinned Ara 3D Gen character generator
         run: |
-          mkdir -p tools
-          git clone --filter=blob:none https://github.com/olatunde85/3d-gen.git tools/ara3dgen
-          git -C tools/ara3dgen fetch --depth 1 origin a4947ffdd14acf2ff018cb3568c941595f86d86e
-          git -C tools/ara3dgen checkout --detach a4947ffdd14acf2ff018cb3568c941595f86d86e
+          GENERATOR_DIR="$RUNNER_TEMP/ara3dgen"
+          git clone --filter=blob:none https://github.com/olatunde85/3d-gen.git "$GENERATOR_DIR"
+          git -C "$GENERATOR_DIR" fetch --depth 1 origin a4947ffdd14acf2ff018cb3568c941595f86d86e
+          git -C "$GENERATOR_DIR" checkout --detach a4947ffdd14acf2ff018cb3568c941595f86d86e
       - name: Cache CC0 MakeHuman source and generated library
         uses: actions/cache@v4
         with:
           path: |
-            tools/ara3dgen/vendor
-            tools/ara3dgen/public/assets
-            tools/ara3dgen/node_modules
+            ${{ runner.temp }}/ara3dgen/vendor
+            ${{ runner.temp }}/ara3dgen/public/assets
+            ${{ runner.temp }}/ara3dgen/node_modules
           key: ara3dgen-assets-a4947ffdd14acf2ff018cb3568c941595f86d86e-v1
       - name: Install Ara 3D Gen dependencies and CC0 assets
         run: |
-          npm install --prefix tools/ara3dgen
-          npm run setup-assets --prefix tools/ara3dgen
+          GENERATOR_DIR="$RUNNER_TEMP/ara3dgen"
+          npm install --prefix "$GENERATOR_DIR"
+          npm run setup-assets --prefix "$GENERATOR_DIR"
       - name: Generate Minh and Linh production-quality character GLBs
         run: |
           mkdir -p assets/characters/generated
-          npm run export --prefix tools/ara3dgen -- --params ../../assets/characters/source/minh.params.json --out ../../assets/characters/generated --formats glb --detail medium
-          npm run export --prefix tools/ara3dgen -- --params ../../assets/characters/source/linh.params.json --out ../../assets/characters/generated --formats glb --detail medium
+          GENERATOR_DIR="$RUNNER_TEMP/ara3dgen"
+          npm run export --prefix "$GENERATOR_DIR" -- --params "$GITHUB_WORKSPACE/assets/characters/source/minh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated" --formats glb --detail medium
+          npm run export --prefix "$GENERATOR_DIR" -- --params "$GITHUB_WORKSPACE/assets/characters/source/linh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated" --formats glb --detail medium
           python3 - <<'PY'
           from pathlib import Path
           import json, struct
