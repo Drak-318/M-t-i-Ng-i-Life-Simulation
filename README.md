@@ -29,7 +29,7 @@ Bản Web mặc định vẫn dùng hình thể người 3D procedural cách đi
 
 Bản Three.js hiện là chế độ thử nghiệm bật bằng tham số URL; bản mặc định vẫn giữ renderer ổn định. Mô hình nhân vật sẽ chỉ được bật mặc định sau khi kiểm tra hình ảnh, chuyển động và gameplay đạt yêu cầu.
 
-Asset Lab là khu vực kỹ thuật tách biệt để kiểm tra GLB, humanoid skeleton, tỷ lệ model và animation. Model trong phòng lab là fixture kỹ thuật CC0, không phải Minh hoặc Linh. Nhân vật chính chỉ được gán model sau khi có asset phù hợp và vượt qua kiểm thử.
+3D Asset Lab dùng fixture kỹ thuật CC0 để kiểm tra loader. Character Candidate Review chứa các model low-poly chỉ phục vụ thử rig. Production Character Review dùng model Minh/Linh được sinh từ tham số dự án; chỉ bật trong game thử nghiệm cho tới khi vượt qua nghiệm thu hình ảnh và gameplay.
 
 Tài liệu kỹ thuật: docs/ART_PIPELINE.md. Danh sách model chính thức: assets/characters/manifest.json.
 
