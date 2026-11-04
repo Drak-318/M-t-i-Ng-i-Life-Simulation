@@ -145,3 +145,8 @@ Không được coi placeholder là sản phẩm cuối.
 - The overlay consumes the current game positions/yaw/walk state and plays imported idle/walk clips. It does not change save data, relationship state, schedules or story logic.
 - Default gameplay still uses the established renderer. The opt-in overlay is not yet approved as the default visual runtime.
 - Added Playwright browser coverage for the actual game page and a screenshot artifact. CI result is pending for this revision; do not report this integration as visually approved until the workflow passes and the screenshot is reviewed.
+
+
+### Character asset quality gate
+
+Measured candidate GLBs are 1,852 and 2,776 triangles, with 6 and 8 material slots respectively and no embedded textures. Both have 31-joint humanoid rigs and 11 animation clips. These are low-poly technical integration candidates, not final character art; production Minh/Linh remain unassigned pending higher-detail textured models or a custom art pass.
