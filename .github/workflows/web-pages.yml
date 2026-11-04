@@ -91,7 +91,7 @@ jobs:
           mkdir -p assets/characters/generated
           GENERATOR_DIR="$RUNNER_TEMP/ara3dgen"
           npm --prefix "$GENERATOR_DIR" run export -- --params "$GITHUB_WORKSPACE/assets/characters/source/minh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated" --formats glb --detail medium
-          npm run export --prefix "$GENERATOR_DIR" -- --params "$GITHUB_WORKSPACE/assets/characters/source/linh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated" --formats glb --detail medium
+          npm --prefix "$GENERATOR_DIR" run export -- --params "$GITHUB_WORKSPACE/assets/characters/source/linh.params.json" --out "$GITHUB_WORKSPACE/assets/characters/generated" --formats glb --detail medium
           python3 - <<'PY'
           from pathlib import Path
           import json, struct
