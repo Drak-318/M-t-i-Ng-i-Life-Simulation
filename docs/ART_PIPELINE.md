@@ -95,3 +95,33 @@ A filename alone does not make a model compatible. Bone names, bind pose, axes, 
 ## Development fixture limitation
 
 The Quaternius model used in the asset lab is a CC0 superhero male rig fixture. It exists only to test GLB loading and skeleton inspection. It is not Minh, Linh, the final art style, or an approved production character. Production character assets remain unassigned in assets/characters/manifest.json.
+
+
+## Milestone ledger — 2026-11-04
+
+### Stage 1 — Reusable 3D asset foundation: implementation complete
+
+Completed and committed:
+- Three.js world adapter and GLTFLoader-based character loader are isolated from the active gameplay renderer.
+- GLB fixture is fetched from a pinned upstream commit during Pages deployment; the workflow validates glTF 2.0 container integrity.
+- Automated tests cover manifest structure, loader/skeleton requirements, animation mixer hooks, world adapter, asset lab wiring and GLB header.
+- CI has passed for the current main revision, including Web 3D smoke test and GitHub Pages deployment.
+
+Acceptance boundary: Stage 1 means the technical foundation and automated checks are in place. It does **not** claim that the browser has been visually inspected, that Minh/Linh production models exist, or that the active game renderer has migrated. The fixture remains development-only.
+
+### Stage 2 — Production character asset selection and preparation: in progress
+
+Candidate source identified: Quaternius Universal Base Characters (CC0), which documents six rigged humanoid bases, male/female proportions and compatibility with its animation library. The pack's regular-proportion models are a better starting point for ordinary adult characters than the superhero development fixture. Before any model is assigned to Minh or Linh, the pipeline must verify clothing coverage, hair, textures, skeleton hierarchy, forward axis, scale and browser appearance. Do not ship an undressed base mesh as a finished character.
+
+Candidate animation source: Quaternius Universal Animation Library (CC0), with 120+ humanoid animations. Retarget compatibility must be proven against the selected character skeleton; do not assume identical rigs from marketing descriptions alone.
+
+Stage 2 exit criteria:
+1. Choose an everyday adult male and female base that fit the game's art direction.
+2. Add appropriate contemporary everyday outfits and distinct hair/face styling.
+3. Preserve local assets and a complete source/license ledger.
+4. Verify both characters load in the lab, with valid skeletons and suitable animation clips.
+5. Review screenshots at game camera distance before assigning either asset to production.
+
+Official source references:
+- https://quaternius.com/packs/universalbasecharacters.html
+- https://quaternius.com/packs/universalanimationlibrary.html
