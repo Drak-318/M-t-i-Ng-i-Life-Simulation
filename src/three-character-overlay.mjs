@@ -40,7 +40,7 @@ export async function attachLifeCharacterOverlay(canvas, options = {}) {
         name: id === 'minh' ? 'Minh — imported GLB' : 'Linh — imported GLB',
         targetHeight: options.targetHeight || 3.05
       });
-      actor.actor.rotation.y = options.forwardOffset ?? Math.PI;
+      actor.actor.rotation.y = options.forwardOffset ?? 0;
       actor.setMotion('idle');
       scene.add(actor.actor);
       actors.set(id, { handle: actor, motion: 'idle' });
