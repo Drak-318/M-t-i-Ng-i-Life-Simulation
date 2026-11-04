@@ -17,6 +17,14 @@ Game mô phỏng cuộc sống 3D trên **Web**, với cốt truyện phân nhá
 
 Bản thử nghiệm hiện tại dùng hình thể người 3D procedural cách điệu, có khuôn mặt, tóc, trang phục và chuyển động cơ bản. Đây vẫn là prototype đồ họa, chưa phải model nhân vật sản xuất cuối cùng.
 
+## 3D Asset Lab — nền tảng nhân vật
+
+**[Mở phòng kiểm tra model 3D](https://drak-318.github.io/M-t-i-Ng-i-Life-Simulation/art-pipeline-test.html)**
+
+Asset Lab là khu vực kỹ thuật tách biệt để kiểm tra GLB, humanoid skeleton, tỷ lệ model và animation. Model trong phòng lab là fixture kỹ thuật CC0, không phải Minh hoặc Linh. Nhân vật chính chỉ được gán model sau khi có asset phù hợp và vượt qua kiểm thử.
+
+Tài liệu kỹ thuật: docs/ART_PIPELINE.md. Danh sách model chính thức: assets/characters/manifest.json.
+
 ## Mục tiêu
 
 Tạo một thế giới hiện đại nơi người chơi là một người trưởng thành bình thường. Người chơi lựa chọn dựa trên những gì mình biết ở thời điểm đó; thế giới, NPC và các mối quan hệ phản ứng theo thời gian.
@@ -50,8 +58,9 @@ Nhân vật người chơi: **Nguyễn Minh, 24 tuổi**, nhân viên văn phòn
 
 ## Công nghệ hiện tại
 
-- **Web 3D:** Three.js
-- **HTML/CSS/JavaScript:** giao diện và runtime hiện tại
+- **Web 3D hiện tại:** custom WebGL renderer (prototype, đang được thay thế theo từng giai đoạn)
+- **Three.js + GLTFLoader:** asset lab độc lập để kiểm thử GLB, skeleton và animation; chưa thay thế renderer chính
+- **HTML/CSS/JavaScript:** giao diện và gameplay runtime hiện tại
 - **GitHub:** quản lý mã nguồn
 - **GitHub Pages:** preview/deployment Web
 
