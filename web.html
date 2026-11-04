@@ -27,11 +27,11 @@
 <script src="src/character-system.js?v=20261104-9"></script>
 <script src="src/web3d_v5.js?v=20261104-9"></script>
 <script type="module">
-import { attachLifeCharacterOverlay } from './src/three-character-overlay.mjs';
 const enabled = new URLSearchParams(location.search).get('threeCharacters') === '1';
 if (enabled) {
   window.__lifeUseImportedCharacters = true;
-  const start = () => attachLifeCharacterOverlay(document.getElementById('character-overlay'))
+  const start = () => import('./src/three-character-overlay.mjs')
+    .then(({ attachLifeCharacterOverlay }) => attachLifeCharacterOverlay(document.getElementById('character-overlay')))
     .then(api => { window.__lifeThreeOverlay = api; window.__lifeThreeOverlayReady = true; })
     .catch(error => {
       window.__lifeThreeOverlayError = error.message;
