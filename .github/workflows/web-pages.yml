@@ -139,6 +139,7 @@ jobs:
               doc = json.loads(data[20:20+length].decode("utf-8").rstrip(" \\t\\r\\n\\0"))
               assert doc.get("skins") and max(len(s.get("joints", [])) for s in doc["skins"]) >= 60, f"{name}: expected game humanoid rig"
               assert doc.get("animations"), f"{name}: animations missing"
+              assert len(doc["animations"]) == 3, f"{name}: expected only idle/walk/run gameplay clips"
               names = [a.get("name", "").lower() for a in doc["animations"]]
               assert any("idle" in n for n in names), f"{name}: idle clip missing"
               assert any("walk" in n for n in names), f"{name}: walk clip missing"
