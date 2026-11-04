@@ -28,3 +28,22 @@ assert.ok(candidateLab.includes('minh-base-ped-man.glb'), 'Male candidate must b
 assert.ok(candidateLab.includes('linh-base-casual-woman.glb'), 'Female candidate must be loaded in review lab');
 assert.ok(candidateLab.includes('loadCharacterAsset'), 'Review lab must use production GLB loader');
 assert.ok(candidateLab.includes('candidate only'), 'Candidate lab must not imply production approval');
+
+function readGlbJson(path) {
+  const data = fs.readFileSync(path);
+  assert.equal(data.toString('ascii', 0, 4), 'glTF');
+  assert.equal(data.readUInt32LE(4), 2);
+  assert.equal(data.readUInt32LE(8), data.length);
+  const jsonLength = data.readUInt32LE(12);
+  assert.equal(data.readUInt32LE(16), 0x4E4F534A);
+  return JSON.parse(data.toString('utf8', 20, 20 + jsonLength).replace(/[\\0 ]+$/g, ''));
+}
+for (const path of [
+  'assets/characters/candidates/minh-base-ped-man.glb',
+  'assets/characters/candidates/linh-base-casual-woman.glb'
+]) {
+  const gltf = readGlbJson(path);
+  assert.ok(gltf.meshes?.length, path + ' must contain a visible mesh');
+  assert.ok(gltf.skins?.some(skin => (skin.joints?.length || 0) >= 20), path + ' must contain a usable humanoid skeleton');
+}
+console.log('Everyday character candidate GLB/skeleton checks: PASS');
