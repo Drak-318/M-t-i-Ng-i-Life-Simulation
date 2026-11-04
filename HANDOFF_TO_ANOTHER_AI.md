@@ -139,3 +139,12 @@ Stage 2 is now active: source ordinary adult male/female models, verify CC0 prov
 ### Candidate quality findings
 
 Do not promote the current two pedestrian models to final character art: Man is 1,852 tris/6 material slots/no textures; Woman Casual is 2,776 tris/8 slots/no textures. Both have 31 joints and 11 clips and are useful only for validating the rig/animation/gameplay bridge. Seek better detailed textured everyday-human assets or schedule a custom art pass; keep manifest production asset fields null.
+
+
+## Higher-quality generated Minh/Linh assets
+
+- Versioned generator inputs: `assets/characters/source/minh.params.json`, `linh.params.json`.
+- Build uses Ara 3D Gen pinned at `a4947ffdd14acf2ff018cb3568c941595f86d86e`, with MakeHuman CC0 source data and game rig/medium detail/photo textures/face shapes/animations.
+- Pages workflow caches generator + CC0 data, generates `assets/characters/generated/Minh.glb` and `Linh.glb`, validates 12k–50k triangles, embedded images, 60+ joints and idle/walk/run clips.
+- `src/three-character-overlay.mjs` and `character-production-review.html` now reference the generated GLBs. The earlier Quaternius pedestrian GLBs are retained only as low-poly integration candidates.
+- Need inspect first successful deployment and screenshot; tune scale/forward axis/appearance and only then decide if the models meet final visual direction.
