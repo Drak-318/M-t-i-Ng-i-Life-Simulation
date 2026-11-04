@@ -187,7 +187,7 @@ try{
  gl=canvas.getContext("webgl",{antialias:true,alpha:false})||canvas.getContext("experimental-webgl");
  if(!gl)throw new Error("Trình duyệt không cấp phát được WebGL context.");
  const vs=`attribute vec3 aPos;attribute vec3 aNor;uniform mat4 uMVP;uniform mat4 uModel;varying vec3 vNor;void main(){vec4 w=uModel*vec4(aPos,1.0);vNor=normalize(mat3(uModel)*aNor);gl_Position=uMVP*w;}`;
- const fs=`precision mediump float;uniform vec3 uColor;uniform vec3 uLight;uniform float uNight;varying vec3 vNor;void main(){float d=max(dot(normalize(vNor),normalize(uLight)),0.0);vec3 c=uColor*(0.42+0.58*d);c*=mix(1.0,0.55,uNight);gl_FragColor=vec4(c,1.0);}`;
+ const fs=`precision mediump float;uniform vec3 uColor;uniform vec3 uLight;uniform float uNight;varying vec3 vNor;void main(){float d=max(dot(normalize(vNor),normalize(uLight)),0.0);vec3 c=uColor*(0.62+0.38*d);c*=mix(1.0,0.68,uNight);gl_FragColor=vec4(c,1.0);}`;
  prog=gl.createProgram();if(!prog)throw new Error("WebGL createProgram returned null; glError=0x"+gl.getError().toString(16));
  gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);
  if(!gl.getProgramParameter(prog,gl.LINK_STATUS))throw new Error("Program link failed: "+(gl.getProgramInfoLog(prog)||"empty log"));
