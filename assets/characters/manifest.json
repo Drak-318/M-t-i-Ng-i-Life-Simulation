@@ -25,14 +25,20 @@
   },
   "gameCharacters": {
     "minh": {
-      "status": "awaiting-approved-production-model",
-      "asset": null,
-      "design": "Vietnamese adult man, 24, ordinary office employee, contemporary everyday clothing"
+      "status": "generated-at-deploy-awaiting-visual-approval",
+      "asset": "assets/characters/generated/Minh.glb",
+      "design": "Vietnamese adult man, 24, ordinary office employee, contemporary everyday clothing",
+      "generationParams": "assets/characters/source/minh.params.json",
+      "generator": "Ara 3D Gen @ a4947ffdd14acf2ff018cb3568c941595f86d86e",
+      "license": "MakeHuman CC0 1.0; Ara 3D Gen MIT; embedded CMU-derived animation clips under CMU database terms"
     },
     "linh": {
-      "status": "awaiting-approved-production-model",
-      "asset": null,
-      "design": "Vietnamese adult woman, 24, content designer, contemporary everyday clothing"
+      "status": "generated-at-deploy-awaiting-visual-approval",
+      "asset": "assets/characters/generated/Linh.glb",
+      "design": "Vietnamese adult woman, 24, content designer, contemporary everyday clothing",
+      "generationParams": "assets/characters/source/linh.params.json",
+      "generator": "Ara 3D Gen @ a4947ffdd14acf2ff018cb3568c941595f86d86e",
+      "license": "MakeHuman CC0 1.0; Ara 3D Gen MIT; embedded CMU-derived animation clips under CMU database terms"
     },
     "backgroundNpcs": {
       "status": "awaiting-approved-character-variants",
@@ -98,5 +104,20 @@
       ],
       "acceptance": "Not approved as final production models. Both are suitable for rig/animation integration tests but are below the target 12k–45k triangle budget, exceed the preferred four material slots and contain no embedded textures. Keep them as integration candidates until a higher-detail textured everyday-human asset or custom art pass closes these gaps."
     }
+  },
+  "productionGeneration": {
+    "status": "build-time-generation",
+    "generatorRepository": "https://github.com/olatunde85/3d-gen",
+    "generatorCommit": "a4947ffdd14acf2ff018cb3568c941595f86d86e",
+    "detail": "medium",
+    "targetTriangles": [
+      12000,
+      50000
+    ],
+    "rig": "game",
+    "restPose": "T",
+    "ethnicityMix": "Asian 88%, Caucasian 12% for fictional Vietnamese adult character direction",
+    "buildWorkflow": ".github/workflows/web-pages.yml",
+    "assetsStored": "Generated into the GitHub Pages build artifact; source parameter files are versioned in this repository."
   }
 }
