@@ -173,3 +173,16 @@ The first pedestrian GLBs are retained as rig-integration fixtures only. For the
 - GitHub Pages workflow caches the generator dependencies and CC0 asset library, builds `Minh.glb` and `Linh.glb`, validates their texture images, humanoid skeleton, idle/walk/run clips and 12k–50k triangle budget, then runs the browser tests.
 
 The production review page and opt-in gameplay overlay now point at these generated GLBs. The generator is build-time only; no visitor downloads MakeHuman source data or calls an external generator at runtime. The first successful build and screenshot review are still required before marking these models visually approved or enabling them by default.
+
+### Stage 2 — production character acceptance hardening — 2026-11-05
+
+The in-game Chromium acceptance test now checks more than successful file loading:
+- Both Minh and Linh must be present in the gameplay bridge and imported actor layer.
+- Each character must have a valid humanoid skeleton with at least 60 bones.
+- Each model must meet the 12,000–50,000 triangle medium-detail budget.
+- Each model must contain textures and stay within 32 material slots.
+- Runtime normalization must produce a 1.72 m character height.
+- Exactly three gameplay clips must be available: idle, walk and run.
+- Browser console/page errors must remain empty; a gameplay screenshot is saved as a CI artifact.
+
+This is a stricter automated gate, not visual approval. The production review screenshot still needs human inspection at normal game-camera distance. The imported-character mode remains opt-in until that inspection and gameplay alignment review pass. The default renderer is intentionally not switched yet.
