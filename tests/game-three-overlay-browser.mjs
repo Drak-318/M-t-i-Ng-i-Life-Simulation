@@ -28,7 +28,17 @@ try {
     const bridge=window.__lifeVisualBridge?.getSnapshot?.();
     const overlay=window.__lifeThreeOverlay;
     const motions=[...overlay.actors.entries()].map(([id,entry])=>({id,idle:entry.handle.setMotion('idle'),walk:entry.handle.setMotion('walk'),run:entry.handle.setMotion('run')}));
-    const reports=[...overlay.actors.entries()].map(([id,entry])=>({id,triangles:entry.handle.report.triangleCount,materials:entry.handle.report.materialCount,textures:entry.handle.report.textureCount,hasSkeleton:entry.handle.report.hasSkeleton}));
+    const reports=[...overlay.actors.entries()].map(([id,entry])=>({
+      id,
+      triangles:entry.handle.report.triangleCount,
+      materials:entry.handle.report.materialCount,
+      textures:entry.handle.report.textureCount,
+      bones:entry.handle.report.boneCount,
+      animationCount:entry.handle.report.animationCount,
+      animationNames:entry.handle.report.animationNames,
+      hasSkeleton:entry.handle.report.hasSkeleton,
+      normalizedHeight:entry.handle.report.height*entry.handle.actor.scale.y
+    }));
     return {actorIds:[...overlay.actors.keys()],actorCount:overlay.actors.size,bridgeActors:bridge?.actors?.map(x=>x.id),canvas:!!document.getElementById('character-overlay'),motions,reports};
   });
   assert.deepEqual(info.actorIds,['minh','linh']);
@@ -36,7 +46,11 @@ try {
   assert.equal(info.actorCount,2);
   assert.equal(info.canvas,true);
   assert.ok(info.motions.every(x=>x.idle&&x.walk&&x.run),'Both imported characters must expose idle, walk and run clips');
-  assert.ok(info.reports.every(x=>x.hasSkeleton&&x.triangles>0),'Both imported characters must report valid mesh/skeleton diagnostics');
+  assert.ok(info.reports.every(x=>x.hasSkeleton&&x.bones>=60),'Both imported characters must have a production humanoid skeleton');
+  assert.ok(info.reports.every(x=>x.triangles>=12000&&x.triangles<=50000),'Both imported characters must meet the medium-detail triangle budget');
+  assert.ok(info.reports.every(x=>x.materials<=32&&x.textures>0),'Both imported characters must include textured materials within the material limit');
+  assert.ok(info.reports.every(x=>Math.abs(x.normalizedHeight-1.72)<0.03),'Both imported characters must be normalized to 1.72m');
+  assert.ok(info.reports.every(x=>x.animationCount===3&&['idle','walk','run'].every(clip=>x.animationNames.some(name=>name.toLowerCase().includes(clip)))),'Both imported characters must ship idle, walk and run clips only');
   assert.deepEqual(errors,[],'Game overlay should not emit browser errors');
   fs.mkdirSync('artifacts',{recursive:true});
   await page.screenshot({path:'artifacts/game-three-character-overlay.png',fullPage:true});
