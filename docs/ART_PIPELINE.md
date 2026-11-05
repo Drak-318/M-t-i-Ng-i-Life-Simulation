@@ -186,3 +186,9 @@ The in-game Chromium acceptance test now checks more than successful file loadin
 - Browser console/page errors must remain empty; a gameplay screenshot is saved as a CI artifact.
 
 This is a stricter automated gate, not visual approval. The production review screenshot still needs human inspection at normal game-camera distance. The imported-character mode remains opt-in until that inspection and gameplay alignment review pass. The default renderer is intentionally not switched yet.
+
+### Stage 3 — opening camera framing — 2026-11-05
+
+The first gameplay overlay screenshot exposed a camera placement issue: the opening third-person camera started inside the Nhà Minh building volume, obscuring most of the neighborhood. The default camera yaw is now moved behind Minh, facing toward the street and the home frontage.
+
+The visual bridge exposes the camera world position for diagnostics. The Chromium gameplay acceptance test now asserts that the opening camera is behind Minh and outside the Nhà Minh bounds. This supplements model-load checks with a basic gameplay framing check. It does not replace visual inspection on desktop and mobile aspect ratios.
