@@ -39,12 +39,15 @@ try {
       hasSkeleton:entry.handle.report.hasSkeleton,
       normalizedHeight:entry.handle.report.height*entry.handle.actor.scale.y
     }));
-    return {actorIds:[...overlay.actors.keys()],actorCount:overlay.actors.size,bridgeActors:bridge?.actors?.map(x=>x.id),canvas:!!document.getElementById('character-overlay'),motions,reports};
+    return {actorIds:[...overlay.actors.keys()],actorCount:overlay.actors.size,bridgeActors:bridge?.actors?.map(x=>x.id),camera:bridge?.camera,minh:bridge?.actors?.find(x=>x.id==='minh'),canvas:!!document.getElementById('character-overlay'),motions,reports};
   });
   assert.deepEqual(info.actorIds,['minh','linh']);
   assert.deepEqual(info.bridgeActors,['minh','linh']);
   assert.equal(info.actorCount,2);
   assert.equal(info.canvas,true);
+  assert.ok(info.camera&&Number.isFinite(info.camera.x)&&Number.isFinite(info.camera.z),'Gameplay camera position must be exposed to the visual bridge');
+  assert.ok(info.camera.z<info.minh.z-3,'Opening camera must stay behind Minh, outside the home building, and frame the neighborhood');
+  assert.ok(!(info.camera.x>-29.5&&info.camera.x<-18.5&&info.camera.z>15.5&&info.camera.z<24.5),'Opening camera must not start inside the Nhà Minh collision bounds');
   assert.ok(info.motions.every(x=>x.idle&&x.walk&&x.run),'Both imported characters must expose idle, walk and run clips');
   assert.ok(info.reports.every(x=>x.hasSkeleton&&x.bones>=60),'Both imported characters must have a production humanoid skeleton');
   assert.ok(info.reports.every(x=>x.triangles>=12000&&x.triangles<=50000),'Both imported characters must meet the medium-detail triangle budget');
